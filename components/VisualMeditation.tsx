@@ -307,10 +307,10 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
       >
         <SacredGeometry
           type={currentGeometry}
-          size={280}
+          size={250}
           color="#ffffff"
           animated={true}
-          opacity={0.6}
+          opacity={0.8}
         />
       </Animated.View>
 
@@ -318,31 +318,20 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
       <View style={styles.secondaryGeometry}>
         <SacredGeometry
           type={frequency < 25 ? 'seedOfLife' : frequency < 50 ? 'mandala' : 'torusField'}
-          size={400}
+          size={350}
           color="#ffffff"
           animated={true}
-          opacity={0.15}
+          opacity={0.3}
         />
       </View>
 
       <View style={styles.tertiaryGeometry}>
         <SacredGeometry
           type={frequency < 15 ? 'vesicaPiscis' : frequency < 35 ? 'fibonacci' : 'treeOfLife'}
-          size={500}
+          size={450}
           color="#ffffff"
           animated={true}
-          opacity={0.08}
-        />
-      </View>
-
-      {/* Additional quaternary layer for more complexity */}
-      <View style={styles.quaternaryGeometry}>
-        <SacredGeometry
-          type={frequency < 20 ? 'platonic' : frequency < 40 ? 'merkaba' : 'goldenSpiral'}
-          size={600}
-          color="#ffffff"
-          animated={true}
-          opacity={0.05}
+          opacity={0.15}
         />
       </View>
 
@@ -357,11 +346,8 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    width: 300,
+    height: 300,
     alignItems: 'center',
     justifyContent: 'center',
   },

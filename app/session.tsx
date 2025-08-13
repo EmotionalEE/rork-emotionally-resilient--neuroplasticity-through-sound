@@ -261,26 +261,27 @@ export default function SessionScreen() {
 
           {/* Sacred Geometry Visualization */}
           <View style={styles.visualizer}>
-            <SacredGeometry
-              type="flowerOfLife"
-              size={200}
-              color="#ffffff"
-              animated={sessionStarted && isPlaying}
-              opacity={0.4}
-            />
-            <View style={styles.centerCircle}>
-              <Brain size={48} color="#fff" />
-            </View>
+            {sessionStarted ? (
+              <VisualMeditation
+                frequency={parseInt(session.frequency, 10)}
+                isPlaying={isPlaying}
+                emotionGradient={session.gradient}
+              />
+            ) : (
+              <>
+                <SacredGeometry
+                  type="flowerOfLife"
+                  size={200}
+                  color="#ffffff"
+                  animated={false}
+                  opacity={0.6}
+                />
+                <View style={styles.centerCircle}>
+                  <Brain size={48} color="#fff" />
+                </View>
+              </>
+            )}
           </View>
-
-          {/* Full-screen Visual Meditation */}
-          {sessionStarted && (
-            <VisualMeditation
-              frequency={parseInt(session.frequency, 10)}
-              isPlaying={isPlaying}
-              emotionGradient={session.gradient}
-            />
-          )}
 
           <View style={styles.breathingGuide}>
             <Animated.View
@@ -402,11 +403,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   visualizer: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 300,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 40,
+    position: "relative",
   },
   pulseCircle: {
     position: "absolute",

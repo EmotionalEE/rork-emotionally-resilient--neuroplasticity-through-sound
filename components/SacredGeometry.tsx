@@ -27,7 +27,7 @@ export default function SacredGeometry({
       Animated.loop(
         Animated.timing(rotateAnim, {
           toValue: 1,
-          duration: 30000,
+          duration: 20000,
           useNativeDriver: true,
         })
       ).start();
@@ -36,13 +36,13 @@ export default function SacredGeometry({
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: 1.1,
-            duration: 3000,
+            toValue: 1.15,
+            duration: 2000,
             useNativeDriver: true,
           }),
           Animated.timing(pulseAnim, {
             toValue: 1,
-            duration: 3000,
+            duration: 2000,
             useNativeDriver: true,
           }),
         ])
