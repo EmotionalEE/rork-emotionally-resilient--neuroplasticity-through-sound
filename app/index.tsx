@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import {
   Brain,
   Heart,
@@ -32,10 +32,20 @@ export default function HomeScreen() {
   const router = useRouter();
   const { progress, hasCompletedOnboarding } = useUserProgress();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
+  const [isNavigationReady, setIsNavigationReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
 
+  // Use useFocusEffect to ensure navigation is ready
+  useFocusEffect(
+    useCallback(() => {
+      setIsNavigationReady(true);
+    }, [])
+  );
+
   useEffect(() => {
+    if (!isNavigationReady) return;
+    
     if (!hasCompletedOnboarding) {
       router.replace("/onboarding");
       return;
@@ -54,7 +64,7 @@ export default function HomeScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
+  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router, isNavigationReady]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     if (Platform.OS !== "web") {
