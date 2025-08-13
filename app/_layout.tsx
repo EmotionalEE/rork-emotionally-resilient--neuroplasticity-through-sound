@@ -5,8 +5,6 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AudioProvider } from "@/providers/AudioProvider";
 import { UserProgressProvider } from "@/providers/UserProgressProvider";
-import { EmotionProvider } from "@/providers/EmotionProvider";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,18 +26,14 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <UserProgressProvider>
-            <EmotionProvider>
-              <AudioProvider>
-                <RootLayoutNav />
-              </AudioProvider>
-            </EmotionProvider>
-          </UserProgressProvider>
-        </GestureHandlerRootView>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <UserProgressProvider>
+          <AudioProvider>
+            <RootLayoutNav />
+          </AudioProvider>
+        </UserProgressProvider>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 }

@@ -1,78 +1,45 @@
 import { EmotionalState, Session } from "@/types/session";
 
 export const emotionalStates: EmotionalState[] = [
-  // Negative emotions (low to high intensity)
-  {
-    id: "depressed",
-    label: "Depressed",
-    gradient: ["#2C3E50", "#34495E"],
-    intensity: 1,
-    category: "negative",
-  },
-  {
-    id: "sad",
-    label: "Sad",
-    gradient: ["#667eea", "#764ba2"],
-    intensity: 2,
-    category: "negative",
-  },
   {
     id: "anxious",
     label: "Anxious",
     gradient: ["#FF6B6B", "#C44569"],
-    intensity: 3,
-    category: "negative",
   },
   {
     id: "stressed",
     label: "Stressed",
     gradient: ["#F7971E", "#FFD200"],
-    intensity: 4,
-    category: "negative",
+  },
+  {
+    id: "sad",
+    label: "Sad",
+    gradient: ["#667eea", "#764ba2"],
   },
   {
     id: "angry",
     label: "Angry",
     gradient: ["#f093fb", "#f5576c"],
-    intensity: 5,
-    category: "negative",
   },
-  // Neutral emotions
-  {
-    id: "neutral",
-    label: "Neutral",
-    gradient: ["#95A5A6", "#BDC3C7"],
-    intensity: 6,
-    category: "neutral",
-  },
-  // Positive emotions (low to high intensity)
   {
     id: "calm",
     label: "Calm",
     gradient: ["#4facfe", "#00f2fe"],
-    intensity: 7,
-    category: "positive",
   },
   {
     id: "focused",
     label: "Focused",
     gradient: ["#43e97b", "#38f9d7"],
-    intensity: 8,
-    category: "positive",
   },
   {
     id: "happy",
     label: "Happy",
     gradient: ["#fa709a", "#fee140"],
-    intensity: 9,
-    category: "positive",
   },
   {
     id: "energized",
     label: "Energized",
     gradient: ["#30cfd0", "#330867"],
-    intensity: 10,
-    category: "positive",
   },
 ];
 
@@ -84,7 +51,7 @@ export const sessions: Session[] = [
     duration: 15,
     frequency: "10",
     gradient: ["#667eea", "#764ba2"],
-    targetEmotions: ["depressed", "anxious", "stressed", "calm"],
+    targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
   },
   {
@@ -114,7 +81,7 @@ export const sessions: Session[] = [
     duration: 30,
     frequency: "2",
     gradient: ["#a8edea", "#fed6e3"],
-    targetEmotions: ["depressed", "anxious", "stressed", "calm"],
+    targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
   },
   {

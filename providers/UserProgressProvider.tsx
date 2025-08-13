@@ -37,17 +37,10 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     try {
       const stored = await AsyncStorage.getItem(PROGRESS_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
-        // Validate the parsed data structure
-        if (parsed && typeof parsed === 'object') {
-          setProgress({ ...defaultProgress, ...parsed });
-        } else {
-          setProgress(defaultProgress);
-        }
+        setProgress(JSON.parse(stored));
       }
     } catch (error) {
       console.error("Error loading progress:", error);
-      setProgress(defaultProgress);
     }
   }, []);
 

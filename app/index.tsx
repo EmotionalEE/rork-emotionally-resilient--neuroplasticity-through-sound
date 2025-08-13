@@ -25,55 +25,35 @@ import {
 } from "lucide-react-native";
 import { emotionalStates, sessions } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
-import { useEmotions } from "@/providers/EmotionProvider";
-import EmotionTrendChart from "@/components/EmotionTrendChart";
-import EmotionVisualizer from "@/components/EmotionVisualizer";
-import SacredGeometry from "@/components/SacredGeometry";
 import { EmotionalState, Session } from "@/types/session";
 import * as Haptics from "expo-haptics";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { progress, hasCompletedOnboarding } = useUserProgress();
-  const { getCurrentMood } = useEmotions();
-  
-  const currentMood = getCurrentMood();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
 
-  console.log('HomeScreen render - hasCompletedOnboarding:', hasCompletedOnboarding, 'progress:', progress);
-
   useEffect(() => {
-    console.log('HomeScreen useEffect - hasCompletedOnboarding:', hasCompletedOnboarding);
-    
-    // Add a small delay to ensure providers are initialized
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      
-      if (!hasCompletedOnboarding) {
-        console.log('Redirecting to onboarding');
-        router.replace("/onboarding");
-        return;
-      }
+    if (!hasCompletedOnboarding) {
+      router.replace("/onboarding");
+      return;
+    }
 
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 20,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, 100);
-
-    return () => clearTimeout(timer);
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 20,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
@@ -95,12 +75,10 @@ export default function HomeScreen() {
 
   const getEmotionIcon = useCallback((emotion: EmotionalState) => {
     const icons: Record<string, LucideIcon> = {
-      depressed: Moon,
       anxious: Cloud,
       stressed: Zap,
       sad: Moon,
       angry: Activity,
-      neutral: Heart,
       calm: Waves,
       focused: Brain,
       happy: Sun,
@@ -116,19 +94,6 @@ export default function HomeScreen() {
       : sessions,
     [selectedEmotion]
   );
-
-  if (isLoading) {
-    return (
-      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.loadingContainer}>
-            <Brain size={64} color="#fff" />
-            <Text style={styles.loadingText}>Loading...</Text>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
 
   return (
     <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
@@ -181,12 +146,7 @@ export default function HomeScreen() {
                         isSelected && styles.emotionCardSelected,
                       ]}
                     >
-                      <EmotionVisualizer
-                        emotionId={emotion.id}
-                        intensity={emotion.intensity}
-                        gradient={emotion.gradient}
-                        size={60}
-                      />
+                      {getEmotionIcon(emotion)}
                       <Text style={styles.emotionLabel}>{emotion.label}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -194,20 +154,6 @@ export default function HomeScreen() {
               );
             })}
           </ScrollView>
-
-          <EmotionTrendChart days={7} />
-          
-          {currentMood && (
-            <View style={styles.currentMoodCard}>
-              <Text style={styles.currentMoodTitle}>Current Mood</Text>
-              <Text style={styles.currentMoodText}>
-                {emotionalStates.find(e => e.id === currentMood.emotionId)?.label || 'Unknown'}
-              </Text>
-              <Text style={styles.currentMoodIntensity}>
-                Intensity: {currentMood.intensity}/10
-              </Text>
-            </View>
-          )}
 
           <View style={styles.sessionsSection}>
             <Text style={styles.sectionTitle}>
@@ -261,13 +207,7 @@ export default function HomeScreen() {
                         </View>
                       </View>
                       <View style={styles.sessionIcon}>
-                        <SacredGeometry
-                          type={index % 2 === 0 ? 'flowerOfLife' : 'vesicaPiscis'}
-                          size={60}
-                          color="rgba(255,255,255,0.8)"
-                          animated={true}
-                          opacity={0.6}
-                        />
+                        <Waves size={32} color="rgba(255,255,255,0.8)" />
                       </View>
                     </View>
                   </LinearGradient>
@@ -437,40 +377,6 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.7)",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 20,
-  },
-  loadingText: {
-    fontSize: 18,
-    color: "rgba(255,255,255,0.8)",
-    fontWeight: "600" as const,
-  },
-  currentMoodCard: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 16,
-    padding: 20,
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  currentMoodTitle: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "rgba(255,255,255,0.8)",
-    marginBottom: 8,
-  },
-  currentMoodText: {
-    fontSize: 18,
-    fontWeight: "bold" as const,
-    color: "#fff",
-    marginBottom: 4,
-  },
-  currentMoodIntensity: {
-    fontSize: 14,
     color: "rgba(255,255,255,0.7)",
   },
 });

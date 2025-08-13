@@ -7,7 +7,6 @@ import {
   Platform,
   Animated,
   Alert,
-  BackHandler,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,16 +17,12 @@ import {
   X,
   Volume2,
   Brain,
+  Heart,
   Activity,
 } from "lucide-react-native";
-import { sessions, emotionalStates } from "@/constants/sessions";
+import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
-import { useEmotions } from "@/providers/EmotionProvider";
-import EmotionSelector from "@/components/EmotionSelector";
-import VisualMeditation from "@/components/VisualMeditation";
-import EmotionVisualizer from "@/components/EmotionVisualizer";
-import SacredGeometry from "@/components/SacredGeometry";
 import * as Haptics from "expo-haptics";
 
 export default function SessionScreen() {
@@ -35,74 +30,17 @@ export default function SessionScreen() {
   const { sessionId } = useLocalSearchParams();
   const { playSound, stopSound, isPlaying } = useAudio();
   const { addSession } = useUserProgress();
-  const { addEmotion } = useEmotions();
   
   const session = useMemo(() => sessions.find((s) => s.id === sessionId), [sessionId]);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [showPreEmotionSelector, setShowPreEmotionSelector] = useState(false);
-  const [showPostEmotionSelector, setShowPostEmotionSelector] = useState(false);
-  const [preSessionEmotion, setPreSessionEmotion] = useState<string | null>(null);
-  const [sessionStarted, setSessionStarted] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const waveAnim = useRef(new Animated.Value(0)).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
 
-  const handleClose = useCallback(async () => {
-    try {
-      // Always stop sound first
-      await stopSound();
-      
-      // If session hasn't started yet, just go back
-      if (!sessionStarted) {
-        router.back();
-        return;
-      }
-      
-      // If session is in progress, show confirmation
-      Alert.alert(
-        "End Session",
-        "Are you sure you want to end this session?",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "End Session",
-            style: "destructive",
-            onPress: () => {
-              router.back();
-            },
-          },
-        ]
-      );
-    } catch (error) {
-      console.warn('Error in handleClose:', error);
-      // Force navigation even if there's an error
-      router.back();
-    }
-  }, [stopSound, router, sessionStarted]);
-
-  // Show pre-session emotion selector when component mounts
   useEffect(() => {
-    if (session && !sessionStarted) {
-      setShowPreEmotionSelector(true);
-    }
-  }, [session, sessionStarted]);
-
-  // Handle Android back button
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-        handleClose();
-        return true; // Prevent default back action
-      });
-
-      return () => backHandler.remove();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!session || !sessionStarted) return;
+    if (!session) return;
 
     // Start animations
     Animated.loop(
@@ -150,57 +88,35 @@ export default function SessionScreen() {
     }, 4000);
 
     return () => {
-      try {
-        stopSound();
-        clearInterval(breathTimer);
-      } catch (error) {
-        console.warn('Error in cleanup:', error);
-      }
+      stopSound();
+      clearInterval(breathTimer);
     };
-  }, [session, sessionStarted, pulseAnim, waveAnim, breathAnim, stopSound]);
+  }, [session, pulseAnim, waveAnim, breathAnim, stopSound]);
 
   const handleComplete = useCallback(async () => {
-    try {
-      if (Platform.OS !== "web") {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-      
-      await stopSound();
-      setShowPostEmotionSelector(true);
-    } catch (error) {
-      console.warn('Error in handleComplete:', error);
-      setShowPostEmotionSelector(true);
+    if (Platform.OS !== "web") {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-  }, [stopSound]);
-
-  const handlePostEmotionSelect = useCallback(async (emotionId: string, intensity: number) => {
-    try {
-      if (session) {
-        await addSession(session.id, Math.floor(timeElapsed / 60));
-        await addEmotion(emotionId, intensity, session.id);
-      }
-      
-      setShowPostEmotionSelector(false);
-      
-      Alert.alert(
-        "Session Complete!",
-        "Great job! You've completed this session and tracked your emotional progress.",
-        [
-          {
-            text: "Continue",
-            onPress: () => router.back(),
-          },
-        ]
-      );
-    } catch (error) {
-      console.warn('Error in handlePostEmotionSelect:', error);
-      setShowPostEmotionSelector(false);
-      router.back();
+    
+    if (session) {
+      await addSession(session.id, Math.floor(timeElapsed / 60));
     }
-  }, [session, timeElapsed, addSession, addEmotion, router]);
+    
+    stopSound();
+    Alert.alert(
+      "Session Complete!",
+      "Great job! You've completed this session.",
+      [
+        {
+          text: "Continue",
+          onPress: () => router.back(),
+        },
+      ]
+    );
+  }, [session, timeElapsed, addSession, stopSound, router]);
 
   useEffect(() => {
-    if (!isPaused && session && sessionStarted) {
+    if (!isPaused && session) {
       const timer = setInterval(() => {
         setTimeElapsed((prev) => {
           if (prev >= session.duration * 60) {
@@ -213,51 +129,41 @@ export default function SessionScreen() {
 
       return () => clearInterval(timer);
     }
-  }, [isPaused, session, sessionStarted, handleComplete]);
+  }, [isPaused, session, handleComplete]);
 
   const handlePlayPause = useCallback(async () => {
-    if (!sessionStarted) return;
-    
-    try {
-      if (Platform.OS !== "web") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
-
-      if (isPlaying) {
-        await stopSound();
-        setIsPaused(true);
-      } else {
-        if (session) {
-          await playSound(session.audioUrl);
-          setIsPaused(false);
-        }
-      }
-    } catch (error) {
-      console.warn('Error in handlePlayPause:', error);
-      setIsPaused(true);
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-  }, [isPlaying, session, sessionStarted, playSound, stopSound]);
 
-  const handlePreEmotionSelect = useCallback(async (emotionId: string, intensity: number) => {
-    try {
-      await addEmotion(emotionId, intensity, session?.id);
-      setPreSessionEmotion(emotionId);
-      setShowPreEmotionSelector(false);
-      setSessionStarted(true);
-      
-      // Auto-start the session
+    if (isPlaying) {
+      stopSound();
+      setIsPaused(true);
+    } else {
       if (session) {
         await playSound(session.audioUrl);
         setIsPaused(false);
       }
-    } catch (error) {
-      console.warn('Error in handlePreEmotionSelect:', error);
-      setShowPreEmotionSelector(false);
-      setSessionStarted(true);
     }
-  }, [addEmotion, session, playSound]);
+  }, [isPlaying, session, playSound, stopSound]);
 
-
+  const handleClose = useCallback(() => {
+    Alert.alert(
+      "End Session",
+      "Are you sure you want to end this session?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "End Session",
+          style: "destructive",
+          onPress: () => {
+            stopSound();
+            router.back();
+          },
+        },
+      ]
+    );
+  }, [stopSound, router]);
 
 
 
@@ -277,26 +183,9 @@ export default function SessionScreen() {
     );
   }
 
-  // const currentMood = getCurrentMood(); // Removed unused variable
-  const preEmotionState = preSessionEmotion ? emotionalStates.find(e => e.id === preSessionEmotion) : null;
-
   const progress = (timeElapsed / (session.duration * 60)) * 100;
 
   return (
-    <>
-      <EmotionSelector
-        visible={showPreEmotionSelector}
-        onClose={() => setShowPreEmotionSelector(false)}
-        onSelect={handlePreEmotionSelect}
-        title="How are you feeling before this session?"
-      />
-      
-      <EmotionSelector
-        visible={showPostEmotionSelector}
-        onClose={() => setShowPostEmotionSelector(false)}
-        onSelect={handlePostEmotionSelect}
-        title="How are you feeling after this session?"
-      />
     <LinearGradient colors={session.gradient as unknown as readonly [string, string, ...string[]]} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
@@ -309,28 +198,42 @@ export default function SessionScreen() {
           <Text style={styles.sessionTitle}>{session.title}</Text>
           <Text style={styles.frequency}>{session.frequency}Hz</Text>
 
-          {/* Sacred Geometry Visualization */}
           <View style={styles.visualizer}>
-            <SacredGeometry
-              type="flowerOfLife"
-              size={200}
-              color="#ffffff"
-              animated={sessionStarted && isPlaying}
-              opacity={0.4}
+            <Animated.View
+              style={[
+                styles.pulseCircle,
+                {
+                  transform: [{ scale: pulseAnim }],
+                  opacity: pulseAnim.interpolate({
+                    inputRange: [1, 1.2],
+                    outputRange: [0.3, 0.1],
+                  }),
+                },
+              ]}
+            />
+            <Animated.View
+              style={[
+                styles.waveCircle,
+                {
+                  transform: [
+                    {
+                      scale: waveAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.8, 1.5],
+                      }),
+                    },
+                  ],
+                  opacity: waveAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.5, 0],
+                  }),
+                },
+              ]}
             />
             <View style={styles.centerCircle}>
               <Brain size={48} color="#fff" />
             </View>
           </View>
-
-          {/* Full-screen Visual Meditation */}
-          {sessionStarted && (
-            <VisualMeditation
-              frequency={parseInt(session.frequency, 10)}
-              isPlaying={isPlaying}
-              emotionGradient={session.gradient}
-            />
-          )}
 
           <View style={styles.breathingGuide}>
             <Animated.View
@@ -385,17 +288,10 @@ export default function SessionScreen() {
           </View>
 
           <View style={styles.infoCards}>
-            {preEmotionState && (
-              <View style={styles.infoCard}>
-                <EmotionVisualizer
-                  emotionId={preEmotionState.id}
-                  intensity={5}
-                  gradient={preEmotionState.gradient}
-                  size={40}
-                />
-                <Text style={styles.infoText}>Starting: {preEmotionState.label}</Text>
-              </View>
-            )}
+            <View style={styles.infoCard}>
+              <Heart size={20} color="#fff" />
+              <Text style={styles.infoText}>Reduces Stress</Text>
+            </View>
             <View style={styles.infoCard}>
               <Activity size={20} color="#fff" />
               <Text style={styles.infoText}>Balances Energy</Text>
@@ -408,7 +304,6 @@ export default function SessionScreen() {
         </View>
       </SafeAreaView>
     </LinearGradient>
-    </>
   );
 }
 

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Audio } from "expo-av";
-import { Platform } from "react-native";
 import createContextHook from "@nkzw/create-context-hook";
 
 interface AudioContextType {
@@ -15,61 +14,27 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    // Configure audio mode only on native platforms
-    if (Platform.OS !== 'web') {
-      Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        shouldDuckAndroid: true,
-      }).catch(error => {
-        console.warn('Failed to set audio mode:', error);
-      });
-    }
+    // Configure audio mode
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: true,
+      shouldDuckAndroid: true,
+    });
 
     return () => {
       if (sound) {
-        sound.unloadAsync().catch(error => {
-          console.warn('Failed to unload sound:', error);
-        });
+        sound.unloadAsync();
       }
     };
-  }, [sound]);
-
-  const stopSound = useCallback(async () => {
-    try {
-      if (sound) {
-        try {
-          const status = await sound.getStatusAsync();
-          if (status.isLoaded) {
-            if (status.isPlaying) {
-              await sound.stopAsync();
-            }
-            await sound.unloadAsync();
-          }
-        } catch (error) {
-          console.warn("Error stopping sound:", error);
-          // Try to force unload even if status check fails
-          try {
-            await sound.unloadAsync();
-          } catch (unloadError) {
-            console.warn("Error force unloading sound:", unloadError);
-          }
-        }
-      }
-    } catch (error) {
-      console.warn("Error in stopSound:", error);
-    } finally {
-      // Always reset state regardless of errors
-      setSound(null);
-      setIsPlaying(false);
-    }
   }, [sound]);
 
   const playSound = useCallback(async (url: string) => {
     try {
       // Stop current sound if playing
-      await stopSound();
+      if (sound) {
+        await sound.unloadAsync();
+      }
 
       console.log("Loading sound from:", url);
       
@@ -84,17 +49,27 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       // Set up playback status update
       newSound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
-          setIsPlaying(status.isPlaying || false);
-        } else {
-          setIsPlaying(false);
+          setIsPlaying(status.isPlaying);
         }
       });
     } catch (error) {
       console.error("Error playing sound:", error);
       setIsPlaying(false);
-      setSound(null);
     }
-  }, [stopSound]);
+  }, [sound]);
+
+  const stopSound = useCallback(async () => {
+    if (sound) {
+      try {
+        await sound.stopAsync();
+        await sound.unloadAsync();
+        setSound(null);
+        setIsPlaying(false);
+      } catch (error) {
+        console.error("Error stopping sound:", error);
+      }
+    }
+  }, [sound]);
 
   const setVolume = useCallback(async (volume: number) => {
     if (sound) {
