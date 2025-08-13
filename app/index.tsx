@@ -32,55 +32,29 @@ export default function HomeScreen() {
   const router = useRouter();
   const { progress, hasCompletedOnboarding } = useUserProgress();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [isReady, setIsReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
 
-  // Wait for the navigation system to be ready
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    if (!hasCompletedOnboarding) {
+      router.replace("/onboarding");
+      return;
+    }
 
-  // Handle navigation after the system is ready
-  useEffect(() => {
-    if (!isReady) return;
-
-    const handleNavigation = async () => {
-      if (!hasCompletedOnboarding && !isNavigating) {
-        setIsNavigating(true);
-        try {
-          router.replace("/onboarding");
-        } catch (error) {
-          console.log('Navigation error:', error);
-          setIsNavigating(false);
-        }
-        return;
-      }
-
-      if (hasCompletedOnboarding) {
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.spring(scaleAnim, {
-            toValue: 1,
-            tension: 20,
-            friction: 7,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-    };
-
-    handleNavigation();
-  }, [isReady, hasCompletedOnboarding, fadeAnim, scaleAnim, router, isNavigating]);
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 20,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     if (Platform.OS !== "web") {
@@ -120,32 +94,6 @@ export default function HomeScreen() {
       : sessions,
     [selectedEmotion]
   );
-
-  // Show loading state while system is not ready or navigating
-  if (!isReady || (!hasCompletedOnboarding && isNavigating)) {
-    return (
-      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading...</Text>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
-
-  // If onboarding is not completed but we're ready, show loading while navigation happens
-  if (!hasCompletedOnboarding) {
-    return (
-      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading...</Text>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
 
   return (
     <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
@@ -430,14 +378,5 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    color: "#fff",
-    fontSize: 16,
   },
 });
