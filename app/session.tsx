@@ -99,7 +99,7 @@ export default function SessionScreen() {
 
       return () => backHandler.remove();
     }
-  }, []);
+  }, [handleClose]);
 
   useEffect(() => {
     if (!session || !sessionStarted) return;
@@ -228,13 +228,19 @@ export default function SessionScreen() {
         setIsPaused(true);
       } else {
         if (session) {
+          console.log('Attempting to play audio:', session.audioUrl);
           await playSound(session.audioUrl);
           setIsPaused(false);
         }
       }
     } catch (error) {
-      console.warn('Error in handlePlayPause:', error);
+      console.error('Error in handlePlayPause:', error);
       setIsPaused(true);
+      Alert.alert(
+        "Audio Error",
+        "Unable to play audio. Please check your internet connection and try again.",
+        [{ text: "OK" }]
+      );
     }
   }, [isPlaying, session, sessionStarted, playSound, stopSound]);
 

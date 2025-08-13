@@ -73,26 +73,45 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
       console.log("Loading sound from:", url);
       
-      const { sound: newSound } = await Audio.Sound.createAsync(
+      // Add timeout for loading
+      const loadPromise = Audio.Sound.createAsync(
         { uri: url },
-        { shouldPlay: true, isLooping: true }
+        { shouldPlay: false, isLooping: true }
       );
-
-      setSound(newSound);
-      setIsPlaying(true);
-
-      // Set up playback status update
+      
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Audio loading timeout')), 10000);
+      });
+      
+      const { sound: newSound } = await Promise.race([loadPromise, timeoutPromise]) as { sound: Audio.Sound };
+      
+      console.log("Sound loaded successfully, starting playback...");
+      
+      // Set up playback status update before playing
       newSound.setOnPlaybackStatusUpdate((status) => {
+        console.log("Playback status:", status);
         if (status.isLoaded) {
           setIsPlaying(status.isPlaying || false);
         } else {
           setIsPlaying(false);
+          if ('error' in status && status.error) {
+            console.error("Loading error:", status.error);
+          }
         }
       });
+      
+      setSound(newSound);
+      
+      // Start playing
+      await newSound.playAsync();
+      setIsPlaying(true);
+      
+      console.log("Playback started successfully");
     } catch (error) {
       console.error("Error playing sound:", error);
       setIsPlaying(false);
       setSound(null);
+      throw error; // Re-throw to let the caller handle it
     }
   }, [stopSound]);
 
