@@ -33,17 +33,32 @@ export default function HomeScreen() {
   const { progress, hasCompletedOnboarding } = useUserProgress();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
 
+  // Wait for the navigation system to be ready
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle navigation after the system is ready
+  useEffect(() => {
+    if (!isReady) return;
+
     const handleNavigation = async () => {
       if (!hasCompletedOnboarding && !isNavigating) {
         setIsNavigating(true);
-        // Add a small delay to ensure the navigation system is ready
-        setTimeout(() => {
+        try {
           router.replace("/onboarding");
-        }, 100);
+        } catch (error) {
+          console.log('Navigation error:', error);
+          setIsNavigating(false);
+        }
         return;
       }
 
@@ -65,7 +80,7 @@ export default function HomeScreen() {
     };
 
     handleNavigation();
-  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router, isNavigating]);
+  }, [isReady, hasCompletedOnboarding, fadeAnim, scaleAnim, router, isNavigating]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     if (Platform.OS !== "web") {
@@ -106,7 +121,20 @@ export default function HomeScreen() {
     [selectedEmotion]
   );
 
-  // Show loading state while navigating
+  // Show loading state while system is not ready or navigating
+  if (!isReady || (!hasCompletedOnboarding && isNavigating)) {
+    return (
+      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
+  // If onboarding is not completed but we're ready, show loading while navigation happens
   if (!hasCompletedOnboarding) {
     return (
       <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
