@@ -33,7 +33,7 @@ import * as Haptics from "expo-haptics";
 export default function SessionScreen() {
   const router = useRouter();
   const { sessionId } = useLocalSearchParams();
-  const { playSound, stopSound, isPlaying, isLoading } = useAudio();
+  const { playSound, stopSound, isPlaying } = useAudio();
   const { addSession } = useUserProgress();
   const { addEmotion } = useEmotions();
   
@@ -99,7 +99,7 @@ export default function SessionScreen() {
 
       return () => backHandler.remove();
     }
-  }, [handleClose]);
+  }, []);
 
   useEffect(() => {
     if (!session || !sessionStarted) return;
@@ -216,7 +216,7 @@ export default function SessionScreen() {
   }, [isPaused, session, sessionStarted, handleComplete]);
 
   const handlePlayPause = useCallback(async () => {
-    if (!sessionStarted || isLoading) return;
+    if (!sessionStarted) return;
     
     try {
       if (Platform.OS !== "web") {
@@ -224,40 +224,19 @@ export default function SessionScreen() {
       }
 
       if (isPlaying) {
-        console.log('Stopping audio playback');
         await stopSound();
         setIsPaused(true);
       } else {
         if (session) {
-          console.log('Attempting to play audio for session:', session.title, 'URL:', session.audioUrl);
           await playSound(session.audioUrl);
           setIsPaused(false);
-          console.log('Audio playback started successfully');
         }
       }
     } catch (error) {
-      console.error('Error in handlePlayPause:', error);
+      console.warn('Error in handlePlayPause:', error);
       setIsPaused(true);
-      
-      // More specific error messages
-      let errorMessage = "Unable to play audio. Please try again.";
-      if (error instanceof Error) {
-        if (error.message.includes('timeout')) {
-          errorMessage = "Audio loading timed out. Please check your internet connection and try again.";
-        } else if (error.message.includes('network')) {
-          errorMessage = "Network error. Please check your internet connection.";
-        } else if (error.message.includes('format')) {
-          errorMessage = "Audio format not supported. Please try a different session.";
-        }
-      }
-      
-      Alert.alert(
-        "Audio Error",
-        errorMessage,
-        [{ text: "OK" }]
-      );
     }
-  }, [isPlaying, session, sessionStarted, playSound, stopSound, isLoading]);
+  }, [isPlaying, session, sessionStarted, playSound, stopSound]);
 
   const handlePreEmotionSelect = useCallback(async (emotionId: string, intensity: number) => {
     try {
@@ -389,17 +368,14 @@ export default function SessionScreen() {
           <View style={styles.controls}>
             <TouchableOpacity
               onPress={handlePlayPause}
-              style={[styles.playButton, isLoading && styles.playButtonDisabled]}
-              activeOpacity={isLoading ? 1 : 0.8}
-              disabled={isLoading}
+              style={styles.playButton}
+              activeOpacity={0.8}
             >
               <LinearGradient
                 colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
                 style={styles.playButtonGradient}
               >
-                {isLoading ? (
-                  <Activity size={40} color="#fff" />
-                ) : isPlaying ? (
+                {isPlaying ? (
                   <Pause size={40} color="#fff" />
                 ) : (
                   <Play size={40} color="#fff" style={{ marginLeft: 4 }} />
@@ -564,9 +540,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.4)",
-  },
-  playButtonDisabled: {
-    opacity: 0.6,
   },
   infoCards: {
     flexDirection: "row",
