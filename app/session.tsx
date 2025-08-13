@@ -20,7 +20,6 @@ import {
   Heart,
   Activity,
 } from "lucide-react-native";
-import Svg, { Circle, Polygon, Path, G } from "react-native-svg";
 import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
@@ -39,8 +38,6 @@ export default function SessionScreen() {
   const waveAnim = useRef(new Animated.Value(0)).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
-  const geometryAnim = useRef(new Animated.Value(0)).current;
-  const mandalaAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!session) return;
@@ -85,23 +82,6 @@ export default function SessionScreen() {
     );
     breathAnimation.start();
 
-    // Sacred geometry animations
-    Animated.loop(
-      Animated.timing(geometryAnim, {
-        toValue: 1,
-        duration: 8000,
-        useNativeDriver: true,
-      })
-    ).start();
-
-    Animated.loop(
-      Animated.timing(mandalaAnim, {
-        toValue: 1,
-        duration: 12000,
-        useNativeDriver: true,
-      })
-    ).start();
-
     // Update breathing phase
     const breathTimer = setInterval(() => {
       setBreathingPhase(prev => prev === 'in' ? 'out' : 'in');
@@ -111,7 +91,7 @@ export default function SessionScreen() {
       stopSound();
       clearInterval(breathTimer);
     };
-  }, [session, pulseAnim, waveAnim, breathAnim, geometryAnim, mandalaAnim, stopSound]);
+  }, [session, pulseAnim, waveAnim, breathAnim, stopSound]);
 
   const handleComplete = useCallback(async () => {
     if (Platform.OS !== "web") {
@@ -219,94 +199,6 @@ export default function SessionScreen() {
           <Text style={styles.frequency}>{session.frequency}Hz</Text>
 
           <View style={styles.visualizer}>
-            {/* Sacred Geometry Background */}
-            <Animated.View
-              style={[
-                styles.geometryContainer,
-                {
-                  transform: [
-                    {
-                      rotate: geometryAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '360deg'],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <Svg width={300} height={300} style={styles.geometrySvg}>
-                {/* Flower of Life Pattern */}
-                <G opacity={0.3}>
-                  <Circle cx={150} cy={150} r={40} fill="none" stroke="#fff" strokeWidth={1} />
-                  <Circle cx={150} cy={110} r={40} fill="none" stroke="#fff" strokeWidth={1} />
-                  <Circle cx={150} cy={190} r={40} fill="none" stroke="#fff" strokeWidth={1} />
-                  <Circle cx={115} cy={130} r={40} fill="none" stroke="#fff" strokeWidth={1} />
-                  <Circle cx={185} cy={130} r={40} fill="none" stroke="#fff" strokeWidth={1} />
-                  <Circle cx={115} cy={170} r={40} fill="none" stroke="#fff" strokeWidth={1} />
-                  <Circle cx={185} cy={170} r={40} fill="none" stroke="#fff" strokeWidth={1} />
-                </G>
-                {/* Metatron's Cube */}
-                <G opacity={0.2}>
-                  <Polygon
-                    points="150,80 200,120 200,180 150,220 100,180 100,120"
-                    fill="none"
-                    stroke="#fff"
-                    strokeWidth={1}
-                  />
-                  <Polygon
-                    points="150,100 180,120 180,180 150,200 120,180 120,120"
-                    fill="none"
-                    stroke="#fff"
-                    strokeWidth={1}
-                  />
-                </G>
-              </Svg>
-            </Animated.View>
-
-            {/* Mandala Pattern */}
-            <Animated.View
-              style={[
-                styles.mandalaContainer,
-                {
-                  transform: [
-                    {
-                      rotate: mandalaAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '-360deg'],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <Svg width={250} height={250} style={styles.mandalaSvg}>
-                <G opacity={0.4}>
-                  {/* Outer petals */}
-                  {Array.from({ length: 12 }).map((_, i) => {
-                    const angle = (i * 30) * Math.PI / 180;
-                    const x1 = 125 + Math.cos(angle) * 80;
-                    const y1 = 125 + Math.sin(angle) * 80;
-                    const x2 = 125 + Math.cos(angle) * 100;
-                    const y2 = 125 + Math.sin(angle) * 100;
-                    return (
-                      <Path
-                        key={i}
-                        d={`M 125 125 L ${x1} ${y1} L ${x2} ${y2} Z`}
-                        fill="none"
-                        stroke="#fff"
-                        strokeWidth={0.8}
-                      />
-                    );
-                  })}
-                  {/* Inner circle */}
-                  <Circle cx={125} cy={125} r={60} fill="none" stroke="#fff" strokeWidth={1} />
-                  <Circle cx={125} cy={125} r={30} fill="none" stroke="#fff" strokeWidth={1} />
-                </G>
-              </Svg>
-            </Animated.View>
-
-            {/* Pulsing circles */}
             <Animated.View
               style={[
                 styles.pulseCircle,
@@ -338,8 +230,6 @@ export default function SessionScreen() {
                 },
               ]}
             />
-            
-            {/* Center icon */}
             <View style={styles.centerCircle}>
               <Brain size={48} color="#fff" />
             </View>
@@ -457,31 +347,11 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   visualizer: {
-    width: 300,
-    height: 300,
+    width: 200,
+    height: 200,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 40,
-  },
-  geometryContainer: {
-    position: "absolute",
-    width: 300,
-    height: 300,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  geometrySvg: {
-    position: "absolute",
-  },
-  mandalaContainer: {
-    position: "absolute",
-    width: 250,
-    height: 250,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mandalaSvg: {
-    position: "absolute",
   },
   pulseCircle: {
     position: "absolute",

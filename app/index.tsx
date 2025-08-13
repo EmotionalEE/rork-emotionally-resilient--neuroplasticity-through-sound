@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,9 +11,18 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
-
-import Svg, { Circle, Polygon, Path, G } from "react-native-svg";
+import {
+  Brain,
+  Heart,
+  Sparkles,
+  Waves,
+  Activity,
+  Moon,
+  Sun,
+  Cloud,
+  Zap,
+  LucideIcon,
+} from "lucide-react-native";
 import { emotionalStates, sessions } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { EmotionalState, Session } from "@/types/session";
@@ -23,9 +32,29 @@ export default function HomeScreen() {
   const router = useRouter();
   const { progress, hasCompletedOnboarding } = useUserProgress();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
+
+  useEffect(() => {
+    if (!hasCompletedOnboarding) {
+      router.replace("/onboarding");
+      return;
+    }
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 20,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     if (Platform.OS !== "web") {
@@ -45,91 +74,18 @@ export default function HomeScreen() {
   }, [router]);
 
   const getEmotionIcon = useCallback((emotion: EmotionalState) => {
-    const geometryIcons: Record<string, React.ReactNode> = {
-      anxious: (
-        <Svg width={24} height={24} viewBox="0 0 24 24">
-          <G opacity={0.9}>
-            <Circle cx={12} cy={12} r={8} fill="none" stroke="#fff" strokeWidth={1.5} />
-            <Circle cx={12} cy={12} r={4} fill="none" stroke="#fff" strokeWidth={1} />
-            <Path d="M12 4 L16 8 L12 12 L8 8 Z" fill="none" stroke="#fff" strokeWidth={1} />
-          </G>
-        </Svg>
-      ),
-      stressed: (
-        <Svg width={24} height={24} viewBox="0 0 24 24">
-          <G opacity={0.9}>
-            <Polygon points="12,2 22,20 2,20" fill="none" stroke="#fff" strokeWidth={1.5} />
-            <Circle cx={12} cy={14} r={3} fill="none" stroke="#fff" strokeWidth={1} />
-            <Path d="M12 8 L15 11 L12 14 L9 11 Z" fill="none" stroke="#fff" strokeWidth={1} />
-          </G>
-        </Svg>
-      ),
-      sad: (
-        <Svg width={24} height={24} viewBox="0 0 24 24">
-          <G opacity={0.9}>
-            <Circle cx={12} cy={12} r={9} fill="none" stroke="#fff" strokeWidth={1.5} />
-            <Path d="M12 3 L12 21 M3 12 L21 12" stroke="#fff" strokeWidth={1} />
-            <Circle cx={12} cy={12} r={3} fill="none" stroke="#fff" strokeWidth={1} />
-          </G>
-        </Svg>
-      ),
-      angry: (
-        <Svg width={24} height={24} viewBox="0 0 24 24">
-          <G opacity={0.9}>
-            <Polygon points="12,2 20,8 20,16 12,22 4,16 4,8" fill="none" stroke="#fff" strokeWidth={1.5} />
-            <Polygon points="12,6 16,10 12,14 8,10" fill="none" stroke="#fff" strokeWidth={1} />
-          </G>
-        </Svg>
-      ),
-      calm: (
-        <Svg width={24} height={24} viewBox="0 0 24 24">
-          <G opacity={0.9}>
-            <Circle cx={12} cy={12} r={10} fill="none" stroke="#fff" strokeWidth={1.5} />
-            <Circle cx={12} cy={12} r={6} fill="none" stroke="#fff" strokeWidth={1} />
-            <Circle cx={12} cy={12} r={2} fill="none" stroke="#fff" strokeWidth={1} />
-          </G>
-        </Svg>
-      ),
-      focused: (
-        <Svg width={24} height={24} viewBox="0 0 24 24">
-          <G opacity={0.9}>
-            <Polygon points="12,1 23,12 12,23 1,12" fill="none" stroke="#fff" strokeWidth={1.5} />
-            <Circle cx={12} cy={12} r={4} fill="none" stroke="#fff" strokeWidth={1} />
-            <Path d="M12 8 L16 12 L12 16 L8 12 Z" fill="none" stroke="#fff" strokeWidth={1} />
-          </G>
-        </Svg>
-      ),
-      happy: (
-        <Svg width={24} height={24} viewBox="0 0 24 24">
-          <G opacity={0.9}>
-            {Array.from({ length: 8 }).map((_, i) => {
-              const angle = (i * 45) * Math.PI / 180;
-              const x1 = 12 + Math.cos(angle) * 6;
-              const y1 = 12 + Math.sin(angle) * 6;
-              const x2 = 12 + Math.cos(angle) * 10;
-              const y2 = 12 + Math.sin(angle) * 10;
-              return <Path key={i} d={`M ${x1} ${y1} L ${x2} ${y2}`} stroke="#fff" strokeWidth={1} />;
-            })}
-            <Circle cx={12} cy={12} r={4} fill="none" stroke="#fff" strokeWidth={1.5} />
-          </G>
-        </Svg>
-      ),
-      energized: (
-        <Svg width={24} height={24} viewBox="0 0 24 24">
-          <G opacity={0.9}>
-            <Polygon points="12,2 18,8 18,16 12,22 6,16 6,8" fill="none" stroke="#fff" strokeWidth={1.5} />
-            <Polygon points="12,6 15,9 15,15 12,18 9,15 9,9" fill="none" stroke="#fff" strokeWidth={1} />
-            <Circle cx={12} cy={12} r={2} fill="#fff" />
-          </G>
-        </Svg>
-      ),
+    const icons: Record<string, LucideIcon> = {
+      anxious: Cloud,
+      stressed: Zap,
+      sad: Moon,
+      angry: Activity,
+      calm: Waves,
+      focused: Brain,
+      happy: Sun,
+      energized: Sparkles,
     };
-    
-    return geometryIcons[emotion.id] || (
-      <Svg width={24} height={24} viewBox="0 0 24 24">
-        <Circle cx={12} cy={12} r={8} fill="none" stroke="#fff" strokeWidth={1.5} />
-      </Svg>
-    );
+    const Icon = icons[emotion.id] || Heart;
+    return <Icon size={24} color="#fff" />;
   }, []);
 
   const filteredSessions = useMemo(() => 
@@ -138,49 +94,6 @@ export default function HomeScreen() {
       : sessions,
     [selectedEmotion]
   );
-
-  // Use useFocusEffect to handle navigation after the screen is focused
-  useFocusEffect(
-    useCallback(() => {
-      // Add a small delay to ensure the navigation system is ready
-      const timer = setTimeout(() => {
-        setIsInitialized(true);
-        if (!hasCompletedOnboarding) {
-          router.replace("/onboarding");
-          return;
-        }
-
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.spring(scaleAnim, {
-            toValue: 1,
-            tension: 20,
-            friction: 7,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router])
-  );
-
-  // Don't render anything until initialized
-  if (!isInitialized) {
-    return (
-      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading...</Text>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
 
   return (
     <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
@@ -233,9 +146,7 @@ export default function HomeScreen() {
                         isSelected && styles.emotionCardSelected,
                       ]}
                     >
-                      <View style={styles.emotionIconContainer}>
-                        {getEmotionIcon(emotion)}
-                      </View>
+                      {getEmotionIcon(emotion)}
                       <Text style={styles.emotionLabel}>{emotion.label}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -296,17 +207,7 @@ export default function HomeScreen() {
                         </View>
                       </View>
                       <View style={styles.sessionIcon}>
-                        <Svg width={32} height={32} viewBox="0 0 32 32">
-                          <G opacity={0.8}>
-                            <Circle cx={16} cy={16} r={12} fill="none" stroke="#fff" strokeWidth={1.5} />
-                            <Circle cx={16} cy={16} r={8} fill="none" stroke="#fff" strokeWidth={1} />
-                            <Circle cx={16} cy={16} r={4} fill="none" stroke="#fff" strokeWidth={1} />
-                            <Path d="M16 4 L20 8 L16 12 L12 8 Z" fill="none" stroke="#fff" strokeWidth={1} />
-                            <Path d="M28 16 L24 20 L20 16 L24 12 Z" fill="none" stroke="#fff" strokeWidth={1} />
-                            <Path d="M16 28 L12 24 L16 20 L20 24 Z" fill="none" stroke="#fff" strokeWidth={1} />
-                            <Path d="M4 16 L8 12 L12 16 L8 20 Z" fill="none" stroke="#fff" strokeWidth={1} />
-                          </G>
-                        </Svg>
+                        <Waves size={32} color="rgba(255,255,255,0.8)" />
                       </View>
                     </View>
                   </LinearGradient>
@@ -379,10 +280,6 @@ const styles = StyleSheet.create({
   },
   emotionCardSelected: {
     borderColor: "rgba(255,255,255,0.5)",
-  },
-  emotionIconContainer: {
-    alignItems: "center",
-    justifyContent: "center",
   },
   emotionLabel: {
     color: "#fff",
@@ -481,15 +378,5 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loadingText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600" as const,
   },
 });
