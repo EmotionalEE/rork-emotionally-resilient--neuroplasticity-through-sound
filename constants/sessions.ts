@@ -79,8 +79,8 @@ export const emotionalStates: EmotionalState[] = [
 export const sessions: Session[] = [
   {
     id: "alpha-waves",
-    title: "Alpha Wave Meditation",
-    description: "Promotes relaxation and reduces anxiety with 10Hz alpha waves",
+    title: "Calm & Centered",
+    description: "Find your inner peace and release anxiety with soothing frequencies",
     duration: 15,
     frequency: "10",
     gradient: ["#667eea", "#764ba2"],
@@ -89,8 +89,8 @@ export const sessions: Session[] = [
   },
   {
     id: "theta-healing",
-    title: "Theta Healing Session",
-    description: "Deep meditation and emotional healing with 6Hz theta waves",
+    title: "Deep Emotional Healing",
+    description: "Transform sadness into serenity with profound healing vibrations",
     duration: 20,
     frequency: "6",
     gradient: ["#f093fb", "#f5576c"],
@@ -99,8 +99,8 @@ export const sessions: Session[] = [
   },
   {
     id: "beta-focus",
-    title: "Beta Focus Booster",
-    description: "Enhance concentration and mental clarity with 20Hz beta waves",
+    title: "Mental Clarity & Focus",
+    description: "Sharpen your mind and boost concentration with energizing frequencies",
     duration: 10,
     frequency: "20",
     gradient: ["#4facfe", "#00f2fe"],
@@ -109,8 +109,8 @@ export const sessions: Session[] = [
   },
   {
     id: "delta-sleep",
-    title: "Delta Deep Sleep",
-    description: "Prepare for restful sleep with 2Hz delta waves",
+    title: "Peaceful Rest & Recovery",
+    description: "Release stress and prepare for deep, restorative sleep",
     duration: 30,
     frequency: "2",
     gradient: ["#a8edea", "#fed6e3"],
@@ -119,8 +119,8 @@ export const sessions: Session[] = [
   },
   {
     id: "gamma-insight",
-    title: "Gamma Insight",
-    description: "Heighten awareness and cognitive function with 40Hz gamma waves",
+    title: "Elevated Awareness",
+    description: "Expand consciousness and unlock your highest potential",
     duration: 12,
     frequency: "40",
     gradient: ["#ffecd2", "#fcb69f"],
@@ -129,8 +129,8 @@ export const sessions: Session[] = [
   },
   {
     id: "528hz-love",
-    title: "528Hz Love Frequency",
-    description: "The miracle tone for transformation and DNA repair",
+    title: "Heart Opening & Love",
+    description: "Open your heart to love and transform negative emotions",
     duration: 18,
     frequency: "528",
     gradient: ["#ff9a9e", "#fecfef"],
@@ -139,8 +139,8 @@ export const sessions: Session[] = [
   },
   {
     id: "396hz-release",
-    title: "396Hz Liberation",
-    description: "Release fear and guilt with this powerful solfeggio frequency",
+    title: "Freedom from Fear",
+    description: "Release limiting beliefs and embrace your authentic self",
     duration: 15,
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
@@ -149,8 +149,8 @@ export const sessions: Session[] = [
   },
   {
     id: "741hz-detox",
-    title: "741Hz Emotional Detox",
-    description: "Cleanse negative emotions and toxins from your energy field",
+    title: "Emotional Cleansing",
+    description: "Purify your emotional body and release toxic feelings",
     duration: 22,
     frequency: "741",
     gradient: ["#d299c2", "#fef9d7"],
