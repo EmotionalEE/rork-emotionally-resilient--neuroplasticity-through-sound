@@ -224,21 +224,36 @@ export default function SessionScreen() {
       }
 
       if (isPlaying) {
+        console.log('Stopping audio playback');
         await stopSound();
         setIsPaused(true);
       } else {
         if (session) {
-          console.log('Attempting to play audio:', session.audioUrl);
+          console.log('Attempting to play audio for session:', session.title, 'URL:', session.audioUrl);
           await playSound(session.audioUrl);
           setIsPaused(false);
+          console.log('Audio playback started successfully');
         }
       }
     } catch (error) {
       console.error('Error in handlePlayPause:', error);
       setIsPaused(true);
+      
+      // More specific error messages
+      let errorMessage = "Unable to play audio. Please try again.";
+      if (error instanceof Error) {
+        if (error.message.includes('timeout')) {
+          errorMessage = "Audio loading timed out. Please check your internet connection and try again.";
+        } else if (error.message.includes('network')) {
+          errorMessage = "Network error. Please check your internet connection.";
+        } else if (error.message.includes('format')) {
+          errorMessage = "Audio format not supported. Please try a different session.";
+        }
+      }
+      
       Alert.alert(
         "Audio Error",
-        "Unable to play audio. Please check your internet connection and try again.",
+        errorMessage,
         [{ text: "OK" }]
       );
     }

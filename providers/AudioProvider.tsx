@@ -128,7 +128,7 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
             if (!signal.aborted) {
               reject(new Error('Audio loading timeout'));
             }
-          }, 10000);
+          }, 15000); // Increased timeout to 15 seconds
           
           signal.addEventListener('abort', () => {
             clearTimeout(timeout);
@@ -168,6 +168,9 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
           await newSound.unloadAsync();
           throw new Error('Operation cancelled');
         }
+        
+        // Add a small delay before playing to ensure everything is ready
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         // Start playing
         await newSound.playAsync();

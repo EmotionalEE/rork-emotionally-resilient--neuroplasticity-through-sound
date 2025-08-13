@@ -135,7 +135,7 @@ export const sessions: Session[] = [
     frequency: "528",
     gradient: ["#ff9a9e", "#fecfef"],
     targetEmotions: ["sad", "angry", "happy", "calm"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a",
+    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
   },
   {
     id: "396hz-release",
