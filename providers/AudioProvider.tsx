@@ -36,19 +36,40 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
     };
   }, [sound]);
 
-  const playSound = useCallback(async (url: string) => {
+  const stopSound = useCallback(async () => {
     try {
-      // Stop current sound if playing
       if (sound) {
         try {
           const status = await sound.getStatusAsync();
           if (status.isLoaded) {
+            if (status.isPlaying) {
+              await sound.stopAsync();
+            }
             await sound.unloadAsync();
           }
         } catch (error) {
-          console.warn("Error unloading previous sound:", error);
+          console.warn("Error stopping sound:", error);
+          // Try to force unload even if status check fails
+          try {
+            await sound.unloadAsync();
+          } catch (unloadError) {
+            console.warn("Error force unloading sound:", unloadError);
+          }
         }
       }
+    } catch (error) {
+      console.warn("Error in stopSound:", error);
+    } finally {
+      // Always reset state regardless of errors
+      setSound(null);
+      setIsPlaying(false);
+    }
+  }, [sound]);
+
+  const playSound = useCallback(async (url: string) => {
+    try {
+      // Stop current sound if playing
+      await stopSound();
 
       console.log("Loading sound from:", url);
       
@@ -64,37 +85,16 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       newSound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
           setIsPlaying(status.isPlaying || false);
+        } else {
+          setIsPlaying(false);
         }
       });
     } catch (error) {
       console.error("Error playing sound:", error);
       setIsPlaying(false);
+      setSound(null);
     }
-  }, [sound]);
-
-  const stopSound = useCallback(async () => {
-    if (sound) {
-      try {
-        const status = await sound.getStatusAsync();
-        if (status.isLoaded) {
-          if (status.isPlaying) {
-            await sound.stopAsync();
-          }
-          await sound.unloadAsync();
-        }
-      } catch (error) {
-        console.warn("Error stopping sound:", error);
-        // Continue with cleanup even if there's an error
-      } finally {
-        // Always reset state
-        setSound(null);
-        setIsPlaying(false);
-      }
-    } else {
-      // Reset state even if no sound object exists
-      setIsPlaying(false);
-    }
-  }, [sound]);
+  }, [stopSound]);
 
   const setVolume = useCallback(async (volume: number) => {
     if (sound) {

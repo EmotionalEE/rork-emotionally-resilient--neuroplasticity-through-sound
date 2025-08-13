@@ -7,6 +7,7 @@ import {
   Platform,
   Animated,
   Alert,
+  BackHandler,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -48,12 +49,57 @@ export default function SessionScreen() {
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
 
+  const handleClose = useCallback(async () => {
+    try {
+      // Always stop sound first
+      await stopSound();
+      
+      // If session hasn't started yet, just go back
+      if (!sessionStarted) {
+        router.back();
+        return;
+      }
+      
+      // If session is in progress, show confirmation
+      Alert.alert(
+        "End Session",
+        "Are you sure you want to end this session?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "End Session",
+            style: "destructive",
+            onPress: () => {
+              router.back();
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.warn('Error in handleClose:', error);
+      // Force navigation even if there's an error
+      router.back();
+    }
+  }, [stopSound, router, sessionStarted]);
+
   // Show pre-session emotion selector when component mounts
   useEffect(() => {
     if (session && !sessionStarted) {
       setShowPreEmotionSelector(true);
     }
   }, [session, sessionStarted]);
+
+  // Handle Android back button
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        handleClose();
+        return true; // Prevent default back action
+      });
+
+      return () => backHandler.remove();
+    }
+  }, []);
 
   useEffect(() => {
     if (!session || !sessionStarted) return;
@@ -104,36 +150,53 @@ export default function SessionScreen() {
     }, 4000);
 
     return () => {
-      stopSound();
-      clearInterval(breathTimer);
+      try {
+        stopSound();
+        clearInterval(breathTimer);
+      } catch (error) {
+        console.warn('Error in cleanup:', error);
+      }
     };
   }, [session, sessionStarted, pulseAnim, waveAnim, breathAnim, stopSound]);
 
   const handleComplete = useCallback(async () => {
-    if (Platform.OS !== "web") {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    try {
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+      
+      await stopSound();
+      setShowPostEmotionSelector(true);
+    } catch (error) {
+      console.warn('Error in handleComplete:', error);
+      setShowPostEmotionSelector(true);
     }
-    
-    stopSound();
-    setShowPostEmotionSelector(true);
   }, [stopSound]);
 
   const handlePostEmotionSelect = useCallback(async (emotionId: string, intensity: number) => {
-    if (session) {
-      await addSession(session.id, Math.floor(timeElapsed / 60));
-      await addEmotion(emotionId, intensity, session.id);
+    try {
+      if (session) {
+        await addSession(session.id, Math.floor(timeElapsed / 60));
+        await addEmotion(emotionId, intensity, session.id);
+      }
+      
+      setShowPostEmotionSelector(false);
+      
+      Alert.alert(
+        "Session Complete!",
+        "Great job! You've completed this session and tracked your emotional progress.",
+        [
+          {
+            text: "Continue",
+            onPress: () => router.back(),
+          },
+        ]
+      );
+    } catch (error) {
+      console.warn('Error in handlePostEmotionSelect:', error);
+      setShowPostEmotionSelector(false);
+      router.back();
     }
-    
-    Alert.alert(
-      "Session Complete!",
-      "Great job! You've completed this session and tracked your emotional progress.",
-      [
-        {
-          text: "Continue",
-          onPress: () => router.back(),
-        },
-      ]
-    );
   }, [session, timeElapsed, addSession, addEmotion, router]);
 
   useEffect(() => {
@@ -155,50 +218,46 @@ export default function SessionScreen() {
   const handlePlayPause = useCallback(async () => {
     if (!sessionStarted) return;
     
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-
-    if (isPlaying) {
-      stopSound();
-      setIsPaused(true);
-    } else {
-      if (session) {
-        await playSound(session.audioUrl);
-        setIsPaused(false);
+    try {
+      if (Platform.OS !== "web") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       }
+
+      if (isPlaying) {
+        await stopSound();
+        setIsPaused(true);
+      } else {
+        if (session) {
+          await playSound(session.audioUrl);
+          setIsPaused(false);
+        }
+      }
+    } catch (error) {
+      console.warn('Error in handlePlayPause:', error);
+      setIsPaused(true);
     }
   }, [isPlaying, session, sessionStarted, playSound, stopSound]);
 
   const handlePreEmotionSelect = useCallback(async (emotionId: string, intensity: number) => {
-    await addEmotion(emotionId, intensity, session?.id);
-    setPreSessionEmotion(emotionId);
-    setSessionStarted(true);
-    
-    // Auto-start the session
-    if (session) {
-      await playSound(session.audioUrl);
-      setIsPaused(false);
+    try {
+      await addEmotion(emotionId, intensity, session?.id);
+      setPreSessionEmotion(emotionId);
+      setShowPreEmotionSelector(false);
+      setSessionStarted(true);
+      
+      // Auto-start the session
+      if (session) {
+        await playSound(session.audioUrl);
+        setIsPaused(false);
+      }
+    } catch (error) {
+      console.warn('Error in handlePreEmotionSelect:', error);
+      setShowPreEmotionSelector(false);
+      setSessionStarted(true);
     }
   }, [addEmotion, session, playSound]);
 
-  const handleClose = useCallback(() => {
-    Alert.alert(
-      "End Session",
-      "Are you sure you want to end this session?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "End Session",
-          style: "destructive",
-          onPress: () => {
-            stopSound();
-            router.back();
-          },
-        },
-      ]
-    );
-  }, [stopSound, router]);
+
 
 
 
