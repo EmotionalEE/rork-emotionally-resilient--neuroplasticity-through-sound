@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   Brain,
   Heart,
@@ -30,54 +30,31 @@ import * as Haptics from "expo-haptics";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const { progress, hasCompletedOnboarding } = useUserProgress();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
-  const [isNavigationReady, setIsNavigationReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
 
-  // Wait for navigation to be ready
   useEffect(() => {
-    const unsubscribe = navigation.addListener('state', () => {
-      setIsNavigationReady(true);
-    });
-    
-    // Check if already ready
-    if (navigation.getState()) {
-      setIsNavigationReady(true);
+    if (!hasCompletedOnboarding) {
+      router.replace("/onboarding");
+      return;
     }
-    
-    return unsubscribe;
-  }, [navigation]);
 
-  useEffect(() => {
-    if (!isNavigationReady) return;
-    
-    // Small delay to ensure router is fully ready
-    const timer = setTimeout(() => {
-      if (!hasCompletedOnboarding) {
-        router.replace("/onboarding");
-        return;
-      }
-
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 20,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router, isNavigationReady]);
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 20,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     if (Platform.OS !== "web") {

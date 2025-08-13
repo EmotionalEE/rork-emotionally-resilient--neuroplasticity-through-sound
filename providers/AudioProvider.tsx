@@ -33,14 +33,7 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
     try {
       // Stop current sound if playing
       if (sound) {
-        try {
-          const status = await sound.getStatusAsync();
-          if (status.isLoaded) {
-            await sound.unloadAsync();
-          }
-        } catch (error) {
-          console.log("Error unloading previous sound:", error);
-        }
+        await sound.unloadAsync();
       }
 
       console.log("Loading sound from:", url);
@@ -68,20 +61,12 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   const stopSound = useCallback(async () => {
     if (sound) {
       try {
-        const status = await sound.getStatusAsync();
-        if (status.isLoaded) {
-          if (status.isPlaying) {
-            await sound.stopAsync();
-          }
-          await sound.unloadAsync();
-        }
+        await sound.stopAsync();
+        await sound.unloadAsync();
         setSound(null);
         setIsPlaying(false);
       } catch (error) {
         console.error("Error stopping sound:", error);
-        // Reset state even if there's an error
-        setSound(null);
-        setIsPlaying(false);
       }
     }
   }, [sound]);
@@ -89,10 +74,7 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   const setVolume = useCallback(async (volume: number) => {
     if (sound) {
       try {
-        const status = await sound.getStatusAsync();
-        if (status.isLoaded) {
-          await sound.setVolumeAsync(volume);
-        }
+        await sound.setVolumeAsync(volume);
       } catch (error) {
         console.error("Error setting volume:", error);
       }
