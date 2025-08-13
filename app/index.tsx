@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 import Svg, { Circle, Polygon, Path, G } from "react-native-svg";
 import { emotionalStates, sessions } from "@/constants/sessions";
@@ -22,29 +23,9 @@ export default function HomeScreen() {
   const router = useRouter();
   const { progress, hasCompletedOnboarding } = useUserProgress();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
-
-  useEffect(() => {
-    if (!hasCompletedOnboarding) {
-      router.replace("/onboarding");
-      return;
-    }
-
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 20,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     if (Platform.OS !== "web") {
@@ -157,6 +138,49 @@ export default function HomeScreen() {
       : sessions,
     [selectedEmotion]
   );
+
+  // Use useFocusEffect to handle navigation after the screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      // Add a small delay to ensure the navigation system is ready
+      const timer = setTimeout(() => {
+        setIsInitialized(true);
+        if (!hasCompletedOnboarding) {
+          router.replace("/onboarding");
+          return;
+        }
+
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            tension: 20,
+            friction: 7,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router])
+  );
+
+  // Don't render anything until initialized
+  if (!isInitialized) {
+    return (
+      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
 
   return (
     <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
@@ -457,5 +481,15 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     color: "rgba(255,255,255,0.7)",
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600" as const,
   },
 });
