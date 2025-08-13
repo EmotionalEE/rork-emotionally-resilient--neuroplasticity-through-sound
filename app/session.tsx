@@ -173,7 +173,6 @@ export default function SessionScreen() {
   const handlePreEmotionSelect = useCallback(async (emotionId: string, intensity: number) => {
     await addEmotion(emotionId, intensity, session?.id);
     setPreSessionEmotion(emotionId);
-    setShowPreEmotionSelector(false);
     setSessionStarted(true);
     
     // Auto-start the session
@@ -182,11 +181,6 @@ export default function SessionScreen() {
       setIsPaused(false);
     }
   }, [addEmotion, session, playSound]);
-
-  const handlePreEmotionClose = useCallback(() => {
-    setShowPreEmotionSelector(false);
-    router.back();
-  }, [router]);
 
   const handleClose = useCallback(() => {
     Alert.alert(
@@ -233,17 +227,14 @@ export default function SessionScreen() {
     <>
       <EmotionSelector
         visible={showPreEmotionSelector}
-        onClose={handlePreEmotionClose}
+        onClose={() => setShowPreEmotionSelector(false)}
         onSelect={handlePreEmotionSelect}
         title="How are you feeling before this session?"
       />
       
       <EmotionSelector
         visible={showPostEmotionSelector}
-        onClose={() => {
-          setShowPostEmotionSelector(false);
-          router.back();
-        }}
+        onClose={() => setShowPostEmotionSelector(false)}
         onSelect={handlePostEmotionSelect}
         title="How are you feeling after this session?"
       />
@@ -261,27 +252,26 @@ export default function SessionScreen() {
 
           {/* Sacred Geometry Visualization */}
           <View style={styles.visualizer}>
-            {sessionStarted ? (
-              <VisualMeditation
-                frequency={parseInt(session.frequency, 10)}
-                isPlaying={isPlaying}
-                emotionGradient={session.gradient}
-              />
-            ) : (
-              <View style={styles.preSessionVisual}>
-                <SacredGeometry
-                  type="flowerOfLife"
-                  size={200}
-                  color="#ffffff"
-                  animated={true}
-                  opacity={0.8}
-                />
-                <View style={styles.centerCircle}>
-                  <Brain size={48} color="#fff" />
-                </View>
-              </View>
-            )}
+            <SacredGeometry
+              type="flowerOfLife"
+              size={200}
+              color="#ffffff"
+              animated={sessionStarted && isPlaying}
+              opacity={0.4}
+            />
+            <View style={styles.centerCircle}>
+              <Brain size={48} color="#fff" />
+            </View>
           </View>
+
+          {/* Full-screen Visual Meditation */}
+          {sessionStarted && (
+            <VisualMeditation
+              frequency={parseInt(session.frequency, 10)}
+              isPlaying={isPlaying}
+              emotionGradient={session.gradient}
+            />
+          )}
 
           <View style={styles.breathingGuide}>
             <Animated.View
@@ -403,12 +393,11 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   visualizer: {
-    width: 300,
-    height: 300,
+    width: 200,
+    height: 200,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 40,
-    position: "relative",
   },
   pulseCircle: {
     position: "absolute",
@@ -425,15 +414,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#fff",
   },
-  preSessionVisual: {
-    position: 'absolute',
-    width: 300,
-    height: 300,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   centerCircle: {
-    position: 'absolute',
     width: 120,
     height: 120,
     borderRadius: 60,

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import SacredGeometry from './SacredGeometry';
-import Svg, { Path, G, Defs, RadialGradient, Stop } from 'react-native-svg';
 
 interface VisualMeditationProps {
   frequency: number;
@@ -11,7 +10,7 @@ interface VisualMeditationProps {
 }
 
 function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; emotionGradient: string[] }) {
-  const ringAnims = useRef(Array.from({ length: 8 }, () => new Animated.Value(0))).current;
+  const ringAnims = useRef(Array.from({ length: 5 }, () => new Animated.Value(0))).current;
 
   useEffect(() => {
     if (isPlaying) {
@@ -19,7 +18,7 @@ function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; em
         Animated.loop(
           Animated.timing(ringAnim, {
             toValue: 1,
-            duration: 2000 + (index * 300),
+            duration: 3000 + (index * 500),
             useNativeDriver: true,
           })
         ).start();
@@ -32,17 +31,12 @@ function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; em
       {ringAnims.map((ringAnim, index) => {
         const scale = ringAnim.interpolate({
           inputRange: [0, 1],
-          outputRange: [0.3, 2.5],
+          outputRange: [0.5, 2],
         });
 
         const opacity = ringAnim.interpolate({
-          inputRange: [0, 0.2, 0.8, 1],
-          outputRange: [0, 0.8, 0.3, 0],
-        });
-
-        const borderWidth = ringAnim.interpolate({
-          inputRange: [0, 0.5, 1],
-          outputRange: [3, 1, 0.5],
+          inputRange: [0, 0.3, 1],
+          outputRange: [0.8, 0.4, 0],
         });
 
         return (
@@ -53,8 +47,7 @@ function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; em
               {
                 transform: [{ scale }],
                 opacity,
-                borderColor: emotionGradient[index % emotionGradient.length] || '#ffffff',
-                borderWidth,
+                borderColor: emotionGradient[0],
               }
             ]}
           />
@@ -64,154 +57,82 @@ function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; em
   );
 }
 
-function EnergyField({ frequency, isPlaying, emotionGradient }: { frequency: number; isPlaying: boolean; emotionGradient: string[] }) {
-  const fieldAnims = useRef(Array.from({ length: 20 }, () => new Animated.Value(0))).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (isPlaying) {
-      // Field line animations
-      fieldAnims.forEach((anim, index) => {
-        Animated.loop(
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 4000 + (index * 100),
-            useNativeDriver: false,
-          })
-        ).start();
-      });
-
-      // Rotation animation
-      Animated.loop(
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: 20000,
-          useNativeDriver: true,
-        })
-      ).start();
-    }
-  }, [isPlaying, fieldAnims, rotateAnim]);
-
-  const rotation = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const renderEnergyLines = () => {
-    return fieldAnims.map((anim, index) => {
-      const angle = (index * 18) * (Math.PI / 180);
-      const baseRadius = 50;
-      const maxRadius = 300;
-      
-
-
-      const x1 = 200 + baseRadius * Math.cos(angle);
-      const y1 = 200 + baseRadius * Math.sin(angle);
-      
-      return (
-        <Animated.View key={index} style={{ position: 'absolute' }}>
-          <Svg width={400} height={400} style={{ position: 'absolute' }}>
-            <Defs>
-              <RadialGradient id={`energyGradient-${index}`} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor={emotionGradient[0] || '#ffffff'} stopOpacity={0.8} />
-                <Stop offset="100%" stopColor={emotionGradient[1] || emotionGradient[0] || '#ffffff'} stopOpacity={0.1} />
-              </RadialGradient>
-            </Defs>
-            <G>
-              <Path
-                d={`M ${x1} ${y1} Q ${200 + (baseRadius + 50) * Math.cos(angle + 0.5)} ${200 + (baseRadius + 50) * Math.sin(angle + 0.5)} ${200 + maxRadius * Math.cos(angle)} ${200 + maxRadius * Math.sin(angle)}`}
-                stroke={`url(#energyGradient-${index})`}
-                strokeWidth="2"
-                fill="none"
-                opacity={0.6}
-              />
-            </G>
-          </Svg>
-        </Animated.View>
-      );
-    });
-  };
-
-  return (
-    <Animated.View 
-      style={[
-        styles.energyField,
-        {
-          transform: [{ rotate: rotation }]
-        }
-      ]}
-    >
-      {renderEnergyLines()}
-    </Animated.View>
-  );
-}
-
 export default function VisualMeditation({ frequency, isPlaying, emotionGradient }: VisualMeditationProps) {
-  const [currentGeometry, setCurrentGeometry] = useState<'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral' | 'merkaba' | 'treeOfLife' | 'seedOfLife' | 'platonic' | 'mandala' | 'fibonacci' | 'torusField'>('flowerOfLife');
+  const [currentGeometry, setCurrentGeometry] = useState<'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral'>('flowerOfLife');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const particleAnims = useRef(Array.from({ length: 12 }, () => new Animated.Value(0))).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const colorShiftAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Always fade in when component mounts
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 2000,
-      useNativeDriver: true,
-    }).start();
-
-    // Breathing animation based on frequency
-    const breathDuration = Math.max(2000, 8000 - (frequency * 10));
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(breathAnim, {
-          toValue: 1,
-          duration: breathDuration,
-          useNativeDriver: true,
-        }),
-        Animated.timing(breathAnim, {
-          toValue: 0,
-          duration: breathDuration,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Color shifting animation
-    Animated.loop(
-      Animated.timing(colorShiftAnim, {
+    if (isPlaying) {
+      // Fade in animation
+      Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 10000,
-        useNativeDriver: false,
-      })
-    ).start();
+        duration: 2000,
+        useNativeDriver: true,
+      }).start();
 
-    // Particle animations - more active when playing
-    particleAnims.forEach((anim, index) => {
+      // Breathing animation based on frequency
+      const breathDuration = Math.max(2000, 8000 - (frequency * 10));
       Animated.loop(
-        Animated.timing(anim, {
+        Animated.sequence([
+          Animated.timing(breathAnim, {
+            toValue: 1,
+            duration: breathDuration,
+            useNativeDriver: true,
+          }),
+          Animated.timing(breathAnim, {
+            toValue: 0,
+            duration: breathDuration,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+
+      // Color shifting animation
+      Animated.loop(
+        Animated.timing(colorShiftAnim, {
           toValue: 1,
-          duration: isPlaying ? 5000 + (index * 200) : 8000 + (index * 300),
-          useNativeDriver: true,
+          duration: 10000,
+          useNativeDriver: false,
         })
       ).start();
-    });
 
-    // Change geometry based on frequency with more variety
-    const geometryTimer = setInterval(() => {
-      const geometries: ('flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral' | 'merkaba' | 'treeOfLife' | 'seedOfLife' | 'platonic' | 'mandala' | 'fibonacci' | 'torusField')[] = [
-        'seedOfLife', 'sriYantra', 'vesicaPiscis', 'flowerOfLife', 'merkaba', 
-        'treeOfLife', 'metatronsCube', 'platonic', 'mandala', 'fibonacci', 
-        'goldenSpiral', 'torusField'
-      ];
-      
-      const index = Math.floor((frequency / 50) * geometries.length);
-      const clampedIndex = Math.min(Math.max(index, 0), geometries.length - 1);
-      setCurrentGeometry(geometries[clampedIndex]);
-    }, isPlaying ? 6000 : 10000);
+      // Particle animations
+      particleAnims.forEach((anim, index) => {
+        Animated.loop(
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 5000 + (index * 200),
+            useNativeDriver: true,
+          })
+        ).start();
+      });
 
-    return () => clearInterval(geometryTimer);
+      // Change geometry based on frequency
+      const geometryTimer = setInterval(() => {
+        if (frequency < 10) {
+          setCurrentGeometry('sriYantra');
+        } else if (frequency < 20) {
+          setCurrentGeometry('vesicaPiscis');
+        } else if (frequency < 30) {
+          setCurrentGeometry('flowerOfLife');
+        } else if (frequency < 40) {
+          setCurrentGeometry('metatronsCube');
+        } else {
+          setCurrentGeometry('goldenSpiral');
+        }
+      }, 8000);
+
+      return () => clearInterval(geometryTimer);
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start();
+    }
   }, [isPlaying, frequency, fadeAnim, breathAnim, colorShiftAnim, particleAnims]);
 
   const renderParticles = () => {
@@ -299,37 +220,34 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
       >
         <SacredGeometry
           type={currentGeometry}
-          size={250}
+          size={280}
           color="#ffffff"
           animated={true}
-          opacity={0.8}
+          opacity={0.6}
         />
       </Animated.View>
 
-      {/* Secondary geometry layers with dynamic types */}
+      {/* Secondary geometry layers */}
       <View style={styles.secondaryGeometry}>
         <SacredGeometry
-          type={frequency < 25 ? 'seedOfLife' : frequency < 50 ? 'mandala' : 'torusField'}
-          size={350}
+          type="vesicaPiscis"
+          size={400}
           color="#ffffff"
           animated={true}
-          opacity={0.3}
+          opacity={0.2}
         />
       </View>
 
       <View style={styles.tertiaryGeometry}>
         <SacredGeometry
-          type={frequency < 15 ? 'vesicaPiscis' : frequency < 35 ? 'fibonacci' : 'treeOfLife'}
-          size={450}
+          type="flowerOfLife"
+          size={500}
           color="#ffffff"
           animated={true}
-          opacity={0.15}
+          opacity={0.1}
         />
       </View>
 
-      {/* Energy field visualization */}
-      <EnergyField frequency={frequency} isPlaying={isPlaying} emotionGradient={emotionGradient} />
-      
       {/* Frequency visualization rings */}
       <FrequencyRings isPlaying={isPlaying} emotionGradient={emotionGradient} />
     </Animated.View>
@@ -338,8 +256,11 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
 
 const styles = StyleSheet.create({
   container: {
-    width: 300,
-    height: 300,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -380,23 +301,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  quaternaryGeometry: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   frequencyRing: {
     position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     borderWidth: 2,
-  },
-  energyField: {
-    position: 'absolute',
-    width: 400,
-    height: 400,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

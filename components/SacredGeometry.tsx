@@ -3,7 +3,7 @@ import { StyleSheet, Animated } from 'react-native';
 import Svg, { Circle, Path, Polygon, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 interface SacredGeometryProps {
-  type: 'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral' | 'merkaba' | 'treeOfLife' | 'seedOfLife' | 'platonic' | 'mandala' | 'fibonacci' | 'torusField';
+  type: 'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral';
   size?: number;
   color?: string;
   animated?: boolean;
@@ -27,7 +27,7 @@ export default function SacredGeometry({
       Animated.loop(
         Animated.timing(rotateAnim, {
           toValue: 1,
-          duration: 20000,
+          duration: 30000,
           useNativeDriver: true,
         })
       ).start();
@@ -36,13 +36,13 @@ export default function SacredGeometry({
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: 1.15,
-            duration: 2000,
+            toValue: 1.1,
+            duration: 3000,
             useNativeDriver: true,
           }),
           Animated.timing(pulseAnim, {
             toValue: 1,
-            duration: 2000,
+            duration: 3000,
             useNativeDriver: true,
           }),
         ])
@@ -60,7 +60,7 @@ export default function SacredGeometry({
     const centerX = size / 2;
     const centerY = size / 2;
     
-    const circles: React.ReactElement[] = [];
+    const circles = [];
     
     // Center circle
     circles.push(
@@ -312,283 +312,6 @@ export default function SacredGeometry({
     ];
   };
 
-  const renderMerkaba = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 4;
-    const height = radius * Math.sqrt(3);
-    
-    // Upward tetrahedron
-    const upTriangle1 = `${centerX},${centerY - height/2} ${centerX - radius},${centerY + height/4} ${centerX + radius},${centerY + height/4}`;
-    const upTriangle2 = `${centerX},${centerY + height/3} ${centerX - radius*0.7},${centerY - height/6} ${centerX + radius*0.7},${centerY - height/6}`;
-    
-    // Downward tetrahedron
-    const downTriangle1 = `${centerX},${centerY + height/2} ${centerX - radius},${centerY - height/4} ${centerX + radius},${centerY - height/4}`;
-    const downTriangle2 = `${centerX},${centerY - height/3} ${centerX - radius*0.7},${centerY + height/6} ${centerX + radius*0.7},${centerY + height/6}`;
-    
-    return [
-      <Polygon key="up1" points={upTriangle1} fill="none" stroke={color} strokeWidth="2" opacity={opacity} />,
-      <Polygon key="up2" points={upTriangle2} fill="none" stroke={color} strokeWidth="1.5" opacity={opacity * 0.7} />,
-      <Polygon key="down1" points={downTriangle1} fill="none" stroke={color} strokeWidth="2" opacity={opacity} />,
-      <Polygon key="down2" points={downTriangle2} fill="none" stroke={color} strokeWidth="1.5" opacity={opacity * 0.7} />,
-    ];
-  };
-
-  const renderTreeOfLife = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 12;
-    
-    // Sephirot positions (10 spheres)
-    const sephirot = [
-      { x: centerX, y: centerY - radius * 4, name: 'Kether' },
-      { x: centerX - radius * 2, y: centerY - radius * 2.5, name: 'Binah' },
-      { x: centerX + radius * 2, y: centerY - radius * 2.5, name: 'Chokmah' },
-      { x: centerX - radius * 1.5, y: centerY - radius, name: 'Geburah' },
-      { x: centerX + radius * 1.5, y: centerY - radius, name: 'Chesed' },
-      { x: centerX, y: centerY, name: 'Tiphereth' },
-      { x: centerX - radius * 1.5, y: centerY + radius, name: 'Hod' },
-      { x: centerX + radius * 1.5, y: centerY + radius, name: 'Netzach' },
-      { x: centerX, y: centerY + radius * 2.5, name: 'Yesod' },
-      { x: centerX, y: centerY + radius * 4, name: 'Malkuth' },
-    ];
-    
-    const connections = [
-      [0, 1], [0, 2], [1, 2], [1, 3], [2, 4], [3, 4], [3, 5], [4, 5],
-      [5, 6], [5, 7], [6, 7], [6, 8], [7, 8], [8, 9]
-    ];
-    
-    const elements: React.ReactElement[] = [];
-    
-    // Draw connections
-    connections.forEach(([i, j], index) => {
-      elements.push(
-        <Path
-          key={`connection-${index}`}
-          d={`M ${sephirot[i].x} ${sephirot[i].y} L ${sephirot[j].x} ${sephirot[j].y}`}
-          stroke={color}
-          strokeWidth="1.5"
-          opacity={opacity * 0.6}
-        />
-      );
-    });
-    
-    // Draw sephirot
-    sephirot.forEach((seph, index) => {
-      elements.push(
-        <Circle
-          key={`seph-${index}`}
-          cx={seph.x}
-          cy={seph.y}
-          r={radius * 0.8}
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          opacity={opacity}
-        />
-      );
-    });
-    
-    return elements;
-  };
-
-  const renderSeedOfLife = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 8;
-    
-    const circles: React.ReactElement[] = [];
-    
-    // Center circle
-    circles.push(
-      <Circle key="center" cx={centerX} cy={centerY} r={radius} fill="none" stroke={color} strokeWidth="2" opacity={opacity} />
-    );
-    
-    // Six surrounding circles
-    for (let i = 0; i < 6; i++) {
-      const angle = (i * 60) * (Math.PI / 180);
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
-      
-      circles.push(
-        <Circle key={`seed-${i}`} cx={x} cy={y} r={radius} fill="none" stroke={color} strokeWidth="2" opacity={opacity} />
-      );
-    }
-    
-    return circles;
-  };
-
-  const renderPlatonic = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 4;
-    
-    // Dodecahedron projection (pentagon-based)
-    const elements: React.ReactElement[] = [];
-    
-    // Outer pentagon
-    const outerPoints: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      const angle = (i * 72 - 90) * (Math.PI / 180);
-      outerPoints.push(`${centerX + radius * Math.cos(angle)},${centerY + radius * Math.sin(angle)}`);
-    }
-    
-    // Inner pentagon
-    const innerPoints: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      const angle = (i * 72 - 90) * (Math.PI / 180);
-      innerPoints.push(`${centerX + radius * 0.6 * Math.cos(angle)},${centerY + radius * 0.6 * Math.sin(angle)}`);
-    }
-    
-    elements.push(
-      <Polygon key="outer-pentagon" points={outerPoints.join(' ')} fill="none" stroke={color} strokeWidth="2" opacity={opacity} />
-    );
-    
-    elements.push(
-      <Polygon key="inner-pentagon" points={innerPoints.join(' ')} fill="none" stroke={color} strokeWidth="2" opacity={opacity * 0.7} />
-    );
-    
-    // Connect outer to inner
-    for (let i = 0; i < 5; i++) {
-      const outerAngle = (i * 72 - 90) * (Math.PI / 180);
-      const innerAngle = (i * 72 - 90) * (Math.PI / 180);
-      
-      elements.push(
-        <Path
-          key={`connection-${i}`}
-          d={`M ${centerX + radius * Math.cos(outerAngle)} ${centerY + radius * Math.sin(outerAngle)} L ${centerX + radius * 0.6 * Math.cos(innerAngle)} ${centerY + radius * 0.6 * Math.sin(innerAngle)}`}
-          stroke={color}
-          strokeWidth="1.5"
-          opacity={opacity * 0.5}
-        />
-      );
-    }
-    
-    return elements;
-  };
-
-  const renderMandala = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const elements: React.ReactElement[] = [];
-    
-    // Multiple concentric patterns
-    for (let layer = 1; layer <= 4; layer++) {
-      const layerRadius = (size / 8) * layer;
-      const petals = layer * 8;
-      
-      for (let i = 0; i < petals; i++) {
-        const angle = (i * (360 / petals)) * (Math.PI / 180);
-        const x = centerX + layerRadius * Math.cos(angle);
-        const y = centerY + layerRadius * Math.sin(angle);
-        
-        // Petal shape
-        const petalSize = layerRadius * 0.3;
-        const petalPath = `M ${x} ${y} Q ${x + petalSize * Math.cos(angle + Math.PI/4)} ${y + petalSize * Math.sin(angle + Math.PI/4)} ${x + petalSize * Math.cos(angle)} ${y + petalSize * Math.sin(angle)} Q ${x + petalSize * Math.cos(angle - Math.PI/4)} ${y + petalSize * Math.sin(angle - Math.PI/4)} ${x} ${y}`;
-        
-        elements.push(
-          <Path
-            key={`petal-${layer}-${i}`}
-            d={petalPath}
-            fill="none"
-            stroke={color}
-            strokeWidth="1"
-            opacity={opacity * (0.8 - layer * 0.1)}
-          />
-        );
-      }
-      
-      // Layer circle
-      elements.push(
-        <Circle
-          key={`layer-${layer}`}
-          cx={centerX}
-          cy={centerY}
-          r={layerRadius}
-          fill="none"
-          stroke={color}
-          strokeWidth="1.5"
-          opacity={opacity * 0.4}
-        />
-      );
-    }
-    
-    return elements;
-  };
-
-  const renderFibonacci = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const elements: React.ReactElement[] = [];
-    
-    // Fibonacci sequence visualization
-    const fib = [1, 1, 2, 3, 5, 8, 13, 21];
-    let currentAngle = 0;
-    
-    for (let i = 0; i < fib.length; i++) {
-      const radius = fib[i] * 3;
-      const x = centerX + radius * Math.cos(currentAngle);
-      const y = centerY + radius * Math.sin(currentAngle);
-      
-      elements.push(
-        <Circle
-          key={`fib-${i}`}
-          cx={x}
-          cy={y}
-          r={fib[i] * 2}
-          fill="none"
-          stroke={color}
-          strokeWidth="1.5"
-          opacity={opacity * (1 - i * 0.1)}
-        />
-      );
-      
-      // Golden angle
-      currentAngle += 137.5 * (Math.PI / 180);
-    }
-    
-    return elements;
-  };
-
-  const renderTorusField = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const elements: React.ReactElement[] = [];
-    
-    // Torus field lines
-    for (let i = 0; i < 12; i++) {
-      const angle = (i * 30) * (Math.PI / 180);
-      const majorRadius = size / 4;
-      const minorRadius = size / 12;
-      
-      // Create torus-like curves
-      let pathData = '';
-      for (let t = 0; t <= 2 * Math.PI; t += 0.1) {
-        const x = centerX + (majorRadius + minorRadius * Math.cos(t)) * Math.cos(angle);
-        const y = centerY + (majorRadius + minorRadius * Math.cos(t)) * Math.sin(angle) + minorRadius * Math.sin(t) * 0.5;
-        
-        if (t === 0) {
-          pathData += `M ${x} ${y}`;
-        } else {
-          pathData += ` L ${x} ${y}`;
-        }
-      }
-      
-      elements.push(
-        <Path
-          key={`torus-${i}`}
-          d={pathData}
-          fill="none"
-          stroke={color}
-          strokeWidth="1"
-          opacity={opacity * 0.6}
-        />
-      );
-    }
-    
-    return elements;
-  };
-
   const renderGeometry = () => {
     switch (type) {
       case 'flowerOfLife':
@@ -601,20 +324,6 @@ export default function SacredGeometry({
         return renderVesicaPiscis();
       case 'goldenSpiral':
         return renderGoldenSpiral();
-      case 'merkaba':
-        return renderMerkaba();
-      case 'treeOfLife':
-        return renderTreeOfLife();
-      case 'seedOfLife':
-        return renderSeedOfLife();
-      case 'platonic':
-        return renderPlatonic();
-      case 'mandala':
-        return renderMandala();
-      case 'fibonacci':
-        return renderFibonacci();
-      case 'torusField':
-        return renderTorusField();
       default:
         return renderFlowerOfLife();
     }
