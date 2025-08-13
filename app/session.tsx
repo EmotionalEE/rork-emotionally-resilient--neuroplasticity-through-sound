@@ -33,7 +33,7 @@ import * as Haptics from "expo-haptics";
 export default function SessionScreen() {
   const router = useRouter();
   const { sessionId } = useLocalSearchParams();
-  const { playSound, stopSound, isPlaying } = useAudio();
+  const { playSound, stopSound, isPlaying, isLoading } = useAudio();
   const { addSession } = useUserProgress();
   const { addEmotion } = useEmotions();
   
@@ -216,7 +216,7 @@ export default function SessionScreen() {
   }, [isPaused, session, sessionStarted, handleComplete]);
 
   const handlePlayPause = useCallback(async () => {
-    if (!sessionStarted) return;
+    if (!sessionStarted || isLoading) return;
     
     try {
       if (Platform.OS !== "web") {
@@ -242,7 +242,7 @@ export default function SessionScreen() {
         [{ text: "OK" }]
       );
     }
-  }, [isPlaying, session, sessionStarted, playSound, stopSound]);
+  }, [isPlaying, session, sessionStarted, playSound, stopSound, isLoading]);
 
   const handlePreEmotionSelect = useCallback(async (emotionId: string, intensity: number) => {
     try {
@@ -374,14 +374,17 @@ export default function SessionScreen() {
           <View style={styles.controls}>
             <TouchableOpacity
               onPress={handlePlayPause}
-              style={styles.playButton}
-              activeOpacity={0.8}
+              style={[styles.playButton, isLoading && styles.playButtonDisabled]}
+              activeOpacity={isLoading ? 1 : 0.8}
+              disabled={isLoading}
             >
               <LinearGradient
                 colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
                 style={styles.playButtonGradient}
               >
-                {isPlaying ? (
+                {isLoading ? (
+                  <Activity size={40} color="#fff" />
+                ) : isPlaying ? (
                   <Pause size={40} color="#fff" />
                 ) : (
                   <Play size={40} color="#fff" style={{ marginLeft: 4 }} />
@@ -546,6 +549,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.4)",
+  },
+  playButtonDisabled: {
+    opacity: 0.6,
   },
   infoCards: {
     flexDirection: "row",
