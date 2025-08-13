@@ -11,18 +11,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import {
-  Brain,
-  Heart,
-  Sparkles,
-  Waves,
-  Activity,
-  Moon,
-  Sun,
-  Cloud,
-  Zap,
-  LucideIcon,
-} from "lucide-react-native";
+
+import Svg, { Circle, Polygon, Path, G } from "react-native-svg";
 import { emotionalStates, sessions } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { EmotionalState, Session } from "@/types/session";
@@ -74,18 +64,91 @@ export default function HomeScreen() {
   }, [router]);
 
   const getEmotionIcon = useCallback((emotion: EmotionalState) => {
-    const icons: Record<string, LucideIcon> = {
-      anxious: Cloud,
-      stressed: Zap,
-      sad: Moon,
-      angry: Activity,
-      calm: Waves,
-      focused: Brain,
-      happy: Sun,
-      energized: Sparkles,
+    const geometryIcons: Record<string, React.ReactNode> = {
+      anxious: (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <G opacity={0.9}>
+            <Circle cx={12} cy={12} r={8} fill="none" stroke="#fff" strokeWidth={1.5} />
+            <Circle cx={12} cy={12} r={4} fill="none" stroke="#fff" strokeWidth={1} />
+            <Path d="M12 4 L16 8 L12 12 L8 8 Z" fill="none" stroke="#fff" strokeWidth={1} />
+          </G>
+        </Svg>
+      ),
+      stressed: (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <G opacity={0.9}>
+            <Polygon points="12,2 22,20 2,20" fill="none" stroke="#fff" strokeWidth={1.5} />
+            <Circle cx={12} cy={14} r={3} fill="none" stroke="#fff" strokeWidth={1} />
+            <Path d="M12 8 L15 11 L12 14 L9 11 Z" fill="none" stroke="#fff" strokeWidth={1} />
+          </G>
+        </Svg>
+      ),
+      sad: (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <G opacity={0.9}>
+            <Circle cx={12} cy={12} r={9} fill="none" stroke="#fff" strokeWidth={1.5} />
+            <Path d="M12 3 L12 21 M3 12 L21 12" stroke="#fff" strokeWidth={1} />
+            <Circle cx={12} cy={12} r={3} fill="none" stroke="#fff" strokeWidth={1} />
+          </G>
+        </Svg>
+      ),
+      angry: (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <G opacity={0.9}>
+            <Polygon points="12,2 20,8 20,16 12,22 4,16 4,8" fill="none" stroke="#fff" strokeWidth={1.5} />
+            <Polygon points="12,6 16,10 12,14 8,10" fill="none" stroke="#fff" strokeWidth={1} />
+          </G>
+        </Svg>
+      ),
+      calm: (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <G opacity={0.9}>
+            <Circle cx={12} cy={12} r={10} fill="none" stroke="#fff" strokeWidth={1.5} />
+            <Circle cx={12} cy={12} r={6} fill="none" stroke="#fff" strokeWidth={1} />
+            <Circle cx={12} cy={12} r={2} fill="none" stroke="#fff" strokeWidth={1} />
+          </G>
+        </Svg>
+      ),
+      focused: (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <G opacity={0.9}>
+            <Polygon points="12,1 23,12 12,23 1,12" fill="none" stroke="#fff" strokeWidth={1.5} />
+            <Circle cx={12} cy={12} r={4} fill="none" stroke="#fff" strokeWidth={1} />
+            <Path d="M12 8 L16 12 L12 16 L8 12 Z" fill="none" stroke="#fff" strokeWidth={1} />
+          </G>
+        </Svg>
+      ),
+      happy: (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <G opacity={0.9}>
+            {Array.from({ length: 8 }).map((_, i) => {
+              const angle = (i * 45) * Math.PI / 180;
+              const x1 = 12 + Math.cos(angle) * 6;
+              const y1 = 12 + Math.sin(angle) * 6;
+              const x2 = 12 + Math.cos(angle) * 10;
+              const y2 = 12 + Math.sin(angle) * 10;
+              return <Path key={i} d={`M ${x1} ${y1} L ${x2} ${y2}`} stroke="#fff" strokeWidth={1} />;
+            })}
+            <Circle cx={12} cy={12} r={4} fill="none" stroke="#fff" strokeWidth={1.5} />
+          </G>
+        </Svg>
+      ),
+      energized: (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <G opacity={0.9}>
+            <Polygon points="12,2 18,8 18,16 12,22 6,16 6,8" fill="none" stroke="#fff" strokeWidth={1.5} />
+            <Polygon points="12,6 15,9 15,15 12,18 9,15 9,9" fill="none" stroke="#fff" strokeWidth={1} />
+            <Circle cx={12} cy={12} r={2} fill="#fff" />
+          </G>
+        </Svg>
+      ),
     };
-    const Icon = icons[emotion.id] || Heart;
-    return <Icon size={24} color="#fff" />;
+    
+    return geometryIcons[emotion.id] || (
+      <Svg width={24} height={24} viewBox="0 0 24 24">
+        <Circle cx={12} cy={12} r={8} fill="none" stroke="#fff" strokeWidth={1.5} />
+      </Svg>
+    );
   }, []);
 
   const filteredSessions = useMemo(() => 
@@ -146,7 +209,9 @@ export default function HomeScreen() {
                         isSelected && styles.emotionCardSelected,
                       ]}
                     >
-                      {getEmotionIcon(emotion)}
+                      <View style={styles.emotionIconContainer}>
+                        {getEmotionIcon(emotion)}
+                      </View>
                       <Text style={styles.emotionLabel}>{emotion.label}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -207,7 +272,17 @@ export default function HomeScreen() {
                         </View>
                       </View>
                       <View style={styles.sessionIcon}>
-                        <Waves size={32} color="rgba(255,255,255,0.8)" />
+                        <Svg width={32} height={32} viewBox="0 0 32 32">
+                          <G opacity={0.8}>
+                            <Circle cx={16} cy={16} r={12} fill="none" stroke="#fff" strokeWidth={1.5} />
+                            <Circle cx={16} cy={16} r={8} fill="none" stroke="#fff" strokeWidth={1} />
+                            <Circle cx={16} cy={16} r={4} fill="none" stroke="#fff" strokeWidth={1} />
+                            <Path d="M16 4 L20 8 L16 12 L12 8 Z" fill="none" stroke="#fff" strokeWidth={1} />
+                            <Path d="M28 16 L24 20 L20 16 L24 12 Z" fill="none" stroke="#fff" strokeWidth={1} />
+                            <Path d="M16 28 L12 24 L16 20 L20 24 Z" fill="none" stroke="#fff" strokeWidth={1} />
+                            <Path d="M4 16 L8 12 L12 16 L8 20 Z" fill="none" stroke="#fff" strokeWidth={1} />
+                          </G>
+                        </Svg>
                       </View>
                     </View>
                   </LinearGradient>
@@ -280,6 +355,10 @@ const styles = StyleSheet.create({
   },
   emotionCardSelected: {
     borderColor: "rgba(255,255,255,0.5)",
+  },
+  emotionIconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   emotionLabel: {
     color: "#fff",
