@@ -154,72 +154,64 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
   const colorShiftAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (isPlaying) {
-      // Fade in animation
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 2000,
-        useNativeDriver: true,
-      }).start();
+    // Always fade in when component mounts
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: true,
+    }).start();
 
-      // Breathing animation based on frequency
-      const breathDuration = Math.max(2000, 8000 - (frequency * 10));
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(breathAnim, {
-            toValue: 1,
-            duration: breathDuration,
-            useNativeDriver: true,
-          }),
-          Animated.timing(breathAnim, {
-            toValue: 0,
-            duration: breathDuration,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-
-      // Color shifting animation
-      Animated.loop(
-        Animated.timing(colorShiftAnim, {
+    // Breathing animation based on frequency
+    const breathDuration = Math.max(2000, 8000 - (frequency * 10));
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(breathAnim, {
           toValue: 1,
-          duration: 10000,
-          useNativeDriver: false,
+          duration: breathDuration,
+          useNativeDriver: true,
+        }),
+        Animated.timing(breathAnim, {
+          toValue: 0,
+          duration: breathDuration,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Color shifting animation
+    Animated.loop(
+      Animated.timing(colorShiftAnim, {
+        toValue: 1,
+        duration: 10000,
+        useNativeDriver: false,
+      })
+    ).start();
+
+    // Particle animations - more active when playing
+    particleAnims.forEach((anim, index) => {
+      Animated.loop(
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: isPlaying ? 5000 + (index * 200) : 8000 + (index * 300),
+          useNativeDriver: true,
         })
       ).start();
+    });
 
-      // Particle animations
-      particleAnims.forEach((anim, index) => {
-        Animated.loop(
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 5000 + (index * 200),
-            useNativeDriver: true,
-          })
-        ).start();
-      });
+    // Change geometry based on frequency with more variety
+    const geometryTimer = setInterval(() => {
+      const geometries: ('flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral' | 'merkaba' | 'treeOfLife' | 'seedOfLife' | 'platonic' | 'mandala' | 'fibonacci' | 'torusField')[] = [
+        'seedOfLife', 'sriYantra', 'vesicaPiscis', 'flowerOfLife', 'merkaba', 
+        'treeOfLife', 'metatronsCube', 'platonic', 'mandala', 'fibonacci', 
+        'goldenSpiral', 'torusField'
+      ];
+      
+      const index = Math.floor((frequency / 50) * geometries.length);
+      const clampedIndex = Math.min(Math.max(index, 0), geometries.length - 1);
+      setCurrentGeometry(geometries[clampedIndex]);
+    }, isPlaying ? 6000 : 10000);
 
-      // Change geometry based on frequency with more variety
-      const geometryTimer = setInterval(() => {
-        const geometries: ('flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral' | 'merkaba' | 'treeOfLife' | 'seedOfLife' | 'platonic' | 'mandala' | 'fibonacci' | 'torusField')[] = [
-          'seedOfLife', 'sriYantra', 'vesicaPiscis', 'flowerOfLife', 'merkaba', 
-          'treeOfLife', 'metatronsCube', 'platonic', 'mandala', 'fibonacci', 
-          'goldenSpiral', 'torusField'
-        ];
-        
-        const index = Math.floor((frequency / 50) * geometries.length);
-        const clampedIndex = Math.min(Math.max(index, 0), geometries.length - 1);
-        setCurrentGeometry(geometries[clampedIndex]);
-      }, 6000);
-
-      return () => clearInterval(geometryTimer);
-    } else {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 1000,
-        useNativeDriver: true,
-      }).start();
-    }
+    return () => clearInterval(geometryTimer);
   }, [isPlaying, frequency, fadeAnim, breathAnim, colorShiftAnim, particleAnims]);
 
   const renderParticles = () => {

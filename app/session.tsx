@@ -268,18 +268,18 @@ export default function SessionScreen() {
                 emotionGradient={session.gradient}
               />
             ) : (
-              <>
+              <View style={styles.preSessionVisual}>
                 <SacredGeometry
                   type="flowerOfLife"
                   size={200}
                   color="#ffffff"
-                  animated={false}
-                  opacity={0.6}
+                  animated={true}
+                  opacity={0.8}
                 />
                 <View style={styles.centerCircle}>
                   <Brain size={48} color="#fff" />
                 </View>
-              </>
+              </View>
             )}
           </View>
 
@@ -425,7 +425,15 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#fff",
   },
+  preSessionVisual: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   centerCircle: {
+    position: 'absolute',
     width: 120,
     height: 120,
     borderRadius: 60,
