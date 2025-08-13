@@ -1,0 +1,476 @@
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+  Animated,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import {
+  Brain,
+  Heart,
+  Sparkles,
+  Waves,
+  Activity,
+  Moon,
+  Sun,
+  Cloud,
+  Zap,
+  LucideIcon,
+} from "lucide-react-native";
+import { emotionalStates, sessions } from "@/constants/sessions";
+import { useUserProgress } from "@/providers/UserProgressProvider";
+import { useEmotions } from "@/providers/EmotionProvider";
+import EmotionTrendChart from "@/components/EmotionTrendChart";
+import EmotionVisualizer from "@/components/EmotionVisualizer";
+import SacredGeometry from "@/components/SacredGeometry";
+import { EmotionalState, Session } from "@/types/session";
+import * as Haptics from "expo-haptics";
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const { progress, hasCompletedOnboarding } = useUserProgress();
+  const { getCurrentMood } = useEmotions();
+  
+  const currentMood = getCurrentMood();
+  const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const fadeAnim = useMemo(() => new Animated.Value(0), []);
+  const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
+
+  console.log('HomeScreen render - hasCompletedOnboarding:', hasCompletedOnboarding, 'progress:', progress);
+
+  useEffect(() => {
+    console.log('HomeScreen useEffect - hasCompletedOnboarding:', hasCompletedOnboarding);
+    
+    // Add a small delay to ensure providers are initialized
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      
+      if (!hasCompletedOnboarding) {
+        console.log('Redirecting to onboarding');
+        router.replace("/onboarding");
+        return;
+      }
+
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 20,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
+
+  const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedEmotion(emotion);
+  }, []);
+
+  const handleSessionPress = useCallback((session: Session) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    router.push({
+      pathname: "/session",
+      params: { sessionId: session.id },
+    });
+  }, [router]);
+
+  const getEmotionIcon = useCallback((emotion: EmotionalState) => {
+    const icons: Record<string, LucideIcon> = {
+      depressed: Moon,
+      anxious: Cloud,
+      stressed: Zap,
+      sad: Moon,
+      angry: Activity,
+      neutral: Heart,
+      calm: Waves,
+      focused: Brain,
+      happy: Sun,
+      energized: Sparkles,
+    };
+    const Icon = icons[emotion.id] || Heart;
+    return <Icon size={24} color="#fff" />;
+  }, []);
+
+  const filteredSessions = useMemo(() => 
+    selectedEmotion
+      ? sessions.filter((s) => s.targetEmotions.includes(selectedEmotion.id))
+      : sessions,
+    [selectedEmotion]
+  );
+
+  if (isLoading) {
+    return (
+      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.loadingContainer}>
+            <Brain size={64} color="#fff" />
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
+  return (
+    <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          <Animated.View
+            style={[
+              styles.header,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            <Text style={styles.greeting}>Welcome back</Text>
+            <Text style={styles.title}>How are you feeling?</Text>
+          </Animated.View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.emotionsContainer}
+          >
+            {emotionalStates.map((emotion, index) => {
+              const isSelected = selectedEmotion?.id === emotion.id;
+
+              return (
+                <Animated.View
+                  key={emotion.id}
+                  style={{
+                    opacity: fadeAnim,
+                    transform: [
+                      {
+                        translateY: fadeAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [20, 0],
+                        }),
+                      },
+                    ],
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => handleEmotionSelect(emotion)}
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={isSelected ? (emotion.gradient as unknown as readonly [string, string, ...string[]]) : ["#2a2a3e", "#1f1f2e"] as const}
+                      style={[
+                        styles.emotionCard,
+                        isSelected && styles.emotionCardSelected,
+                      ]}
+                    >
+                      <EmotionVisualizer
+                        emotionId={emotion.id}
+                        intensity={emotion.intensity}
+                        gradient={emotion.gradient}
+                        size={60}
+                      />
+                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })}
+          </ScrollView>
+
+          <EmotionTrendChart days={7} />
+          
+          {currentMood && (
+            <View style={styles.currentMoodCard}>
+              <Text style={styles.currentMoodTitle}>Current Mood</Text>
+              <Text style={styles.currentMoodText}>
+                {emotionalStates.find(e => e.id === currentMood.emotionId)?.label || 'Unknown'}
+              </Text>
+              <Text style={styles.currentMoodIntensity}>
+                Intensity: {currentMood.intensity}/10
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.sessionsSection}>
+            <Text style={styles.sectionTitle}>
+              {selectedEmotion
+                ? `Sessions for ${selectedEmotion.label}`
+                : "Recommended Sessions"}
+            </Text>
+
+            {filteredSessions.map((session, index) => (
+              <Animated.View
+                key={session.id}
+                style={{
+                  opacity: fadeAnim,
+                  transform: [
+                    {
+                      translateX: fadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-30, 0],
+                      }),
+                    },
+                  ],
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => handleSessionPress(session)}
+                  activeOpacity={0.9}
+                >
+                  <LinearGradient
+                    colors={session.gradient as unknown as readonly [string, string, ...string[]]}
+                    style={styles.sessionCard}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <View style={styles.sessionContent}>
+                      <View style={styles.sessionInfo}>
+                        <Text style={styles.sessionTitle}>{session.title}</Text>
+                        <Text style={styles.sessionDescription}>
+                          {session.description}
+                        </Text>
+                        <View style={styles.sessionMeta}>
+                          <View style={styles.sessionTag}>
+                            <Text style={styles.sessionTagText}>
+                              {session.duration} min
+                            </Text>
+                          </View>
+                          <View style={styles.sessionTag}>
+                            <Text style={styles.sessionTagText}>
+                              {session.frequency}Hz
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                      <View style={styles.sessionIcon}>
+                        <SacredGeometry
+                          type={index % 2 === 0 ? 'flowerOfLife' : 'vesicaPiscis'}
+                          size={60}
+                          color="rgba(255,255,255,0.8)"
+                          animated={true}
+                          opacity={0.6}
+                        />
+                      </View>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </View>
+
+          <View style={styles.statsContainer}>
+            <Text style={styles.statsTitle}>Your Progress</Text>
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{progress.totalSessions}</Text>
+                <Text style={styles.statLabel}>Sessions</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{progress.totalMinutes}</Text>
+                <Text style={styles.statLabel}>Minutes</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{progress.streak}</Text>
+                <Text style={styles.statLabel}>Day Streak</Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 30,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  greeting: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.7)",
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold" as const,
+    color: "#fff",
+  },
+  emotionsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  emotionCard: {
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  emotionCardSelected: {
+    borderColor: "rgba(255,255,255,0.5)",
+  },
+  emotionLabel: {
+    color: "#fff",
+    fontSize: 14,
+    marginTop: 8,
+    fontWeight: "600" as const,
+  },
+  sessionsSection: {
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 20,
+  },
+  sessionCard: {
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    minHeight: 120,
+  },
+  sessionContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  sessionInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  sessionTitle: {
+    fontSize: 18,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 8,
+  },
+  sessionDescription: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  sessionMeta: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  sessionTag: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  sessionTagText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600" as const,
+  },
+  sessionIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statsContainer: {
+    paddingHorizontal: 20,
+    marginTop: 30,
+  },
+  statsTitle: {
+    fontSize: 20,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 16,
+  },
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center",
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.7)",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: "rgba(255,255,255,0.8)",
+    fontWeight: "600" as const,
+  },
+  currentMoodCard: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  currentMoodTitle: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 8,
+  },
+  currentMoodText: {
+    fontSize: 18,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 4,
+  },
+  currentMoodIntensity: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.7)",
+  },
+});
