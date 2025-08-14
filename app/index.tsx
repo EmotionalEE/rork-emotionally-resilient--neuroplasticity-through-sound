@@ -99,71 +99,61 @@ export default function HomeScreen() {
     const waveAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-      if (isSelected) {
-        // Start all animations when selected
-        Animated.loop(
-          Animated.timing(rotationAnim, {
-            toValue: 1,
-            duration: 8000,
-            useNativeDriver: true,
-          })
-        ).start();
+      // Always start animations for all icons
+      Animated.loop(
+        Animated.timing(rotationAnim, {
+          toValue: 1,
+          duration: 8000 + Math.random() * 4000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      ).start();
 
-        Animated.loop(
-          Animated.timing(counterRotationAnim, {
-            toValue: 1,
-            duration: 12000,
-            useNativeDriver: true,
-          })
-        ).start();
+      Animated.loop(
+        Animated.timing(counterRotationAnim, {
+          toValue: 1,
+          duration: 12000 + Math.random() * 6000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      ).start();
 
-        Animated.loop(
-          Animated.sequence([
-            Animated.timing(pulseAnim, {
-              toValue: 1.3,
-              duration: 1500,
-              useNativeDriver: true,
-            }),
-            Animated.timing(pulseAnim, {
-              toValue: 1,
-              duration: 1500,
-              useNativeDriver: true,
-            }),
-          ])
-        ).start();
-
-        Animated.loop(
-          Animated.timing(mandalaAnim, {
-            toValue: 1,
-            duration: 3000,
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: isSelected ? 1.3 : 1.1,
+            duration: 1500,
             useNativeDriver: true,
-          })
-        ).start();
-
-        Animated.loop(
-          Animated.timing(spiralAnim, {
+          }),
+          Animated.timing(pulseAnim, {
             toValue: 1,
-            duration: 5000,
+            duration: 1500,
             useNativeDriver: true,
-          })
-        ).start();
+          }),
+        ])
+      ).start();
 
-        Animated.loop(
-          Animated.timing(waveAnim, {
-            toValue: 1,
-            duration: 2000,
-            useNativeDriver: true,
-          })
-        ).start();
-      } else {
-        // Reset animations when not selected
-        rotationAnim.setValue(0);
-        pulseAnim.setValue(1);
-        mandalaAnim.setValue(0);
-        spiralAnim.setValue(0);
-        counterRotationAnim.setValue(0);
-        waveAnim.setValue(0);
-      }
+      Animated.loop(
+        Animated.timing(mandalaAnim, {
+          toValue: 1,
+          duration: 3000 + Math.random() * 2000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      ).start();
+
+      Animated.loop(
+        Animated.timing(spiralAnim, {
+          toValue: 1,
+          duration: 5000 + Math.random() * 3000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      ).start();
+
+      Animated.loop(
+        Animated.timing(waveAnim, {
+          toValue: 1,
+          duration: 2000 + Math.random() * 1000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      ).start();
     }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim, counterRotationAnim, waveAnim]);
 
     const rotation = rotationAnim.interpolate({
@@ -205,7 +195,7 @@ export default function HomeScreen() {
 
     // Render different sacred geometry based on emotion
     const renderSacredGeometry = () => {
-      if (!isSelected) return null;
+      const baseOpacity = isSelected ? 1 : 0.6; // Show geometry always, but dimmer when not selected
 
       switch (emotion.id) {
         case 'anxious':
@@ -217,7 +207,10 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
@@ -239,7 +232,7 @@ export default function HomeScreen() {
                   styles.iconSpiral,
                   {
                     transform: [{ rotate: counterRotation }, { scale: spiralScale }],
-                    opacity: 0.6,
+                    opacity: 0.6 * baseOpacity,
                   },
                 ]}
               >
@@ -271,7 +264,7 @@ export default function HomeScreen() {
                   styles.iconTriangles,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: 0.7,
+                    opacity: 0.7 * baseOpacity,
                   },
                 ]}
               >
@@ -293,7 +286,10 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: counterRotation }, { scale: spiralScale }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
@@ -323,7 +319,10 @@ export default function HomeScreen() {
                   styles.iconFlower,
                   {
                     transform: [{ scale: waveScale }, { rotate: rotation }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
@@ -348,7 +347,7 @@ export default function HomeScreen() {
                   styles.iconSpiral,
                   {
                     transform: [{ rotate: counterRotation }, { scale: spiralScale }],
-                    opacity: 0.5,
+                    opacity: 0.5 * baseOpacity,
                   },
                 ]}
               >
@@ -380,7 +379,10 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
@@ -404,7 +406,7 @@ export default function HomeScreen() {
                   styles.iconTriangles,
                   {
                     transform: [{ rotate: counterRotation }, { scale: spiralScale }],
-                    opacity: 0.8,
+                    opacity: 0.8 * baseOpacity,
                   },
                 ]}
               >
@@ -436,7 +438,10 @@ export default function HomeScreen() {
                   styles.iconFlower,
                   {
                     transform: [{ scale: waveScale }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
@@ -462,7 +467,7 @@ export default function HomeScreen() {
                   styles.iconSpiral,
                   {
                     transform: [{ rotate: rotation }, { scale: spiralScale }],
-                    opacity: 0.6,
+                    opacity: 0.6 * baseOpacity,
                   },
                 ]}
               >
@@ -495,7 +500,10 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
@@ -519,7 +527,7 @@ export default function HomeScreen() {
                   styles.iconTriangles,
                   {
                     transform: [{ rotate: counterRotation }, { scale: spiralScale }],
-                    opacity: 0.7,
+                    opacity: 0.7 * baseOpacity,
                   },
                 ]}
               >
@@ -541,7 +549,7 @@ export default function HomeScreen() {
                   styles.iconFlower,
                   {
                     transform: [{ scale: waveScale }],
-                    opacity: 0.4,
+                    opacity: 0.4 * baseOpacity,
                   },
                 ]}
               >
@@ -575,7 +583,10 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
@@ -599,7 +610,7 @@ export default function HomeScreen() {
                   styles.iconFlower,
                   {
                     transform: [{ scale: waveScale }, { rotate: counterRotation }],
-                    opacity: 0.7,
+                    opacity: 0.7 * baseOpacity,
                   },
                 ]}
               >
@@ -632,7 +643,10 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
@@ -656,7 +670,7 @@ export default function HomeScreen() {
                   styles.iconSpiral,
                   {
                     transform: [{ rotate: counterRotation }, { scale: spiralScale }],
-                    opacity: 0.8,
+                    opacity: 0.8 * baseOpacity,
                   },
                 ]}
               >
@@ -683,7 +697,7 @@ export default function HomeScreen() {
                   styles.iconTriangles,
                   {
                     transform: [{ rotate: rotation }, { scale: waveScale }],
-                    opacity: 0.6,
+                    opacity: 0.6 * baseOpacity,
                   },
                 ]}
               >
@@ -715,7 +729,10 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity,
+                    opacity: mandalaOpacity.interpolate({
+                      inputRange: [0.2, 0.8],
+                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
+                    }),
                   },
                 ]}
               >
