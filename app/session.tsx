@@ -31,6 +31,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const mandalaAnim = useRef(new Animated.Value(0)).current;
   const flowerAnim = useRef(new Animated.Value(0)).current;
+  const counterRotationAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (isPlaying) {
@@ -43,9 +45,18 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         })
       ).start();
 
-      // Rotation animation
+      // Rotation animation (clockwise)
       Animated.loop(
         Animated.timing(rotationAnim, {
+          toValue: 1,
+          duration: 15000,
+          useNativeDriver: true,
+        })
+      ).start();
+
+      // Counter rotation (counter-clockwise)
+      Animated.loop(
+        Animated.timing(counterRotationAnim, {
           toValue: 1,
           duration: 20000,
           useNativeDriver: true,
@@ -57,12 +68,12 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         Animated.sequence([
           Animated.timing(mandalaAnim, {
             toValue: 1,
-            duration: 3000,
+            duration: 2500,
             useNativeDriver: true,
           }),
           Animated.timing(mandalaAnim, {
             toValue: 0,
-            duration: 3000,
+            duration: 2500,
             useNativeDriver: true,
           }),
         ])
@@ -72,37 +83,63 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
       Animated.loop(
         Animated.timing(flowerAnim, {
           toValue: 1,
-          duration: 12000,
+          duration: 10000,
           useNativeDriver: true,
         })
+      ).start();
+
+      // Pulse animation
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.2,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ])
       ).start();
     } else {
       geometryAnim.setValue(0);
       rotationAnim.setValue(0);
       mandalaAnim.setValue(0);
       flowerAnim.setValue(0);
+      counterRotationAnim.setValue(0);
+      pulseAnim.setValue(1);
     }
-  }, [isPlaying, geometryAnim, rotationAnim, mandalaAnim, flowerAnim]);
+  }, [isPlaying, geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim]);
 
   const rotation = rotationAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
 
+  const counterRotation = counterRotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['360deg', '0deg'],
+  });
+
   const scale = geometryAnim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0.8, 1.2, 0.8],
+    outputRange: [0.8, 1.3, 0.8],
   });
 
   const mandalaScale = mandalaAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.9, 1.1],
+    outputRange: [0.8, 1.3],
   });
 
   const flowerOpacity = flowerAnim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0.3, 0.8, 0.3],
+    outputRange: [0.2, 0.9, 0.2],
   });
+
+  const breathScale = breathingPhase === 'in' ? 1.4 : 0.6;
+  const breathOpacity = breathingPhase === 'in' ? 0.9 : 0.3;
 
   return (
     <View style={styles.geometryContainer}>
@@ -116,13 +153,46 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
           },
         ]}
       >
-        {[...Array(12)].map((_, i) => (
-          <View
+        {[...Array(16)].map((_, i) => (
+          <Animated.View
             key={i}
             style={[
               styles.mandalaLine,
               {
-                transform: [{ rotate: `${i * 30}deg` }],
+                transform: [
+                  { rotate: `${i * 22.5}deg` },
+                  { scale: pulseAnim },
+                ],
+                opacity: mandalaAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.2, 0.8],
+                }),
+              },
+            ]}
+          />
+        ))}
+      </Animated.View>
+
+      {/* Counter-rotating outer ring */}
+      <Animated.View
+        style={[
+          styles.outerRing,
+          {
+            transform: [{ rotate: counterRotation }, { scale: pulseAnim }],
+            opacity: 0.6,
+          },
+        ]}
+      >
+        {[...Array(8)].map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.ringDot,
+              {
+                transform: [
+                  { rotate: `${i * 45}deg` },
+                  { translateY: -120 },
+                ],
               },
             ]}
           />
@@ -134,17 +204,21 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.hexagonContainer,
           {
-            transform: [{ rotate: rotation }, { scale }],
+            transform: [{ rotate: counterRotation }, { scale }],
           },
         ]}
       >
         {[...Array(6)].map((_, i) => (
-          <View
+          <Animated.View
             key={i}
             style={[
               styles.hexagonSide,
               {
                 transform: [{ rotate: `${i * 60}deg` }],
+                opacity: geometryAnim.interpolate({
+                  inputRange: [0, 0.5, 1],
+                  outputRange: [0.3, 0.8, 0.3],
+                }),
               },
             ]}
           />
@@ -157,19 +231,20 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
           styles.flowerContainer,
           {
             opacity: flowerOpacity,
-            transform: [{ scale }],
+            transform: [{ scale }, { rotate: rotation }],
           },
         ]}
       >
         {[...Array(7)].map((_, i) => (
-          <View
+          <Animated.View
             key={i}
             style={[
               styles.flowerCircle,
               {
                 transform: [
                   { rotate: `${i * 51.43}deg` },
-                  { translateY: i === 0 ? 0 : -30 },
+                  { translateY: i === 0 ? 0 : -35 },
+                  { scale: pulseAnim },
                 ],
               },
             ]}
@@ -182,24 +257,48 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.spiralContainer,
           {
-            transform: [{ rotate: rotation }],
+            transform: [{ rotate: rotation }, { scale: mandalaScale }],
             opacity: mandalaAnim.interpolate({
               inputRange: [0, 1],
-              outputRange: [0.2, 0.6],
+              outputRange: [0.3, 0.8],
             }),
           },
         ]}
       >
-        {[...Array(8)].map((_, i) => (
-          <View
+        {[...Array(12)].map((_, i) => (
+          <Animated.View
             key={i}
             style={[
               styles.spiralDot,
               {
                 transform: [
-                  { rotate: `${i * 45}deg` },
-                  { translateY: -40 - i * 8 },
+                  { rotate: `${i * 30}deg` },
+                  { translateY: -50 - i * 6 },
+                  { scale: pulseAnim },
                 ],
+              },
+            ]}
+          />
+        ))}
+      </Animated.View>
+
+      {/* Inner rotating triangles */}
+      <Animated.View
+        style={[
+          styles.triangleContainer,
+          {
+            transform: [{ rotate: counterRotation }, { scale: breathScale }],
+            opacity: breathOpacity,
+          },
+        ]}
+      >
+        {[...Array(3)].map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.innerTriangle,
+              {
+                transform: [{ rotate: `${i * 120}deg` }],
               },
             ]}
           />
@@ -211,12 +310,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.breathGeometry,
           {
-            transform: [
-              {
-                scale: breathingPhase === 'in' ? 1.2 : 0.8,
-              },
-            ],
-            opacity: breathingPhase === 'in' ? 0.8 : 0.4,
+            transform: [{ scale: breathScale }, { rotate: rotation }],
+            opacity: breathOpacity,
           },
         ]}
       >
@@ -585,8 +680,23 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 2,
     height: 140,
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(255,255,255,0.4)",
     top: 0,
+    borderRadius: 1,
+  },
+  outerRing: {
+    position: "absolute",
+    width: 240,
+    height: 240,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ringDot: {
+    position: "absolute",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.6)",
   },
   hexagonContainer: {
     position: "absolute",
@@ -611,11 +721,11 @@ const styles = StyleSheet.create({
   },
   flowerCircle: {
     position: "absolute",
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.4)",
   },
   spiralContainer: {
     position: "absolute",
@@ -626,10 +736,29 @@ const styles = StyleSheet.create({
   },
   spiralDot: {
     position: "absolute",
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.6)",
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.7)",
+  },
+  triangleContainer: {
+    position: "absolute",
+    width: 80,
+    height: 80,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  innerTriangle: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: 12,
+    borderRightWidth: 12,
+    borderBottomWidth: 20,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "rgba(255,255,255,0.5)",
+    top: -10,
   },
   breathGeometry: {
     position: "absolute",
