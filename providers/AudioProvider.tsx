@@ -24,7 +24,11 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
     return () => {
       if (sound) {
-        sound.unloadAsync();
+        sound.getStatusAsync().then((status) => {
+          if (status.isLoaded) {
+            sound.unloadAsync().catch(() => {});
+          }
+        }).catch(() => {});
       }
     };
   }, [sound]);
@@ -33,7 +37,15 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
     try {
       // Stop current sound if playing
       if (sound) {
-        await sound.unloadAsync();
+        try {
+          const status = await sound.getStatusAsync();
+          if (status.isLoaded) {
+            await sound.stopAsync();
+          }
+          await sound.unloadAsync();
+        } catch (cleanupError) {
+          console.log("Sound cleanup error (non-critical):", cleanupError);
+        }
       }
 
       console.log("Loading sound from:", url);
@@ -61,12 +73,20 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   const stopSound = useCallback(async () => {
     if (sound) {
       try {
-        await sound.stopAsync();
-        await sound.unloadAsync();
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          if (status.isPlaying) {
+            await sound.stopAsync();
+          }
+          await sound.unloadAsync();
+        }
         setSound(null);
         setIsPlaying(false);
       } catch (error) {
-        console.error("Error stopping sound:", error);
+        console.log("Error stopping sound (handled):", error);
+        // Still clean up state even if stop fails
+        setSound(null);
+        setIsPlaying(false);
       }
     }
   }, [sound]);
@@ -74,9 +94,12 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   const setVolume = useCallback(async (volume: number) => {
     if (sound) {
       try {
-        await sound.setVolumeAsync(volume);
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          await sound.setVolumeAsync(volume);
+        }
       } catch (error) {
-        console.error("Error setting volume:", error);
+        console.log("Error setting volume:", error);
       }
     }
   }, [sound]);
