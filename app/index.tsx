@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -89,7 +89,78 @@ export default function HomeScreen() {
     });
   }, [router]);
 
-  const getEmotionIcon = useCallback((emotion: EmotionalState) => {
+  // Sacred Geometry Icon Component
+  const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
+    const rotationAnim = useRef(new Animated.Value(0)).current;
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+    const mandalaAnim = useRef(new Animated.Value(0)).current;
+    const spiralAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      if (isSelected) {
+        // Start all animations when selected
+        Animated.loop(
+          Animated.timing(rotationAnim, {
+            toValue: 1,
+            duration: 8000,
+            useNativeDriver: true,
+          })
+        ).start();
+
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulseAnim, {
+              toValue: 1.3,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+            Animated.timing(pulseAnim, {
+              toValue: 1,
+              duration: 1500,
+              useNativeDriver: true,
+            }),
+          ])
+        ).start();
+
+        Animated.loop(
+          Animated.timing(mandalaAnim, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+          })
+        ).start();
+
+        Animated.loop(
+          Animated.timing(spiralAnim, {
+            toValue: 1,
+            duration: 5000,
+            useNativeDriver: true,
+          })
+        ).start();
+      } else {
+        // Reset animations when not selected
+        rotationAnim.setValue(0);
+        pulseAnim.setValue(1);
+        mandalaAnim.setValue(0);
+        spiralAnim.setValue(0);
+      }
+    }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim]);
+
+    const rotation = rotationAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg'],
+    });
+
+    const mandalaOpacity = mandalaAnim.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0.2, 0.8, 0.2],
+    });
+
+    const spiralScale = spiralAnim.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0.8, 1.2, 0.8],
+    });
+
     const icons: Record<string, LucideIcon> = {
       anxious: Cloud,
       stressed: Zap,
@@ -101,7 +172,129 @@ export default function HomeScreen() {
       energized: Sparkles,
     };
     const Icon = icons[emotion.id] || Heart;
-    return <Icon size={24} color="#fff" />;
+
+    return (
+      <View style={styles.iconContainer}>
+        {/* Sacred Geometry Background */}
+        {isSelected && (
+          <>
+            {/* Outer rotating mandala */}
+            <Animated.View
+              style={[
+                styles.iconMandala,
+                {
+                  transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                  opacity: mandalaOpacity,
+                },
+              ]}
+            >
+              {[...Array(8)].map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.mandalaRay,
+                    {
+                      transform: [{ rotate: `${i * 45}deg` }],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+
+            {/* Sacred spiral */}
+            <Animated.View
+              style={[
+                styles.iconSpiral,
+                {
+                  transform: [{ rotate: rotation }, { scale: spiralScale }],
+                  opacity: 0.6,
+                },
+              ]}
+            >
+              {[...Array(6)].map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.spiralDot,
+                    {
+                      transform: [
+                        { rotate: `${i * 60}deg` },
+                        { translateY: -15 - i * 3 },
+                      ],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+
+            {/* Inner triangles */}
+            <Animated.View
+              style={[
+                styles.iconTriangles,
+                {
+                  transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                  opacity: 0.7,
+                },
+              ]}
+            >
+              {[...Array(3)].map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.innerTriangle,
+                    {
+                      transform: [{ rotate: `${i * 120}deg` }],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+
+            {/* Flower of Life pattern */}
+            <Animated.View
+              style={[
+                styles.iconFlower,
+                {
+                  transform: [{ scale: spiralScale }],
+                  opacity: mandalaOpacity,
+                },
+              ]}
+            >
+              {[...Array(4)].map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.flowerPetal,
+                    {
+                      transform: [
+                        { rotate: `${i * 90}deg` },
+                        { translateY: -8 },
+                      ],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+          </>
+        )}
+
+        {/* Main Icon */}
+        <Animated.View
+          style={[
+            styles.mainIcon,
+            {
+              transform: [{ scale: isSelected ? pulseAnim : 1 }],
+            },
+          ]}
+        >
+          <Icon size={24} color="#fff" />
+        </Animated.View>
+      </View>
+    );
+  };
+
+  const getEmotionIcon = useCallback((emotion: EmotionalState, isSelected: boolean) => {
+    return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} />;
   }, []);
 
   const filteredSessions = useMemo(() => 
@@ -175,7 +368,7 @@ export default function HomeScreen() {
                         isSelected && styles.emotionCardSelected,
                       ]}
                     >
-                      {getEmotionIcon(emotion)}
+                      {getEmotionIcon(emotion, isSelected)}
                       <Text style={styles.emotionLabel}>{emotion.label}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -417,5 +610,80 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "600" as const,
+  },
+  // Sacred Geometry Icon Styles
+  iconContainer: {
+    width: 60,
+    height: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  iconMandala: {
+    position: "absolute",
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mandalaRay: {
+    position: "absolute",
+    width: 1,
+    height: 25,
+    backgroundColor: "rgba(255,255,255,0.4)",
+    top: 0,
+  },
+  iconSpiral: {
+    position: "absolute",
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  spiralDot: {
+    position: "absolute",
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: "rgba(255,255,255,0.6)",
+  },
+  iconTriangles: {
+    position: "absolute",
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  innerTriangle: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderBottomWidth: 7,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "rgba(255,255,255,0.5)",
+    top: -3.5,
+  },
+  iconFlower: {
+    position: "absolute",
+    width: 35,
+    height: 35,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  flowerPetal: {
+    position: "absolute",
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
+  },
+  mainIcon: {
+    zIndex: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
