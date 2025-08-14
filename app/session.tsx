@@ -25,6 +25,217 @@ import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import * as Haptics from "expo-haptics";
 
+// Sacred Geometry Component
+const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; breathingPhase: 'in' | 'out' }) => {
+  const geometryAnim = useRef(new Animated.Value(0)).current;
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+  const mandalaAnim = useRef(new Animated.Value(0)).current;
+  const flowerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (isPlaying) {
+      // Main geometry animation
+      Animated.loop(
+        Animated.timing(geometryAnim, {
+          toValue: 1,
+          duration: 8000,
+          useNativeDriver: true,
+        })
+      ).start();
+
+      // Rotation animation
+      Animated.loop(
+        Animated.timing(rotationAnim, {
+          toValue: 1,
+          duration: 20000,
+          useNativeDriver: true,
+        })
+      ).start();
+
+      // Mandala pulsing
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(mandalaAnim, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(mandalaAnim, {
+            toValue: 0,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+
+      // Flower of Life animation
+      Animated.loop(
+        Animated.timing(flowerAnim, {
+          toValue: 1,
+          duration: 12000,
+          useNativeDriver: true,
+        })
+      ).start();
+    } else {
+      geometryAnim.setValue(0);
+      rotationAnim.setValue(0);
+      mandalaAnim.setValue(0);
+      flowerAnim.setValue(0);
+    }
+  }, [isPlaying, geometryAnim, rotationAnim, mandalaAnim, flowerAnim]);
+
+  const rotation = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const scale = geometryAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.8, 1.2, 0.8],
+  });
+
+  const mandalaScale = mandalaAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.9, 1.1],
+  });
+
+  const flowerOpacity = flowerAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.3, 0.8, 0.3],
+  });
+
+  return (
+    <View style={styles.geometryContainer}>
+      {/* Outer rotating mandala */}
+      <Animated.View
+        style={[
+          styles.mandalaOuter,
+          {
+            transform: [{ rotate: rotation }, { scale: mandalaScale }],
+            opacity: flowerOpacity,
+          },
+        ]}
+      >
+        {[...Array(12)].map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.mandalaLine,
+              {
+                transform: [{ rotate: `${i * 30}deg` }],
+              },
+            ]}
+          />
+        ))}
+      </Animated.View>
+
+      {/* Middle hexagon pattern */}
+      <Animated.View
+        style={[
+          styles.hexagonContainer,
+          {
+            transform: [{ rotate: rotation }, { scale }],
+          },
+        ]}
+      >
+        {[...Array(6)].map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.hexagonSide,
+              {
+                transform: [{ rotate: `${i * 60}deg` }],
+              },
+            ]}
+          />
+        ))}
+      </Animated.View>
+
+      {/* Flower of Life pattern */}
+      <Animated.View
+        style={[
+          styles.flowerContainer,
+          {
+            opacity: flowerOpacity,
+            transform: [{ scale }],
+          },
+        ]}
+      >
+        {[...Array(7)].map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.flowerCircle,
+              {
+                transform: [
+                  { rotate: `${i * 51.43}deg` },
+                  { translateY: i === 0 ? 0 : -30 },
+                ],
+              },
+            ]}
+          />
+        ))}
+      </Animated.View>
+
+      {/* Sacred spiral */}
+      <Animated.View
+        style={[
+          styles.spiralContainer,
+          {
+            transform: [{ rotate: rotation }],
+            opacity: mandalaAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.2, 0.6],
+            }),
+          },
+        ]}
+      >
+        {[...Array(8)].map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.spiralDot,
+              {
+                transform: [
+                  { rotate: `${i * 45}deg` },
+                  { translateY: -40 - i * 8 },
+                ],
+              },
+            ]}
+          />
+        ))}
+      </Animated.View>
+
+      {/* Breathing sync geometry */}
+      <Animated.View
+        style={[
+          styles.breathGeometry,
+          {
+            transform: [
+              {
+                scale: breathingPhase === 'in' ? 1.2 : 0.8,
+              },
+            ],
+            opacity: breathingPhase === 'in' ? 0.8 : 0.4,
+          },
+        ]}
+      >
+        {[...Array(4)].map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.breathTriangle,
+              {
+                transform: [{ rotate: `${i * 90}deg` }],
+              },
+            ]}
+          />
+        ))}
+      </Animated.View>
+    </View>
+  );
+};
+
 export default function SessionScreen() {
   const router = useRouter();
   const { sessionId } = useLocalSearchParams();
@@ -199,6 +410,9 @@ export default function SessionScreen() {
           <Text style={styles.frequency}>{session.frequency}Hz</Text>
 
           <View style={styles.visualizer}>
+            {/* Sacred Geometry Background */}
+            <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} />
+            
             <Animated.View
               style={[
                 styles.pulseCircle,
@@ -347,11 +561,94 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   visualizer: {
+    width: 300,
+    height: 300,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 40,
+  },
+  geometryContainer: {
+    position: "absolute",
+    width: 300,
+    height: 300,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mandalaOuter: {
+    position: "absolute",
+    width: 280,
+    height: 280,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mandalaLine: {
+    position: "absolute",
+    width: 2,
+    height: 140,
+    backgroundColor: "rgba(255,255,255,0.3)",
+    top: 0,
+  },
+  hexagonContainer: {
+    position: "absolute",
+    width: 160,
+    height: 160,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  hexagonSide: {
+    position: "absolute",
+    width: 2,
+    height: 80,
+    backgroundColor: "rgba(255,255,255,0.4)",
+    top: 0,
+  },
+  flowerContainer: {
+    position: "absolute",
+    width: 120,
+    height: 120,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  flowerCircle: {
+    position: "absolute",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  spiralContainer: {
+    position: "absolute",
     width: 200,
     height: 200,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 40,
+  },
+  spiralDot: {
+    position: "absolute",
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.6)",
+  },
+  breathGeometry: {
+    position: "absolute",
+    width: 100,
+    height: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  breathTriangle: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: 15,
+    borderRightWidth: 15,
+    borderBottomWidth: 25,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "rgba(255,255,255,0.4)",
+    top: -12.5,
   },
   pulseCircle: {
     position: "absolute",
