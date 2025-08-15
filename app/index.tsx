@@ -124,7 +124,7 @@ export default function HomeScreen() {
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: isSelected ? 1.3 : 1.2, // More prominent pulse for non-selected
+            toValue: isSelected ? 1.3 : 1.1,
             duration: 1500,
             useNativeDriver: true,
           }),
@@ -200,7 +200,7 @@ export default function HomeScreen() {
 
     // Render different sacred geometry based on emotion
     const renderSacredGeometry = () => {
-      const baseOpacity = isSelected ? 1 : 0.85; // Show geometry always with high visibility
+      const baseOpacity = isSelected ? 1 : 0.6; // Show geometry always, but dimmer when not selected
 
       switch (emotion.id) {
         case 'anxious':
