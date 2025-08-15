@@ -28,8 +28,69 @@ import { useUserProgress } from "@/providers/UserProgressProvider";
 import { EmotionalState, Session } from "@/types/session";
 import * as Haptics from "expo-haptics";
 
-// Sacred Geometry Icon Component - moved outside to fix hooks order
-const SacredGeometryIcon = React.memo(({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
+export default function HomeScreen() {
+  const router = useRouter();
+  const { progress, hasCompletedOnboarding } = useUserProgress();
+  const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
+  const [isNavigationReady, setIsNavigationReady] = useState(false);
+  const fadeAnim = useMemo(() => new Animated.Value(0), []);
+  const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
+
+  // Use useFocusEffect to handle navigation when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      // Small delay to ensure navigation is ready
+      const timer = setTimeout(() => {
+        setIsNavigationReady(true);
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }, [])
+  );
+
+  // Handle onboarding navigation after navigation is ready
+  useEffect(() => {
+    if (isNavigationReady && !hasCompletedOnboarding) {
+      router.replace("/onboarding");
+      return;
+    }
+
+    if (isNavigationReady && hasCompletedOnboarding) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 20,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isNavigationReady, hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
+
+  const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedEmotion(emotion);
+  }, []);
+
+  const handleSessionPress = useCallback((session: Session) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    router.push({
+      pathname: "/session",
+      params: { sessionId: session.id },
+    });
+  }, [router]);
+
+  // Sacred Geometry Icon Component
+  const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
     const rotationAnim = useRef(new Animated.Value(0)).current;
     const pulseAnim = useRef(new Animated.Value(1)).current;
     const mandalaAnim = useRef(new Animated.Value(0)).current;
@@ -710,75 +771,7 @@ const SacredGeometryIcon = React.memo(({ emotion, isSelected }: { emotion: Emoti
         </Animated.View>
       </View>
     );
-});
-
-SacredGeometryIcon.displayName = 'SacredGeometryIcon';
-
-export default function HomeScreen() {
-  const router = useRouter();
-  const { progress, hasCompletedOnboarding, hasSeenWelcome, resetWelcomeAndOnboarding } = useUserProgress();
-  const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
-  const [isNavigationReady, setIsNavigationReady] = useState(false);
-  const fadeAnim = useMemo(() => new Animated.Value(0), []);
-  const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
-
-  // Use useFocusEffect to handle navigation when screen is focused
-  useFocusEffect(
-    useCallback(() => {
-      // Small delay to ensure navigation is ready
-      const timer = setTimeout(() => {
-        setIsNavigationReady(true);
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }, [])
-  );
-
-  // Handle navigation flow after navigation is ready
-  useEffect(() => {
-    if (!isNavigationReady) return;
-
-    // Always show welcome screen first, regardless of whether it's been seen before
-    console.log('Navigating to welcome screen');
-    router.replace("/welcome");
-  }, [isNavigationReady, router]);
-
-  // Animate main app when both welcome and onboarding are completed
-  useEffect(() => {
-    if (hasSeenWelcome && hasCompletedOnboarding) {
-      console.log('Showing main app with animations');
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 20,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [hasSeenWelcome, hasCompletedOnboarding, fadeAnim, scaleAnim]);
-
-  const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setSelectedEmotion(emotion);
-  }, []);
-
-  const handleSessionPress = useCallback((session: Session) => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    router.push({
-      pathname: "/session",
-      params: { sessionId: session.id },
-    });
-  }, [router]);
+  };
 
   const getEmotionIcon = useCallback((emotion: EmotionalState, isSelected: boolean) => {
     return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} />;
@@ -793,20 +786,6 @@ export default function HomeScreen() {
 
   // Show loading state while navigation is not ready
   if (!isNavigationReady) {
-    return (
-      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading...</Text>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    );
-  }
-
-  // Only show main app if both welcome and onboarding are completed
-  // Otherwise, the navigation effect above will redirect to welcome
-  if (!hasSeenWelcome || !hasCompletedOnboarding) {
     return (
       <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
@@ -955,17 +934,6 @@ export default function HomeScreen() {
                 <Text style={styles.statLabel}>Day Streak</Text>
               </View>
             </View>
-          </View>
-
-          {/* Temporary reset button for testing */}
-          <View style={styles.debugContainer}>
-            <TouchableOpacity
-              style={styles.debugButton}
-              onPress={resetWelcomeAndOnboarding}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.debugButtonText}>Reset Welcome & Onboarding</Text>
-            </TouchableOpacity>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -1197,24 +1165,5 @@ const styles = StyleSheet.create({
     zIndex: 10,
     alignItems: "center",
     justifyContent: "center",
-  },
-  debugContainer: {
-    paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  debugButton: {
-    backgroundColor: "rgba(255,100,100,0.3)",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,100,100,0.5)",
-  },
-  debugButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600" as const,
-    textAlign: "center",
   },
 });

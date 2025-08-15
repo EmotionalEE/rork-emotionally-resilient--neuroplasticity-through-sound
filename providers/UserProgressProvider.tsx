@@ -13,17 +13,13 @@ interface UserProgress {
 interface UserProgressContextType {
   progress: UserProgress;
   hasCompletedOnboarding: boolean;
-  hasSeenWelcome: boolean;
   completeOnboarding: () => Promise<void>;
-  completeWelcome: () => Promise<void>;
   addSession: (sessionId: string, duration: number) => Promise<void>;
   resetProgress: () => Promise<void>;
-  resetWelcomeAndOnboarding: () => Promise<void>;
 }
 
 const PROGRESS_KEY = "user_progress";
 const ONBOARDING_KEY = "onboarding_completed";
-const WELCOME_KEY = "welcome_seen";
 
 const defaultProgress: UserProgress = {
   totalSessions: 0,
@@ -36,7 +32,6 @@ const defaultProgress: UserProgress = {
 export const [UserProgressProvider, useUserProgress] = createContextHook<UserProgressContextType>(() => {
   const [progress, setProgress] = useState<UserProgress>(defaultProgress);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
-  const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
 
   const loadProgress = useCallback(async () => {
     try {
@@ -58,20 +53,10 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     }
   }, []);
 
-  const checkWelcome = useCallback(async () => {
-    try {
-      const seen = await AsyncStorage.getItem(WELCOME_KEY);
-      setHasSeenWelcome(seen === "true");
-    } catch (error) {
-      console.error("Error checking welcome:", error);
-    }
-  }, []);
-
   useEffect(() => {
     loadProgress();
     checkOnboarding();
-    checkWelcome();
-  }, [loadProgress, checkOnboarding, checkWelcome]);
+  }, [loadProgress, checkOnboarding]);
 
   const completeOnboarding = useCallback(async () => {
     try {
@@ -79,15 +64,6 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
       setHasCompletedOnboarding(true);
     } catch (error) {
       console.error("Error completing onboarding:", error);
-    }
-  }, []);
-
-  const completeWelcome = useCallback(async () => {
-    try {
-      await AsyncStorage.setItem(WELCOME_KEY, "true");
-      setHasSeenWelcome(true);
-    } catch (error) {
-      console.error("Error completing welcome:", error);
     }
   }, []);
 
@@ -135,26 +111,11 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     await saveProgress(defaultProgress);
   }, [saveProgress]);
 
-  const resetWelcomeAndOnboarding = useCallback(async () => {
-    try {
-      await AsyncStorage.removeItem(WELCOME_KEY);
-      await AsyncStorage.removeItem(ONBOARDING_KEY);
-      setHasSeenWelcome(false);
-      setHasCompletedOnboarding(false);
-      console.log('Reset welcome and onboarding states');
-    } catch (error) {
-      console.error('Error resetting welcome and onboarding:', error);
-    }
-  }, []);
-
   return useMemo(() => ({
     progress,
     hasCompletedOnboarding,
-    hasSeenWelcome,
     completeOnboarding,
-    completeWelcome,
     addSession,
     resetProgress,
-    resetWelcomeAndOnboarding,
-  }), [progress, hasCompletedOnboarding, hasSeenWelcome, completeOnboarding, completeWelcome, addSession, resetProgress, resetWelcomeAndOnboarding]);
+  }), [progress, hasCompletedOnboarding, completeOnboarding, addSession, resetProgress]);
 });
