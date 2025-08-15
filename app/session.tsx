@@ -361,12 +361,8 @@ export default function SessionScreen() {
             } catch (error) {
               console.log("Error stopping sound during close:", error);
             }
-            // Use router.dismiss() for modal screens or router.replace() as fallback
-            if (router.canDismiss()) {
-              router.dismiss();
-            } else {
-              router.replace("/");
-            }
+            // Navigate back to home screen
+            router.replace("/");
           },
         },
       ]
@@ -456,12 +452,8 @@ export default function SessionScreen() {
         {
           text: "Continue",
           onPress: () => {
-            // Use router.dismiss() for modal screens or router.replace() as fallback
-            if (router.canDismiss()) {
-              router.dismiss();
-            } else {
-              router.replace("/");
-            }
+            // Navigate back to home screen
+            router.replace("/");
           },
         },
       ]
