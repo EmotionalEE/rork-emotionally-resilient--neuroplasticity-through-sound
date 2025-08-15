@@ -30,7 +30,7 @@ import * as Haptics from "expo-haptics";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { progress, hasCompletedOnboarding } = useUserProgress();
+  const { progress, hasCompletedOnboarding, hasSeenWelcome } = useUserProgress();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
@@ -48,14 +48,19 @@ export default function HomeScreen() {
     }, [])
   );
 
-  // Handle onboarding navigation after navigation is ready
+  // Handle navigation flow after navigation is ready
   useEffect(() => {
-    if (isNavigationReady && !hasCompletedOnboarding) {
+    if (isNavigationReady && !hasSeenWelcome) {
+      router.replace("/welcome");
+      return;
+    }
+
+    if (isNavigationReady && hasSeenWelcome && !hasCompletedOnboarding) {
       router.replace("/onboarding");
       return;
     }
 
-    if (isNavigationReady && hasCompletedOnboarding) {
+    if (isNavigationReady && hasSeenWelcome && hasCompletedOnboarding) {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -70,7 +75,7 @@ export default function HomeScreen() {
         }),
       ]).start();
     }
-  }, [isNavigationReady, hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
+  }, [isNavigationReady, hasSeenWelcome, hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     if (Platform.OS !== "web") {
