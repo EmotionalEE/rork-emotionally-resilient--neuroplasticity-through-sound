@@ -80,14 +80,17 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
           }
           await sound.unloadAsync();
         }
-        setSound(null);
-        setIsPlaying(false);
       } catch (error) {
         console.log("Error stopping sound (handled):", error);
-        // Still clean up state even if stop fails
+        // Continue with cleanup even if stop/unload fails
+      } finally {
+        // Always clean up state
         setSound(null);
         setIsPlaying(false);
       }
+    } else {
+      // Ensure state is clean even if no sound object
+      setIsPlaying(false);
     }
   }, [sound]);
 

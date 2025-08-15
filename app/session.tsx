@@ -7,6 +7,7 @@ import {
   Platform,
   Animated,
   Alert,
+  BackHandler,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -345,6 +346,33 @@ export default function SessionScreen() {
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
 
+  const handleClose = useCallback(() => {
+    Alert.alert(
+      "End Session",
+      "Are you sure you want to end this session?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "End Session",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await stopSound();
+            } catch (error) {
+              console.log("Error stopping sound during close:", error);
+            }
+            // Use router.dismiss() for modal screens or router.replace() as fallback
+            if (router.canDismiss()) {
+              router.dismiss();
+            } else {
+              router.replace("/");
+            }
+          },
+        },
+      ]
+    );
+  }, [stopSound, router]);
+
   useEffect(() => {
     if (!session) return;
 
@@ -393,11 +421,18 @@ export default function SessionScreen() {
       setBreathingPhase(prev => prev === 'in' ? 'out' : 'in');
     }, 4000);
 
+    // Handle Android back button
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      handleClose();
+      return true; // Prevent default back action
+    });
+
     return () => {
       stopSound();
       clearInterval(breathTimer);
+      backHandler.remove();
     };
-  }, [session, pulseAnim, waveAnim, breathAnim, stopSound]);
+  }, [session, pulseAnim, waveAnim, breathAnim, stopSound, handleClose]);
 
   const handleComplete = useCallback(async () => {
     if (Platform.OS !== "web") {
@@ -408,14 +443,26 @@ export default function SessionScreen() {
       await addSession(session.id, Math.floor(timeElapsed / 60));
     }
     
-    stopSound();
+    try {
+      await stopSound();
+    } catch (error) {
+      console.log("Error stopping sound during completion:", error);
+    }
+    
     Alert.alert(
       "Session Complete!",
       "Great job! You've completed this session.",
       [
         {
           text: "Continue",
-          onPress: () => router.back(),
+          onPress: () => {
+            // Use router.dismiss() for modal screens or router.replace() as fallback
+            if (router.canDismiss()) {
+              router.dismiss();
+            } else {
+              router.replace("/");
+            }
+          },
         },
       ]
     );
@@ -453,23 +500,7 @@ export default function SessionScreen() {
     }
   }, [isPlaying, session, playSound, stopSound]);
 
-  const handleClose = useCallback(() => {
-    Alert.alert(
-      "End Session",
-      "Are you sure you want to end this session?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "End Session",
-          style: "destructive",
-          onPress: () => {
-            stopSound();
-            router.back();
-          },
-        },
-      ]
-    );
-  }, [stopSound, router]);
+
 
 
 
