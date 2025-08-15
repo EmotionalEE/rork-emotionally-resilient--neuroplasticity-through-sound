@@ -19,6 +19,8 @@ import {
   Brain,
   Heart,
   Activity,
+  Vibrate,
+  Settings,
 } from "lucide-react-native";
 import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
@@ -26,13 +28,25 @@ import { useUserProgress } from "@/providers/UserProgressProvider";
 import * as Haptics from "expo-haptics";
 
 // Sacred Geometry Component
-const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; breathingPhase: 'in' | 'out' }) => {
+const SacredGeometry = ({ 
+  isPlaying, 
+  breathingPhase, 
+  isVibroacousticsActive, 
+  vibroacousticFrequency 
+}: { 
+  isPlaying: boolean; 
+  breathingPhase: 'in' | 'out';
+  isVibroacousticsActive: boolean;
+  vibroacousticFrequency: number;
+}) => {
   const geometryAnim = useRef(new Animated.Value(0)).current;
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const mandalaAnim = useRef(new Animated.Value(0)).current;
   const flowerAnim = useRef(new Animated.Value(0)).current;
   const counterRotationAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const vibroacousticAnim = useRef(new Animated.Value(0)).current;
+  const vibroacousticPulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (isPlaying) {
@@ -103,6 +117,34 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
           }),
         ])
       ).start();
+
+      // Vibroacoustic-specific animations
+      if (isVibroacousticsActive) {
+        const vibroacousticSpeed = Math.max(500, Math.min(3000, 2000 / vibroacousticFrequency));
+        
+        Animated.loop(
+          Animated.timing(vibroacousticAnim, {
+            toValue: 1,
+            duration: vibroacousticSpeed,
+            useNativeDriver: true,
+          })
+        ).start();
+
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(vibroacousticPulse, {
+              toValue: 1.5,
+              duration: vibroacousticSpeed / 2,
+              useNativeDriver: true,
+            }),
+            Animated.timing(vibroacousticPulse, {
+              toValue: 1,
+              duration: vibroacousticSpeed / 2,
+              useNativeDriver: true,
+            }),
+          ])
+        ).start();
+      }
     } else {
       geometryAnim.setValue(0);
       rotationAnim.setValue(0);
@@ -110,8 +152,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
       flowerAnim.setValue(0);
       counterRotationAnim.setValue(0);
       pulseAnim.setValue(1);
+      vibroacousticAnim.setValue(0);
+      vibroacousticPulse.setValue(1);
     }
-  }, [isPlaying, geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim]);
+  }, [isPlaying, isVibroacousticsActive, vibroacousticFrequency, geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim, vibroacousticAnim, vibroacousticPulse]);
 
   const rotation = rotationAnim.interpolate({
     inputRange: [0, 1],
@@ -140,6 +184,18 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
 
   const breathScale = breathingPhase === 'in' ? 1.4 : 0.6;
   const breathOpacity = breathingPhase === 'in' ? 0.9 : 0.3;
+
+  const vibroacousticRotation = vibroacousticAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const vibroacousticScale = vibroacousticPulse.interpolate({
+    inputRange: [1, 1.5],
+    outputRange: [1, 1.2],
+  });
+
+  const vibroacousticOpacity = isVibroacousticsActive ? 0.8 : 0.3;
 
   return (
     <View style={styles.geometryContainer}>
@@ -327,6 +383,64 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
           />
         ))}
       </Animated.View>
+
+      {/* Vibroacoustic geometry overlay */}
+      {isVibroacousticsActive && (
+        <>
+          <Animated.View
+            style={[
+              styles.vibroacousticRing,
+              {
+                transform: [{ rotate: vibroacousticRotation }, { scale: vibroacousticScale }],
+                opacity: vibroacousticOpacity,
+              },
+            ]}
+          >
+            {[...Array(Math.floor(vibroacousticFrequency / 10))].map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.vibroacousticDot,
+                  {
+                    transform: [
+                      { rotate: `${i * (360 / Math.floor(vibroacousticFrequency / 10))}deg` },
+                      { translateY: -80 },
+                    ],
+                  },
+                ]}
+              />
+            ))}
+          </Animated.View>
+          
+          <Animated.View
+            style={[
+              styles.vibroacousticWaves,
+              {
+                transform: [{ scale: vibroacousticPulse }],
+                opacity: vibroacousticOpacity * 0.6,
+              },
+            ]}
+          >
+            {[...Array(3)].map((_, i) => (
+              <Animated.View
+                key={i}
+                style={[
+                  styles.vibroacousticWave,
+                  {
+                    width: 100 + i * 40,
+                    height: 100 + i * 40,
+                    borderRadius: 50 + i * 20,
+                    opacity: vibroacousticAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8 - i * 0.2, 0.1],
+                    }),
+                  },
+                ]}
+              />
+            ))}
+          </Animated.View>
+        </>
+      )}
     </View>
   );
 };
@@ -334,7 +448,16 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
 export default function SessionScreen() {
   const router = useRouter();
   const { sessionId } = useLocalSearchParams();
-  const { playSound, stopSound, isPlaying } = useAudio();
+  const { 
+    playSound, 
+    stopSound, 
+    isPlaying, 
+    startVibroacoustics, 
+    stopVibroacoustics, 
+    isVibroacousticsActive,
+    vibroacousticIntensity,
+    setVibroacousticIntensity 
+  } = useAudio();
   const { addSession } = useUserProgress();
   
   const session = useMemo(() => sessions.find((s) => s.id === sessionId), [sessionId]);
@@ -344,6 +467,8 @@ export default function SessionScreen() {
   const waveAnim = useRef(new Animated.Value(0)).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
+  const [showVibroacousticControls, setShowVibroacousticControls] = useState(false);
+  const [vibroacousticFrequency, setVibroacousticFrequency] = useState(40);
 
   useEffect(() => {
     if (!session) return;
@@ -395,9 +520,10 @@ export default function SessionScreen() {
 
     return () => {
       stopSound();
+      stopVibroacoustics();
       clearInterval(breathTimer);
     };
-  }, [session, pulseAnim, waveAnim, breathAnim, stopSound]);
+  }, [session, pulseAnim, waveAnim, breathAnim, stopSound, stopVibroacoustics]);
 
   const handleComplete = useCallback(async () => {
     if (Platform.OS !== "web") {
@@ -444,14 +570,19 @@ export default function SessionScreen() {
 
     if (isPlaying) {
       stopSound();
+      stopVibroacoustics();
       setIsPaused(true);
     } else {
       if (session) {
         await playSound(session.audioUrl);
+        // Auto-start vibroacoustics with session frequency
+        const sessionFreq = parseInt(session.frequency) || 40;
+        setVibroacousticFrequency(sessionFreq);
+        startVibroacoustics(sessionFreq);
         setIsPaused(false);
       }
     }
-  }, [isPlaying, session, playSound, stopSound]);
+  }, [isPlaying, session, playSound, stopSound, startVibroacoustics, stopVibroacoustics]);
 
   const handleClose = useCallback(() => {
     Alert.alert(
@@ -464,12 +595,13 @@ export default function SessionScreen() {
           style: "destructive",
           onPress: () => {
             stopSound();
+            stopVibroacoustics();
             router.back();
           },
         },
       ]
     );
-  }, [stopSound, router]);
+  }, [stopSound, stopVibroacoustics, router]);
 
 
 
@@ -506,7 +638,12 @@ export default function SessionScreen() {
 
           <View style={styles.visualizer}>
             {/* Sacred Geometry Background */}
-            <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} />
+            <SacredGeometry 
+              isPlaying={isPlaying} 
+              breathingPhase={breathingPhase}
+              isVibroacousticsActive={isVibroacousticsActive}
+              vibroacousticFrequency={vibroacousticFrequency}
+            />
             
             <Animated.View
               style={[
@@ -596,6 +733,77 @@ export default function SessionScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Vibroacoustic Controls */}
+          <View style={styles.vibroacousticSection}>
+            <TouchableOpacity
+              onPress={() => setShowVibroacousticControls(!showVibroacousticControls)}
+              style={styles.vibroacousticToggle}
+              activeOpacity={0.8}
+            >
+              <Vibrate size={20} color={isVibroacousticsActive ? "#00ff88" : "#fff"} />
+              <Text style={[styles.vibroacousticToggleText, { color: isVibroacousticsActive ? "#00ff88" : "#fff" }]}>
+                Vibroacoustics {isVibroacousticsActive ? 'ON' : 'OFF'}
+              </Text>
+              <Settings size={16} color="rgba(255,255,255,0.6)" />
+            </TouchableOpacity>
+
+            {showVibroacousticControls && (
+              <View style={styles.vibroacousticControls}>
+                <View style={styles.controlRow}>
+                  <Text style={styles.controlLabel}>Frequency: {vibroacousticFrequency}Hz</Text>
+                  <View style={styles.frequencyButtons}>
+                    {[20, 40, 60, 80].map((freq) => (
+                      <TouchableOpacity
+                        key={freq}
+                        onPress={() => {
+                          setVibroacousticFrequency(freq);
+                          if (isVibroacousticsActive) {
+                            stopVibroacoustics();
+                            startVibroacoustics(freq);
+                          }
+                        }}
+                        style={[
+                          styles.frequencyButton,
+                          vibroacousticFrequency === freq && styles.frequencyButtonActive
+                        ]}
+                      >
+                        <Text style={[
+                          styles.frequencyButtonText,
+                          vibroacousticFrequency === freq && styles.frequencyButtonTextActive
+                        ]}>
+                          {freq}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                
+                <View style={styles.controlRow}>
+                  <Text style={styles.controlLabel}>Intensity: {Math.round(vibroacousticIntensity * 100)}%</Text>
+                  <View style={styles.intensityButtons}>
+                    {[0.3, 0.5, 0.7, 1.0].map((intensity) => (
+                      <TouchableOpacity
+                        key={intensity}
+                        onPress={() => setVibroacousticIntensity(intensity)}
+                        style={[
+                          styles.intensityButton,
+                          Math.abs(vibroacousticIntensity - intensity) < 0.1 && styles.intensityButtonActive
+                        ]}
+                      >
+                        <Text style={[
+                          styles.intensityButtonText,
+                          Math.abs(vibroacousticIntensity - intensity) < 0.1 && styles.intensityButtonTextActive
+                        ]}>
+                          {Math.round(intensity * 100)}%
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
+          </View>
+
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
               <Heart size={20} color="#fff" />
@@ -608,6 +816,10 @@ export default function SessionScreen() {
             <View style={styles.infoCard}>
               <Volume2 size={20} color="#fff" />
               <Text style={styles.infoText}>Binaural Beats</Text>
+            </View>
+            <View style={styles.infoCard}>
+              <Vibrate size={20} color={isVibroacousticsActive ? "#00ff88" : "#fff"} />
+              <Text style={[styles.infoText, { color: isVibroacousticsActive ? "#00ff88" : "#fff" }]}>Vibroacoustics</Text>
             </View>
           </View>
         </View>
@@ -864,16 +1076,18 @@ const styles = StyleSheet.create({
   },
   infoCards: {
     flexDirection: "row",
-    gap: 15,
+    gap: 10,
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
   infoCard: {
     backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
   },
   infoText: {
     color: "#fff",
@@ -884,5 +1098,113 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     textAlign: "center",
+  },
+  // Vibroacoustic geometry styles
+  vibroacousticRing: {
+    position: "absolute",
+    width: 160,
+    height: 160,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  vibroacousticDot: {
+    position: "absolute",
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#00ff88",
+  },
+  vibroacousticWaves: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  vibroacousticWave: {
+    position: "absolute",
+    borderWidth: 1,
+    borderColor: "#00ff88",
+  },
+  // Vibroacoustic controls styles
+  vibroacousticSection: {
+    marginBottom: 20,
+    width: "100%",
+  },
+  vibroacousticToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    gap: 10,
+  },
+  vibroacousticToggleText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+  },
+  vibroacousticControls: {
+    marginTop: 15,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 15,
+    padding: 15,
+    gap: 15,
+  },
+  controlRow: {
+    gap: 10,
+  },
+  controlLabel: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 14,
+    fontWeight: "600" as const,
+    marginBottom: 8,
+  },
+  frequencyButtons: {
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+  },
+  frequencyButton: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    minWidth: 50,
+    alignItems: "center",
+  },
+  frequencyButtonActive: {
+    backgroundColor: "#00ff88",
+  },
+  frequencyButtonText: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 12,
+    fontWeight: "600" as const,
+  },
+  frequencyButtonTextActive: {
+    color: "#000",
+  },
+  intensityButtons: {
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+  },
+  intensityButton: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    minWidth: 45,
+    alignItems: "center",
+  },
+  intensityButtonActive: {
+    backgroundColor: "#00ff88",
+  },
+  intensityButtonText: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 12,
+    fontWeight: "600" as const,
+  },
+  intensityButtonTextActive: {
+    color: "#000",
   },
 });
