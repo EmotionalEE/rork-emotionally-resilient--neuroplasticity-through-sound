@@ -30,7 +30,7 @@ import * as Haptics from "expo-haptics";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { progress, hasCompletedOnboarding, hasSeenWelcome } = useUserProgress();
+  const { progress, hasCompletedOnboarding, hasSeenWelcome, resetWelcomeAndOnboarding } = useUserProgress();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
@@ -50,17 +50,25 @@ export default function HomeScreen() {
 
   // Handle navigation flow after navigation is ready
   useEffect(() => {
-    if (isNavigationReady && !hasSeenWelcome) {
+    if (!isNavigationReady) return;
+
+    // Always check welcome first
+    if (!hasSeenWelcome) {
+      console.log('Navigating to welcome screen');
       router.replace("/welcome");
       return;
     }
 
-    if (isNavigationReady && hasSeenWelcome && !hasCompletedOnboarding) {
+    // Then check onboarding
+    if (hasSeenWelcome && !hasCompletedOnboarding) {
+      console.log('Navigating to onboarding screen');
       router.replace("/onboarding");
       return;
     }
 
-    if (isNavigationReady && hasSeenWelcome && hasCompletedOnboarding) {
+    // Finally show main app
+    if (hasSeenWelcome && hasCompletedOnboarding) {
+      console.log('Showing main app');
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -789,8 +797,8 @@ export default function HomeScreen() {
     [selectedEmotion]
   );
 
-  // Show loading state while navigation is not ready
-  if (!isNavigationReady) {
+  // Show loading state while navigation is not ready or during navigation
+  if (!isNavigationReady || !hasSeenWelcome || !hasCompletedOnboarding) {
     return (
       <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
@@ -939,6 +947,17 @@ export default function HomeScreen() {
                 <Text style={styles.statLabel}>Day Streak</Text>
               </View>
             </View>
+          </View>
+
+          {/* Temporary reset button for testing */}
+          <View style={styles.debugContainer}>
+            <TouchableOpacity
+              style={styles.debugButton}
+              onPress={resetWelcomeAndOnboarding}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.debugButtonText}>Reset Welcome & Onboarding</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -1170,5 +1189,24 @@ const styles = StyleSheet.create({
     zIndex: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  debugContainer: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  debugButton: {
+    backgroundColor: "rgba(255,100,100,0.3)",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,100,100,0.5)",
+  },
+  debugButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600" as const,
+    textAlign: "center",
   },
 });

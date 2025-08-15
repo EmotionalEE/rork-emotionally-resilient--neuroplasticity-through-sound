@@ -18,6 +18,7 @@ interface UserProgressContextType {
   completeWelcome: () => Promise<void>;
   addSession: (sessionId: string, duration: number) => Promise<void>;
   resetProgress: () => Promise<void>;
+  resetWelcomeAndOnboarding: () => Promise<void>;
 }
 
 const PROGRESS_KEY = "user_progress";
@@ -134,6 +135,18 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     await saveProgress(defaultProgress);
   }, [saveProgress]);
 
+  const resetWelcomeAndOnboarding = useCallback(async () => {
+    try {
+      await AsyncStorage.removeItem(WELCOME_KEY);
+      await AsyncStorage.removeItem(ONBOARDING_KEY);
+      setHasSeenWelcome(false);
+      setHasCompletedOnboarding(false);
+      console.log('Reset welcome and onboarding states');
+    } catch (error) {
+      console.error('Error resetting welcome and onboarding:', error);
+    }
+  }, []);
+
   return useMemo(() => ({
     progress,
     hasCompletedOnboarding,
@@ -142,5 +155,6 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     completeWelcome,
     addSession,
     resetProgress,
-  }), [progress, hasCompletedOnboarding, hasSeenWelcome, completeOnboarding, completeWelcome, addSession, resetProgress]);
+    resetWelcomeAndOnboarding,
+  }), [progress, hasCompletedOnboarding, hasSeenWelcome, completeOnboarding, completeWelcome, addSession, resetProgress, resetWelcomeAndOnboarding]);
 });
