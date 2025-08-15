@@ -75,23 +75,16 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       try {
         const status = await sound.getStatusAsync();
         if (status.isLoaded) {
-          // Only try to stop if it's actually playing
           if (status.isPlaying) {
             await sound.stopAsync();
           }
-          // Small delay before unloading to prevent race conditions
-          setTimeout(async () => {
-            try {
-              await sound.unloadAsync();
-            } catch {
-              // Ignore unload errors as they're often due to the sound already being unloaded
-            }
-          }, 100);
+          await sound.unloadAsync();
         }
-      } catch {
-        // Ignore status check errors - sound might already be unloaded
-      } finally {
-        // Always clean up state regardless of errors
+        setSound(null);
+        setIsPlaying(false);
+      } catch (error) {
+        console.log("Error stopping sound (handled):", error);
+        // Still clean up state even if stop fails
         setSound(null);
         setIsPlaying(false);
       }

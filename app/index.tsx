@@ -39,10 +39,10 @@ export default function HomeScreen() {
   // Use useFocusEffect to handle navigation when screen is focused
   useFocusEffect(
     useCallback(() => {
-      // Longer delay to ensure navigation is fully ready
+      // Small delay to ensure navigation is ready
       const timer = setTimeout(() => {
         setIsNavigationReady(true);
-      }, 500);
+      }, 100);
 
       return () => clearTimeout(timer);
     }, [])
@@ -50,38 +50,31 @@ export default function HomeScreen() {
 
   // Handle navigation flow after navigation is ready
   useEffect(() => {
-    if (!isNavigationReady) return;
+    if (isNavigationReady && !hasSeenWelcome) {
+      router.replace("/welcome");
+      return;
+    }
 
-    // Add another small delay before navigation to prevent race conditions
-    const navigationTimer = setTimeout(() => {
-      if (!hasSeenWelcome) {
-        router.replace("/welcome");
-        return;
-      }
+    if (isNavigationReady && hasSeenWelcome && !hasCompletedOnboarding) {
+      router.replace("/onboarding");
+      return;
+    }
 
-      if (hasSeenWelcome && !hasCompletedOnboarding) {
-        router.replace("/onboarding");
-        return;
-      }
-
-      if (hasSeenWelcome && hasCompletedOnboarding) {
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.spring(scaleAnim, {
-            toValue: 1,
-            tension: 20,
-            friction: 7,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-    }, 100);
-
-    return () => clearTimeout(navigationTimer);
+    if (isNavigationReady && hasSeenWelcome && hasCompletedOnboarding) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 20,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
   }, [isNavigationReady, hasSeenWelcome, hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
