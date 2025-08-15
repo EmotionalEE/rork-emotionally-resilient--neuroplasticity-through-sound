@@ -13,7 +13,7 @@ import { useUserProgress } from "@/providers/UserProgressProvider";
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { completeWelcome } = useUserProgress();
+  const { completeWelcome, hasCompletedOnboarding } = useUserProgress();
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
   const sparkleAnim = useMemo(() => new Animated.Value(0), []);
@@ -41,14 +41,20 @@ export default function WelcomeScreen() {
       }),
     ]).start();
 
-    // Navigate to onboarding after 3 seconds
+    // Navigate to next screen after 3 seconds
     const timer = setTimeout(async () => {
       await completeWelcome();
-      router.replace("/onboarding");
+      
+      // Check if onboarding is completed to decide where to navigate
+      if (hasCompletedOnboarding) {
+        router.replace("/");
+      } else {
+        router.replace("/onboarding");
+      }
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [fadeAnim, scaleAnim, sparkleAnim, router, completeWelcome]);
+  }, [fadeAnim, scaleAnim, sparkleAnim, router, completeWelcome, hasCompletedOnboarding]);
 
   const sparkleRotation = sparkleAnim.interpolate({
     inputRange: [0, 1],

@@ -738,23 +738,15 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!isNavigationReady) return;
 
-    // Always check welcome first
-    if (!hasSeenWelcome) {
-      console.log('Navigating to welcome screen');
-      router.replace("/welcome");
-      return;
-    }
+    // Always show welcome screen first, regardless of whether it's been seen before
+    console.log('Navigating to welcome screen');
+    router.replace("/welcome");
+  }, [isNavigationReady, router]);
 
-    // Then check onboarding
-    if (hasSeenWelcome && !hasCompletedOnboarding) {
-      console.log('Navigating to onboarding screen');
-      router.replace("/onboarding");
-      return;
-    }
-
-    // Finally show main app
+  // Animate main app when both welcome and onboarding are completed
+  useEffect(() => {
     if (hasSeenWelcome && hasCompletedOnboarding) {
-      console.log('Showing main app');
+      console.log('Showing main app with animations');
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -769,7 +761,7 @@ export default function HomeScreen() {
         }),
       ]).start();
     }
-  }, [isNavigationReady, hasSeenWelcome, hasCompletedOnboarding, fadeAnim, scaleAnim, router]);
+  }, [hasSeenWelcome, hasCompletedOnboarding, fadeAnim, scaleAnim]);
 
   const handleEmotionSelect = useCallback((emotion: EmotionalState) => {
     if (Platform.OS !== "web") {
@@ -799,8 +791,22 @@ export default function HomeScreen() {
     [selectedEmotion]
   );
 
-  // Show loading state while navigation is not ready or during navigation
-  if (!isNavigationReady || !hasSeenWelcome || !hasCompletedOnboarding) {
+  // Show loading state while navigation is not ready
+  if (!isNavigationReady) {
+    return (
+      <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
+  // Only show main app if both welcome and onboarding are completed
+  // Otherwise, the navigation effect above will redirect to welcome
+  if (!hasSeenWelcome || !hasCompletedOnboarding) {
     return (
       <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
