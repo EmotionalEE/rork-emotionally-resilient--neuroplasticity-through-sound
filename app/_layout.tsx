@@ -13,6 +13,7 @@ const queryClient = new QueryClient();
 function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="welcome" />
       <Stack.Screen name="index" />
       <Stack.Screen name="session" options={{ presentation: "modal" }} />
       <Stack.Screen name="onboarding" />
