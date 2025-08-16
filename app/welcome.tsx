@@ -158,12 +158,13 @@ export default function WelcomeScreen() {
                   key={index}
                   style={[
                     styles.featureItem,
-                    {
+                    showContent && {
                       transform: [
                         {
                           translateY: slideAnim.interpolate({
                             inputRange: [0, 50],
                             outputRange: [0, 20 + index * 10],
+                            extrapolate: 'clamp',
                           }),
                         },
                       ],
