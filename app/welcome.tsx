@@ -14,8 +14,6 @@ import { Sparkles, Waves, Heart, ArrowRight } from "lucide-react-native";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import * as Haptics from "expo-haptics";
 
-
-
 export default function WelcomeScreen() {
   const router = useRouter();
   const { hasSeenWelcome, hasCompletedOnboarding, completeWelcome } = useUserProgress();
@@ -23,14 +21,6 @@ export default function WelcomeScreen() {
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
   const slideAnim = useMemo(() => new Animated.Value(50), []);
-  const logoRotateAnim = useMemo(() => new Animated.Value(0), []);
-  const particleAnims = useMemo(() => 
-    Array.from({ length: 12 }, () => ({
-      opacity: new Animated.Value(0),
-      translateY: new Animated.Value(0),
-      scale: new Animated.Value(0),
-    })), []
-  );
 
   useEffect(() => {
     // If user has already seen welcome, redirect immediately
@@ -53,15 +43,6 @@ export default function WelcomeScreen() {
 
   useEffect(() => {
     if (showContent) {
-      // Logo rotation animation
-      Animated.loop(
-        Animated.timing(logoRotateAnim, {
-          toValue: 1,
-          duration: 20000,
-          useNativeDriver: true,
-        })
-      ).start();
-
       // Main content animation
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -81,41 +62,8 @@ export default function WelcomeScreen() {
           useNativeDriver: true,
         }),
       ]).start();
-
-      // Staggered particle animations
-      particleAnims.forEach((anim, index) => {
-        setTimeout(() => {
-          Animated.parallel([
-            Animated.timing(anim.opacity, {
-              toValue: 0.8,
-              duration: 800,
-              useNativeDriver: true,
-            }),
-            Animated.spring(anim.scale, {
-              toValue: 1,
-              tension: 50,
-              friction: 8,
-              useNativeDriver: true,
-            }),
-            Animated.loop(
-              Animated.sequence([
-                Animated.timing(anim.translateY, {
-                  toValue: -20,
-                  duration: 2000 + Math.random() * 1000,
-                  useNativeDriver: true,
-                }),
-                Animated.timing(anim.translateY, {
-                  toValue: 20,
-                  duration: 2000 + Math.random() * 1000,
-                  useNativeDriver: true,
-                }),
-              ])
-            ),
-          ]).start();
-        }, index * 150);
-      });
     }
-  }, [showContent, fadeAnim, scaleAnim, slideAnim, logoRotateAnim, particleAnims]);
+  }, [showContent, fadeAnim, scaleAnim, slideAnim]);
 
   const handleGetStarted = async () => {
     if (Platform.OS !== "web") {
@@ -132,26 +80,7 @@ export default function WelcomeScreen() {
     }
   };
 
-  const logoRotation = logoRotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
 
-  // Sacred geometry particles positions
-  const particlePositions = [
-    { top: '15%', left: '10%' },
-    { top: '25%', right: '15%' },
-    { top: '35%', left: '5%' },
-    { top: '45%', right: '8%' },
-    { top: '55%', left: '12%' },
-    { top: '65%', right: '20%' },
-    { top: '75%', left: '8%' },
-    { top: '20%', left: '50%' },
-    { top: '80%', right: '12%' },
-    { top: '30%', right: '45%' },
-    { top: '70%', left: '45%' },
-    { top: '40%', left: '25%' },
-  ];
 
   return (
     <LinearGradient 
@@ -161,35 +90,6 @@ export default function WelcomeScreen() {
       end={{ x: 1, y: 1 }}
     >
       <SafeAreaView style={styles.safeArea}>
-        {/* Floating Sacred Geometry Particles */}
-        {particleAnims.map((anim, index) => {
-          const position = particlePositions[index];
-          const icons = [Sparkles, Waves, Heart];
-          const Icon = icons[index % icons.length];
-          
-          return (
-            <Animated.View
-              key={index}
-              style={[
-                styles.particle,
-                position,
-                {
-                  opacity: anim.opacity,
-                  transform: [
-                    { translateY: anim.translateY },
-                    { scale: anim.scale },
-                  ],
-                },
-              ]}
-            >
-              <Icon 
-                size={12 + Math.random() * 8} 
-                color={`rgba(255, 255, 255, ${0.3 + Math.random() * 0.4})`} 
-              />
-            </Animated.View>
-          );
-        })}
-
         <View style={styles.content}>
           {/* Logo Section */}
           <Animated.View
@@ -197,10 +97,7 @@ export default function WelcomeScreen() {
               styles.logoContainer,
               {
                 opacity: fadeAnim,
-                transform: [
-                  { scale: scaleAnim },
-                  { rotate: logoRotation },
-                ],
+                transform: [{ scale: scaleAnim }],
               },
             ]}
           >
@@ -214,43 +111,6 @@ export default function WelcomeScreen() {
                 <Waves size={40} color="#fff" />
               </View>
             </LinearGradient>
-            
-            {/* Sacred geometry rings around logo */}
-            <View style={styles.logoRings}>
-              {[...Array(3)].map((_, i) => (
-                <Animated.View
-                  key={i}
-                  style={[
-                    styles.logoRing,
-                    {
-                      width: 120 + i * 20,
-                      height: 120 + i * 20,
-                      borderRadius: 60 + i * 10,
-                      transform: [
-                        {
-                          rotate: logoRotateAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [`${i * 120}deg`, `${360 + i * 120}deg`],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  {[...Array(6)].map((_, j) => (
-                    <View
-                      key={j}
-                      style={[
-                        styles.ringDot,
-                        {
-                          transform: [{ rotate: `${j * 60}deg` }],
-                        },
-                      ]}
-                    />
-                  ))}
-                </Animated.View>
-              ))}
-            </View>
           </Animated.View>
 
           {/* Welcome Text */}
@@ -364,10 +224,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  particle: {
-    position: 'absolute',
-    zIndex: 1,
-  },
+
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -390,26 +247,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoRings: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoRing: {
-    position: 'absolute',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ringDot: {
-    position: 'absolute',
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    top: -1.5,
-  },
+
   textContainer: {
     alignItems: 'center',
     marginBottom: 50,
