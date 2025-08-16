@@ -151,24 +151,22 @@ export default function HomeScreen() {
       ).start();
     }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim, counterRotationAnim, waveAnim]);
 
-    const rotation = rotationAnim.interpolate({
+    const safeRotation = rotationAnim.interpolate({
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg'],
     });
 
-    const counterRotation = counterRotationAnim.interpolate({
+    const safeCounterRotation = counterRotationAnim.interpolate({
       inputRange: [0, 1],
       outputRange: ['360deg', '0deg'],
     });
 
-
-
-    const spiralScale = spiralAnim.interpolate({
+    const safeSpiralScale = spiralAnim.interpolate({
       inputRange: [0, 0.5, 1],
       outputRange: [0.8, 1.2, 0.8],
     });
 
-    const waveScale = waveAnim.interpolate({
+    const safeWaveScale = waveAnim.interpolate({
       inputRange: [0, 0.5, 1],
       outputRange: [1, 1.4, 1],
     });
@@ -198,7 +196,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -220,7 +218,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconSpiral,
                   {
-                    transform: [{ rotate: counterRotation }, { scale: spiralScale }],
+                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
                     opacity: 0.6 * baseOpacity,
                   },
                 ]}
@@ -252,7 +250,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
                     opacity: 0.7 * baseOpacity,
                   },
                 ]}
@@ -274,7 +272,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: counterRotation }, { scale: spiralScale }],
+                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -304,7 +302,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: waveScale }, { rotate: rotation }],
+                    transform: [{ scale: safeWaveScale }, { rotate: safeRotation }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -329,7 +327,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconSpiral,
                   {
-                    transform: [{ rotate: counterRotation }, { scale: spiralScale }],
+                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
                     opacity: 0.5 * baseOpacity,
                   },
                 ]}
@@ -361,7 +359,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -385,7 +383,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: counterRotation }, { scale: spiralScale }],
+                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
                     opacity: 0.8 * baseOpacity,
                   },
                 ]}
@@ -417,7 +415,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: waveScale }],
+                    transform: [{ scale: safeWaveScale }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -443,7 +441,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconSpiral,
                   {
-                    transform: [{ rotate: rotation }, { scale: spiralScale }],
+                    transform: [{ rotate: safeRotation }, { scale: safeSpiralScale }],
                     opacity: 0.6 * baseOpacity,
                   },
                 ]}
@@ -476,7 +474,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -500,7 +498,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: counterRotation }, { scale: spiralScale }],
+                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
                     opacity: 0.7 * baseOpacity,
                   },
                 ]}
@@ -522,7 +520,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: waveScale }],
+                    transform: [{ scale: safeWaveScale }],
                     opacity: 0.4 * baseOpacity,
                   },
                 ]}
@@ -556,7 +554,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -580,7 +578,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: waveScale }, { rotate: counterRotation }],
+                    transform: [{ scale: safeWaveScale }, { rotate: safeCounterRotation }],
                     opacity: 0.7 * baseOpacity,
                   },
                 ]}
@@ -613,7 +611,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -637,7 +635,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconSpiral,
                   {
-                    transform: [{ rotate: counterRotation }, { scale: spiralScale }],
+                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
                     opacity: 0.8 * baseOpacity,
                   },
                 ]}
@@ -664,7 +662,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: rotation }, { scale: waveScale }],
+                    transform: [{ rotate: safeRotation }, { scale: safeWaveScale }],
                     opacity: 0.6 * baseOpacity,
                   },
                 ]}
@@ -696,7 +694,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: rotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}

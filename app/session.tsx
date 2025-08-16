@@ -114,33 +114,38 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     }
   }, [isPlaying, geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim]);
 
-  const rotation = rotationAnim.interpolate({
+
+
+  const breathScale = breathingPhase === 'in' ? 1.4 : 0.6;
+  const breathOpacity = breathingPhase === 'in' ? 0.9 : 0.3;
+
+  // Ensure all animated values are numbers
+  const safeRotation = rotationAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
 
-  const counterRotation = counterRotationAnim.interpolate({
+  const safeCounterRotation = counterRotationAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['360deg', '0deg'],
   });
 
-  const scale = geometryAnim.interpolate({
+  const safeScale = geometryAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0.8, 1.3, 0.8],
   });
 
-  const mandalaScale = mandalaAnim.interpolate({
+  const safeMandalaScale = mandalaAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0.8, 1.3],
   });
 
-  const flowerOpacity = flowerAnim.interpolate({
+  const safeFlowerOpacity = flowerAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0.2, 0.9, 0.2],
   });
 
-  const breathScale = breathingPhase === 'in' ? 1.4 : 0.6;
-  const breathOpacity = breathingPhase === 'in' ? 0.9 : 0.3;
+  const safePulseAnim = pulseAnim;
 
   return (
     <View style={styles.geometryContainer}>
@@ -149,8 +154,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.mandalaOuter,
           {
-            transform: [{ rotate: rotation }, { scale: mandalaScale }],
-            opacity: flowerOpacity,
+            transform: [{ rotate: safeRotation }, { scale: safeMandalaScale }],
+            opacity: safeFlowerOpacity,
           },
         ]}
       >
@@ -162,7 +167,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
               {
                 transform: [
                   { rotate: `${i * 22.5}deg` },
-                  { scale: pulseAnim },
+                  { scale: safePulseAnim },
                 ],
                 opacity: 0.6,
               },
@@ -176,7 +181,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.outerRing,
           {
-            transform: [{ rotate: counterRotation }, { scale: pulseAnim }],
+            transform: [{ rotate: safeCounterRotation }, { scale: safePulseAnim }],
             opacity: 0.6,
           },
         ]}
@@ -202,7 +207,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.hexagonContainer,
           {
-            transform: [{ rotate: counterRotation }, { scale }],
+            transform: [{ rotate: safeCounterRotation }, { scale: safeScale }],
           },
         ]}
       >
@@ -225,8 +230,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.flowerContainer,
           {
-            opacity: flowerOpacity,
-            transform: [{ scale }, { rotate: rotation }],
+            opacity: safeFlowerOpacity,
+            transform: [{ scale: safeScale }, { rotate: safeRotation }],
           },
         ]}
       >
@@ -239,7 +244,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
                 transform: [
                   { rotate: `${i * 51.43}deg` },
                   { translateY: i === 0 ? 0 : -35 },
-                  { scale: pulseAnim },
+                  { scale: safePulseAnim },
                 ],
               },
             ]}
@@ -252,7 +257,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.spiralContainer,
           {
-            transform: [{ rotate: rotation }, { scale: mandalaScale }],
+            transform: [{ rotate: safeRotation }, { scale: safeMandalaScale }],
             opacity: 0.6,
           },
         ]}
@@ -266,7 +271,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
                 transform: [
                   { rotate: `${i * 30}deg` },
                   { translateY: -50 - i * 6 },
-                  { scale: pulseAnim },
+                  { scale: safePulseAnim },
                 ],
               },
             ]}
@@ -279,7 +284,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.triangleContainer,
           {
-            transform: [{ rotate: counterRotation }, { scale: breathScale }],
+            transform: [{ rotate: safeCounterRotation }, { scale: breathScale }],
             opacity: breathOpacity,
           },
         ]}
@@ -302,7 +307,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.breathGeometry,
           {
-            transform: [{ scale: breathScale }, { rotate: rotation }],
+            transform: [{ scale: breathScale }, { rotate: safeRotation }],
             opacity: breathOpacity,
           },
         ]}
