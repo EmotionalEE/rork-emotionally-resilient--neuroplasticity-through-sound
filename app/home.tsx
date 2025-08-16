@@ -161,10 +161,7 @@ export default function HomeScreen() {
       outputRange: ['360deg', '0deg'],
     });
 
-    const mandalaOpacity = mandalaAnim.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [0.2, 0.8, 0.2],
-    });
+
 
     const spiralScale = spiralAnim.interpolate({
       inputRange: [0, 0.5, 1],
@@ -202,10 +199,7 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >
@@ -281,10 +275,7 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: counterRotation }, { scale: spiralScale }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >
@@ -314,10 +305,7 @@ export default function HomeScreen() {
                   styles.iconFlower,
                   {
                     transform: [{ scale: waveScale }, { rotate: rotation }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >
@@ -374,10 +362,7 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >
@@ -433,10 +418,7 @@ export default function HomeScreen() {
                   styles.iconFlower,
                   {
                     transform: [{ scale: waveScale }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >
@@ -495,10 +477,7 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >
@@ -578,10 +557,7 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >
@@ -638,10 +614,7 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >
@@ -724,10 +697,7 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [{ rotate: rotation }, { scale: pulseAnim }],
-                    opacity: mandalaOpacity.interpolate({
-                      inputRange: [0.2, 0.8],
-                      outputRange: [0.2 * baseOpacity, 0.8 * baseOpacity],
-                    }),
+                    opacity: baseOpacity * 0.6,
                   },
                 ]}
               >

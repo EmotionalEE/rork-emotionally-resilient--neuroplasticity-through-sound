@@ -164,10 +164,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
                   { rotate: `${i * 22.5}deg` },
                   { scale: pulseAnim },
                 ],
-                opacity: mandalaAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.2, 0.8],
-                }),
+                opacity: 0.6,
               },
             ]}
           />
@@ -216,10 +213,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
               styles.hexagonSide,
               {
                 transform: [{ rotate: `${i * 60}deg` }],
-                opacity: geometryAnim.interpolate({
-                  inputRange: [0, 0.5, 1],
-                  outputRange: [0.3, 0.8, 0.3],
-                }),
+                opacity: 0.6,
               },
             ]}
           />
@@ -259,10 +253,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
           styles.spiralContainer,
           {
             transform: [{ rotate: rotation }, { scale: mandalaScale }],
-            opacity: mandalaAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0.3, 0.8],
-            }),
+            opacity: 0.6,
           },
         ]}
       >
