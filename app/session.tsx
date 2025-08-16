@@ -117,41 +117,81 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
 
 
   // Ensure all values are numbers before interpolation
-  const safeBreathScale = breathingPhase === 'in' ? 1.4 : 0.6;
-  const safeBreathOpacity = breathingPhase === 'in' ? 0.9 : 0.3;
+  const safeBreathScale = typeof breathingPhase === 'string' && breathingPhase === 'in' ? 1.4 : 0.6;
+  const safeBreathOpacity = typeof breathingPhase === 'string' && breathingPhase === 'in' ? 0.9 : 0.3;
 
-  // Ensure all animated values are numbers
-  const safeRotation = rotationAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+  // Create safe interpolations with proper error handling
+  const safeRotation = useMemo(() => {
+    try {
+      return rotationAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg'],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return '0deg';
+    }
+  }, [rotationAnim]);
 
-  const safeCounterRotation = counterRotationAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['360deg', '0deg'],
-  });
+  const safeCounterRotation = useMemo(() => {
+    try {
+      return counterRotationAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['360deg', '0deg'],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return '0deg';
+    }
+  }, [counterRotationAnim]);
 
-  const safeScale = geometryAnim.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0.8, 1.3, 0.8],
-  });
+  const safeScale = useMemo(() => {
+    try {
+      return geometryAnim.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0.8, 1.3, 0.8],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return 1;
+    }
+  }, [geometryAnim]);
 
-  const safeMandalaScale = mandalaAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 1.3],
-  });
+  const safeMandalaScale = useMemo(() => {
+    try {
+      return mandalaAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.8, 1.3],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return 1;
+    }
+  }, [mandalaAnim]);
 
-  const safeFlowerOpacity = flowerAnim.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0.2, 0.9, 0.2],
-  });
+  const safeFlowerOpacity = useMemo(() => {
+    try {
+      return flowerAnim.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0.2, 0.9, 0.2],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return 0.5;
+    }
+  }, [flowerAnim]);
 
-  // Ensure pulseAnim is properly handled
-  const safePulseScale = pulseAnim.interpolate({
-    inputRange: [1, 1.2],
-    outputRange: [1, 1.2],
-    extrapolate: 'clamp',
-  });
+  const safePulseScale = useMemo(() => {
+    try {
+      return pulseAnim.interpolate({
+        inputRange: [1, 1.2],
+        outputRange: [1, 1.2],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return 1;
+    }
+  }, [pulseAnim]);
 
   return (
     <View style={styles.geometryContainer}>
@@ -348,6 +388,55 @@ export default function SessionScreen() {
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
 
+  // Create safe interpolations for main animations at component level
+  const safePulseOpacity = useMemo(() => {
+    try {
+      return pulseAnim.interpolate({
+        inputRange: [1, 1.2],
+        outputRange: [0.3, 0.1],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return 0.2;
+    }
+  }, [pulseAnim]);
+
+  const safeWaveScale = useMemo(() => {
+    try {
+      return waveAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.8, 1.5],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return 1;
+    }
+  }, [waveAnim]);
+
+  const safeWaveOpacity = useMemo(() => {
+    try {
+      return waveAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.5, 0],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return 0.3;
+    }
+  }, [waveAnim]);
+
+  const safeBreathScale = useMemo(() => {
+    try {
+      return breathAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 1.3],
+        extrapolate: 'clamp',
+      });
+    } catch {
+      return 1;
+    }
+  }, [breathAnim]);
+
   const handleClose = useCallback(() => {
     Alert.alert(
       "End Session",
@@ -538,11 +627,7 @@ export default function SessionScreen() {
                 styles.pulseCircle,
                 {
                   transform: [{ scale: pulseAnim }],
-                  opacity: pulseAnim.interpolate({
-                    inputRange: [1, 1.2],
-                    outputRange: [0.3, 0.1],
-                    extrapolate: 'clamp',
-                  }),
+                  opacity: safePulseOpacity,
                 },
               ]}
             />
@@ -552,18 +637,10 @@ export default function SessionScreen() {
                 {
                   transform: [
                     {
-                      scale: waveAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.8, 1.5],
-                        extrapolate: 'clamp',
-                      }),
+                      scale: safeWaveScale,
                     },
                   ],
-                  opacity: waveAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.5, 0],
-                    extrapolate: 'clamp',
-                  }),
+                  opacity: safeWaveOpacity,
                 },
               ]}
             />
@@ -579,11 +656,7 @@ export default function SessionScreen() {
                 {
                   transform: [
                     {
-                      scale: breathAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [1, 1.3],
-                        extrapolate: 'clamp',
-                      }),
+                      scale: safeBreathScale,
                     },
                   ],
                 },
