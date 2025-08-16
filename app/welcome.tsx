@@ -228,7 +228,7 @@ export default function WelcomeScreen() {
                       borderRadius: 60 + i * 10,
                       transform: [
                         {
-                          rotate: logoRotation.interpolate({
+                          rotate: logoRotateAnim.interpolate({
                             inputRange: [0, 1],
                             outputRange: [`${i * 120}deg`, `${360 + i * 120}deg`],
                           }),
