@@ -242,7 +242,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                    ],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -264,7 +267,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconSpiral,
                   {
-                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
+                    transform: [
+                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                    ],
                     opacity: 0.6 * baseOpacity,
                   },
                 ]}
@@ -296,7 +302,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                    ],
                     opacity: 0.7 * baseOpacity,
                   },
                 ]}
@@ -318,7 +327,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
+                    transform: [
+                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                    ],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -348,7 +360,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: safeWaveScale }, { rotate: safeRotation }],
+                    transform: [
+                      { scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }, 
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }
+                    ],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -373,7 +388,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconSpiral,
                   {
-                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
+                    transform: [
+                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                    ],
                     opacity: 0.5 * baseOpacity,
                   },
                 ]}
@@ -405,7 +423,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                    ],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -429,7 +450,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
+                    transform: [
+                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                    ],
                     opacity: 0.8 * baseOpacity,
                   },
                 ]}
@@ -461,7 +485,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: safeWaveScale }],
+                    transform: [{ scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -487,7 +511,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconSpiral,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safeSpiralScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                    ],
                     opacity: 0.6 * baseOpacity,
                   },
                 ]}
@@ -520,7 +547,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                    ],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -544,7 +574,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
+                    transform: [
+                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                    ],
                     opacity: 0.7 * baseOpacity,
                   },
                 ]}
@@ -566,7 +599,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: safeWaveScale }],
+                    transform: [{ scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }],
                     opacity: 0.4 * baseOpacity,
                   },
                 ]}
@@ -600,7 +633,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                    ],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -624,7 +660,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: safeWaveScale }, { rotate: safeCounterRotation }],
+                    transform: [
+                      { scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }, 
+                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }
+                    ],
                     opacity: 0.7 * baseOpacity,
                   },
                 ]}
@@ -657,7 +696,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                    ],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -681,7 +723,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconSpiral,
                   {
-                    transform: [{ rotate: safeCounterRotation }, { scale: safeSpiralScale }],
+                    transform: [
+                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                    ],
                     opacity: 0.8 * baseOpacity,
                   },
                 ]}
@@ -708,7 +753,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safeWaveScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }
+                    ],
                     opacity: 0.6 * baseOpacity,
                   },
                 ]}
@@ -740,7 +788,10 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
+                    transform: [
+                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                    ],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -772,7 +823,7 @@ export default function HomeScreen() {
           style={[
             styles.mainIcon,
             {
-              transform: [{ scale: isSelected ? safePulseScale : 1 }],
+              transform: [{ scale: isSelected ? (typeof safePulseScale === 'number' ? safePulseScale : 1) : 1 }],
             },
           ]}
         >
@@ -838,11 +889,18 @@ export default function HomeScreen() {
                     opacity: fadeAnim,
                     transform: [
                       {
-                        translateY: fadeAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [20, 0],
-                          extrapolate: 'clamp',
-                        }),
+                        translateY: (() => {
+                          try {
+                            return fadeAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [20, 0],
+                              extrapolate: 'clamp',
+                            });
+                          } catch (error) {
+                            console.log('Home fadeAnim translateY interpolation error:', error);
+                            return 0;
+                          }
+                        })(),
                       },
                     ],
                   }}
@@ -881,11 +939,18 @@ export default function HomeScreen() {
                   opacity: fadeAnim,
                   transform: [
                     {
-                      translateX: fadeAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [-30, 0],
-                        extrapolate: 'clamp',
-                      }),
+                      translateX: (() => {
+                        try {
+                          return fadeAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [-30, 0],
+                            extrapolate: 'clamp',
+                          });
+                        } catch (error) {
+                          console.log('Home fadeAnim translateX interpolation error:', error);
+                          return 0;
+                        }
+                      })(),
                     },
                   ],
                 }}

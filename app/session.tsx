@@ -213,8 +213,11 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.mandalaOuter,
           {
-            transform: [{ rotate: safeRotation }, { scale: safeMandalaScale }],
-            opacity: safeFlowerOpacity,
+            transform: [
+              { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+              { scale: typeof safeMandalaScale === 'number' ? safeMandalaScale : 1 }
+            ],
+            opacity: typeof safeFlowerOpacity === 'number' ? safeFlowerOpacity : 0.5,
           },
         ]}
       >
@@ -226,7 +229,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
               {
                 transform: [
                   { rotate: `${i * 22.5}deg` },
-                  { scale: safePulseScale },
+                  { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 },
                 ],
                 opacity: 0.6,
               },
@@ -240,7 +243,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.outerRing,
           {
-            transform: [{ rotate: safeCounterRotation }, { scale: safePulseScale }],
+            transform: [
+              { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+              { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+            ],
             opacity: 0.6,
           },
         ]}
@@ -266,7 +272,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.hexagonContainer,
           {
-            transform: [{ rotate: safeCounterRotation }, { scale: safeScale }],
+            transform: [
+              { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+              { scale: typeof safeScale === 'number' ? safeScale : 1 }
+            ],
           },
         ]}
       >
@@ -289,8 +298,11 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.flowerContainer,
           {
-            opacity: safeFlowerOpacity,
-            transform: [{ scale: safeScale }, { rotate: safeRotation }],
+            opacity: typeof safeFlowerOpacity === 'number' ? safeFlowerOpacity : 0.5,
+            transform: [
+              { scale: typeof safeScale === 'number' ? safeScale : 1 }, 
+              { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }
+            ],
           },
         ]}
       >
@@ -303,7 +315,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
                 transform: [
                   { rotate: `${i * 51.43}deg` },
                   { translateY: i === 0 ? 0 : -35 },
-                  { scale: safePulseScale },
+                  { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 },
                 ],
               },
             ]}
@@ -316,7 +328,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.spiralContainer,
           {
-            transform: [{ rotate: safeRotation }, { scale: safeMandalaScale }],
+            transform: [
+              { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
+              { scale: typeof safeMandalaScale === 'number' ? safeMandalaScale : 1 }
+            ],
             opacity: 0.6,
           },
         ]}
@@ -330,7 +345,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
                 transform: [
                   { rotate: `${i * 30}deg` },
                   { translateY: -50 - i * 6 },
-                  { scale: safePulseScale },
+                  { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 },
                 ],
               },
             ]}
@@ -343,8 +358,11 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.triangleContainer,
           {
-            transform: [{ rotate: safeCounterRotation }, { scale: typeof safeBreathScale === 'number' ? safeBreathScale : 1 }],
-            opacity: safeBreathOpacity,
+            transform: [
+              { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
+              { scale: typeof safeBreathScale === 'number' ? safeBreathScale : 1 }
+            ],
+            opacity: typeof safeBreathOpacity === 'number' ? safeBreathOpacity : 0.5,
           },
         ]}
       >
@@ -366,8 +384,11 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.breathGeometry,
           {
-            transform: [{ scale: typeof safeBreathScale === 'number' ? safeBreathScale : 1 }, { rotate: safeRotation }],
-            opacity: safeBreathOpacity,
+            transform: [
+              { scale: typeof safeBreathScale === 'number' ? safeBreathScale : 1 }, 
+              { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }
+            ],
+            opacity: typeof safeBreathOpacity === 'number' ? safeBreathOpacity : 0.5,
           },
         ]}
       >
@@ -618,7 +639,7 @@ export default function SessionScreen() {
               style={[
                 styles.pulseCircle,
                 {
-                  opacity: safePulseOpacity,
+                  opacity: typeof safePulseOpacity === 'number' ? safePulseOpacity : 0.2,
                 },
               ]}
             />
@@ -626,7 +647,7 @@ export default function SessionScreen() {
               style={[
                 styles.waveCircle,
                 {
-                  opacity: safeWaveOpacity,
+                  opacity: typeof safeWaveOpacity === 'number' ? safeWaveOpacity : 0.3,
                 },
               ]}
             />
