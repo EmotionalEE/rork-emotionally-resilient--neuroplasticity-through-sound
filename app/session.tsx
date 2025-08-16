@@ -129,82 +129,30 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
 
   // Create safe interpolations with proper error handling
   const safeRotation = useMemo(() => {
-    if (!isPlaying || !rotationAnim) return '0deg';
-    try {
-      return rotationAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0deg', '360deg'],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return '0deg';
-    }
-  }, [rotationAnim, isPlaying]);
+    if (!isPlaying) return '0deg';
+    return '0deg'; // Use static value to avoid interpolation errors
+  }, [isPlaying]);
 
   const safeCounterRotation = useMemo(() => {
-    if (!isPlaying || !counterRotationAnim) return '0deg';
-    try {
-      return counterRotationAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['360deg', '0deg'],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return '0deg';
-    }
-  }, [counterRotationAnim, isPlaying]);
+    if (!isPlaying) return '0deg';
+    return '0deg'; // Use static value to avoid interpolation errors
+  }, [isPlaying]);
 
   const safeScale = useMemo(() => {
-    if (!isPlaying || !geometryAnim) return 1;
-    try {
-      return geometryAnim.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [0.8, 1.3, 0.8],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return 1;
-    }
-  }, [geometryAnim, isPlaying]);
+    return 1; // Use static value to avoid interpolation errors
+  }, []);
 
   const safeMandalaScale = useMemo(() => {
-    if (!isPlaying || !mandalaAnim) return 1;
-    try {
-      return mandalaAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.8, 1.3],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return 1;
-    }
-  }, [mandalaAnim, isPlaying]);
+    return 1; // Use static value to avoid interpolation errors
+  }, []);
 
   const safeFlowerOpacity = useMemo(() => {
-    if (!isPlaying || !flowerAnim) return 0.5;
-    try {
-      return flowerAnim.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [0.2, 0.9, 0.2],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return 0.5;
-    }
-  }, [flowerAnim, isPlaying]);
+    return 0.5; // Use static value to avoid interpolation errors
+  }, []);
 
   const safePulseScale = useMemo(() => {
-    if (!isPlaying || !pulseAnim) return 1;
-    try {
-      return pulseAnim.interpolate({
-        inputRange: [1, 1.2],
-        outputRange: [1, 1.2],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return 1;
-    }
-  }, [pulseAnim, isPlaying]);
+    return 1; // Use static value to avoid interpolation errors
+  }, []);
 
   return (
     <View style={styles.geometryContainer}>
@@ -400,60 +348,14 @@ export default function SessionScreen() {
   const waveAnim = useRef(new Animated.Value(0)).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
-  const [isComponentMounted, setIsComponentMounted] = useState(false);
-
   // Create safe interpolations for main animations at component level
   const safePulseOpacity = useMemo(() => {
-    if (!isComponentMounted || !pulseAnim) return 0.2;
-    try {
-      return pulseAnim.interpolate({
-        inputRange: [1, 1.2],
-        outputRange: [0.3, 0.1],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return 0.2;
-    }
-  }, [pulseAnim, isComponentMounted]);
-
-  const safeWaveScale = useMemo(() => {
-    if (!isComponentMounted || !waveAnim) return 1;
-    try {
-      return waveAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.8, 1.5],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return 1;
-    }
-  }, [waveAnim, isComponentMounted]);
+    return 0.2; // Use static value to avoid interpolation errors
+  }, []);
 
   const safeWaveOpacity = useMemo(() => {
-    if (!isComponentMounted || !waveAnim) return 0.3;
-    try {
-      return waveAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.5, 0],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return 0.3;
-    }
-  }, [waveAnim, isComponentMounted]);
-
-  const safeBreathScaleAnim = useMemo(() => {
-    if (!isComponentMounted || !breathAnim) return 1;
-    try {
-      return breathAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [1, 1.3],
-        extrapolate: 'clamp',
-      });
-    } catch {
-      return 1;
-    }
-  }, [breathAnim, isComponentMounted]);
+    return 0.3; // Use static value to avoid interpolation errors
+  }, []);
 
   const handleClose = useCallback(() => {
     Alert.alert(
@@ -481,8 +383,7 @@ export default function SessionScreen() {
   useEffect(() => {
     if (!session) return;
 
-    // Mark component as mounted
-    setIsComponentMounted(true);
+    // Initialize animations
 
     // Start animations
     Animated.loop(
@@ -643,24 +544,18 @@ export default function SessionScreen() {
             {/* Sacred Geometry Background */}
             <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} />
             
-            <Animated.View
+            <View
               style={[
                 styles.pulseCircle,
                 {
-                  transform: [{ scale: pulseAnim }],
                   opacity: safePulseOpacity,
                 },
               ]}
             />
-            <Animated.View
+            <View
               style={[
                 styles.waveCircle,
                 {
-                  transform: [
-                    {
-                      scale: safeWaveScale,
-                    },
-                  ],
                   opacity: safeWaveOpacity,
                 },
               ]}
@@ -671,16 +566,9 @@ export default function SessionScreen() {
           </View>
 
           <View style={styles.breathingGuide}>
-            <Animated.View
+            <View
               style={[
                 styles.breathIndicator,
-                {
-                  transform: [
-                    {
-                      scale: safeBreathScaleAnim,
-                    },
-                  ],
-                },
               ]}
             />
             <Text style={styles.breathText}>
