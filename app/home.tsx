@@ -151,25 +151,66 @@ export default function HomeScreen() {
       ).start();
     }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim, counterRotationAnim, waveAnim]);
 
-    const safeRotation = rotationAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', '360deg'],
-    });
+    // Create safe interpolations with proper error handling
+    const safeRotation = useMemo(() => {
+      try {
+        return rotationAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['0deg', '360deg'],
+          extrapolate: 'clamp',
+        });
+      } catch {
+        return '0deg';
+      }
+    }, [rotationAnim]);
 
-    const safeCounterRotation = counterRotationAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['360deg', '0deg'],
-    });
+    const safeCounterRotation = useMemo(() => {
+      try {
+        return counterRotationAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['360deg', '0deg'],
+          extrapolate: 'clamp',
+        });
+      } catch {
+        return '0deg';
+      }
+    }, [counterRotationAnim]);
 
-    const safeSpiralScale = spiralAnim.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [0.8, 1.2, 0.8],
-    });
+    const safeSpiralScale = useMemo(() => {
+      try {
+        return spiralAnim.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [0.8, 1.2, 0.8],
+          extrapolate: 'clamp',
+        });
+      } catch {
+        return 1;
+      }
+    }, [spiralAnim]);
 
-    const safeWaveScale = waveAnim.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [1, 1.4, 1],
-    });
+    const safeWaveScale = useMemo(() => {
+      try {
+        return waveAnim.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [1, 1.4, 1],
+          extrapolate: 'clamp',
+        });
+      } catch {
+        return 1;
+      }
+    }, [waveAnim]);
+
+    const safePulseScale = useMemo(() => {
+      try {
+        return pulseAnim.interpolate({
+          inputRange: [1, 1.3],
+          outputRange: [1, 1.3],
+          extrapolate: 'clamp',
+        });
+      } catch {
+        return 1;
+      }
+    }, [pulseAnim]);
 
     const icons: Record<string, LucideIcon> = {
       anxious: Cloud,
@@ -196,7 +237,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -250,7 +291,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconTriangles,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
                     opacity: 0.7 * baseOpacity,
                   },
                 ]}
@@ -359,7 +400,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -474,7 +515,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -554,7 +595,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -611,7 +652,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -694,7 +735,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconMandala,
                   {
-                    transform: [{ rotate: safeRotation }, { scale: pulseAnim }],
+                    transform: [{ rotate: safeRotation }, { scale: safePulseScale }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -726,7 +767,7 @@ export default function HomeScreen() {
           style={[
             styles.mainIcon,
             {
-              transform: [{ scale: isSelected ? pulseAnim : 1 }],
+              transform: [{ scale: isSelected ? safePulseScale : 1 }],
             },
           ]}
         >
