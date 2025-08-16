@@ -117,11 +117,19 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
 
 
   // Ensure all values are numbers before interpolation
-  const safeBreathScale = typeof breathingPhase === 'string' && breathingPhase === 'in' ? 1.4 : 0.6;
-  const safeBreathOpacity = typeof breathingPhase === 'string' && breathingPhase === 'in' ? 0.9 : 0.3;
+  const safeBreathScale = useMemo(() => {
+    if (!isPlaying || !breathingPhase) return 1;
+    return breathingPhase === 'in' ? 1.4 : 0.6;
+  }, [isPlaying, breathingPhase]);
+  
+  const safeBreathOpacity = useMemo(() => {
+    if (!isPlaying || !breathingPhase) return 0.5;
+    return breathingPhase === 'in' ? 0.9 : 0.3;
+  }, [isPlaying, breathingPhase]);
 
   // Create safe interpolations with proper error handling
   const safeRotation = useMemo(() => {
+    if (!isPlaying || !rotationAnim) return '0deg';
     try {
       return rotationAnim.interpolate({
         inputRange: [0, 1],
@@ -131,9 +139,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     } catch {
       return '0deg';
     }
-  }, [rotationAnim]);
+  }, [rotationAnim, isPlaying]);
 
   const safeCounterRotation = useMemo(() => {
+    if (!isPlaying || !counterRotationAnim) return '0deg';
     try {
       return counterRotationAnim.interpolate({
         inputRange: [0, 1],
@@ -143,9 +152,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     } catch {
       return '0deg';
     }
-  }, [counterRotationAnim]);
+  }, [counterRotationAnim, isPlaying]);
 
   const safeScale = useMemo(() => {
+    if (!isPlaying || !geometryAnim) return 1;
     try {
       return geometryAnim.interpolate({
         inputRange: [0, 0.5, 1],
@@ -155,9 +165,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     } catch {
       return 1;
     }
-  }, [geometryAnim]);
+  }, [geometryAnim, isPlaying]);
 
   const safeMandalaScale = useMemo(() => {
+    if (!isPlaying || !mandalaAnim) return 1;
     try {
       return mandalaAnim.interpolate({
         inputRange: [0, 1],
@@ -167,9 +178,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     } catch {
       return 1;
     }
-  }, [mandalaAnim]);
+  }, [mandalaAnim, isPlaying]);
 
   const safeFlowerOpacity = useMemo(() => {
+    if (!isPlaying || !flowerAnim) return 0.5;
     try {
       return flowerAnim.interpolate({
         inputRange: [0, 0.5, 1],
@@ -179,9 +191,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     } catch {
       return 0.5;
     }
-  }, [flowerAnim]);
+  }, [flowerAnim, isPlaying]);
 
   const safePulseScale = useMemo(() => {
+    if (!isPlaying || !pulseAnim) return 1;
     try {
       return pulseAnim.interpolate({
         inputRange: [1, 1.2],
@@ -191,7 +204,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     } catch {
       return 1;
     }
-  }, [pulseAnim]);
+  }, [pulseAnim, isPlaying]);
 
   return (
     <View style={styles.geometryContainer}>
@@ -330,7 +343,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.triangleContainer,
           {
-            transform: [{ rotate: safeCounterRotation }, { scale: safeBreathScale }],
+            transform: [{ rotate: safeCounterRotation }, { scale: typeof safeBreathScale === 'number' ? safeBreathScale : 1 }],
             opacity: safeBreathOpacity,
           },
         ]}
@@ -353,7 +366,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.breathGeometry,
           {
-            transform: [{ scale: safeBreathScale }, { rotate: safeRotation }],
+            transform: [{ scale: typeof safeBreathScale === 'number' ? safeBreathScale : 1 }, { rotate: safeRotation }],
             opacity: safeBreathOpacity,
           },
         ]}
@@ -387,9 +400,11 @@ export default function SessionScreen() {
   const waveAnim = useRef(new Animated.Value(0)).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
+  const [isComponentMounted, setIsComponentMounted] = useState(false);
 
   // Create safe interpolations for main animations at component level
   const safePulseOpacity = useMemo(() => {
+    if (!isComponentMounted || !pulseAnim) return 0.2;
     try {
       return pulseAnim.interpolate({
         inputRange: [1, 1.2],
@@ -399,9 +414,10 @@ export default function SessionScreen() {
     } catch {
       return 0.2;
     }
-  }, [pulseAnim]);
+  }, [pulseAnim, isComponentMounted]);
 
   const safeWaveScale = useMemo(() => {
+    if (!isComponentMounted || !waveAnim) return 1;
     try {
       return waveAnim.interpolate({
         inputRange: [0, 1],
@@ -411,9 +427,10 @@ export default function SessionScreen() {
     } catch {
       return 1;
     }
-  }, [waveAnim]);
+  }, [waveAnim, isComponentMounted]);
 
   const safeWaveOpacity = useMemo(() => {
+    if (!isComponentMounted || !waveAnim) return 0.3;
     try {
       return waveAnim.interpolate({
         inputRange: [0, 1],
@@ -423,9 +440,10 @@ export default function SessionScreen() {
     } catch {
       return 0.3;
     }
-  }, [waveAnim]);
+  }, [waveAnim, isComponentMounted]);
 
-  const safeBreathScale = useMemo(() => {
+  const safeBreathScaleAnim = useMemo(() => {
+    if (!isComponentMounted || !breathAnim) return 1;
     try {
       return breathAnim.interpolate({
         inputRange: [0, 1],
@@ -435,7 +453,7 @@ export default function SessionScreen() {
     } catch {
       return 1;
     }
-  }, [breathAnim]);
+  }, [breathAnim, isComponentMounted]);
 
   const handleClose = useCallback(() => {
     Alert.alert(
@@ -462,6 +480,9 @@ export default function SessionScreen() {
 
   useEffect(() => {
     if (!session) return;
+
+    // Mark component as mounted
+    setIsComponentMounted(true);
 
     // Start animations
     Animated.loop(
@@ -656,7 +677,7 @@ export default function SessionScreen() {
                 {
                   transform: [
                     {
-                      scale: safeBreathScale,
+                      scale: safeBreathScaleAnim,
                     },
                   ],
                 },
