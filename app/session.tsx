@@ -421,6 +421,13 @@ export default function SessionScreen() {
   const waveAnim = useRef(new Animated.Value(0)).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
+  // Initialize animated values with proper numbers
+  useEffect(() => {
+    pulseAnim.setValue(1);
+    waveAnim.setValue(0);
+    breathAnim.setValue(0);
+  }, [pulseAnim, waveAnim, breathAnim]);
+
   // Create safe interpolations for main animations at component level
   const safePulseOpacity = useMemo(() => {
     try {
@@ -463,8 +470,8 @@ export default function SessionScreen() {
             } catch (error) {
               console.log("Error stopping sound during close:", error);
             }
-            // Navigate back to home screen
-            router.replace("/");
+            // Force navigation back to home screen
+            router.push("/");
           },
         },
       ]
@@ -556,8 +563,8 @@ export default function SessionScreen() {
         {
           text: "Continue",
           onPress: () => {
-            // Navigate back to home screen
-            router.replace("/");
+            // Force navigation back to home screen
+            router.push("/");
           },
         },
       ]
