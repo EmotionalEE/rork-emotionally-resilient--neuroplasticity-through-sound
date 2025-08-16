@@ -119,6 +119,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   const breathScale = breathingPhase === 'in' ? 1.4 : 0.6;
   const breathOpacity = breathingPhase === 'in' ? 0.9 : 0.3;
 
+  // Ensure all values are numbers before interpolation
+  const safeBreathScale = typeof breathScale === 'number' ? breathScale : 1;
+  const safeBreathOpacity = typeof breathOpacity === 'number' ? breathOpacity : 0.5;
+
   // Ensure all animated values are numbers
   const safeRotation = rotationAnim.interpolate({
     inputRange: [0, 1],
@@ -284,8 +288,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.triangleContainer,
           {
-            transform: [{ rotate: safeCounterRotation }, { scale: breathScale }],
-            opacity: breathOpacity,
+            transform: [{ rotate: safeCounterRotation }, { scale: safeBreathScale }],
+            opacity: safeBreathOpacity,
           },
         ]}
       >
@@ -307,8 +311,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.breathGeometry,
           {
-            transform: [{ scale: breathScale }, { rotate: safeRotation }],
-            opacity: breathOpacity,
+            transform: [{ scale: safeBreathScale }, { rotate: safeRotation }],
+            opacity: safeBreathOpacity,
           },
         ]}
       >
@@ -535,6 +539,7 @@ export default function SessionScreen() {
                   opacity: pulseAnim.interpolate({
                     inputRange: [1, 1.2],
                     outputRange: [0.3, 0.1],
+                    extrapolate: 'clamp',
                   }),
                 },
               ]}
@@ -548,12 +553,14 @@ export default function SessionScreen() {
                       scale: waveAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [0.8, 1.5],
+                        extrapolate: 'clamp',
                       }),
                     },
                   ],
                   opacity: waveAnim.interpolate({
                     inputRange: [0, 1],
                     outputRange: [0.5, 0],
+                    extrapolate: 'clamp',
                   }),
                 },
               ]}
@@ -573,6 +580,7 @@ export default function SessionScreen() {
                       scale: breathAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [1, 1.3],
+                        extrapolate: 'clamp',
                       }),
                     },
                   ],

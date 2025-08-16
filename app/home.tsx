@@ -795,6 +795,7 @@ export default function HomeScreen() {
                         translateY: fadeAnim.interpolate({
                           inputRange: [0, 1],
                           outputRange: [20, 0],
+                          extrapolate: 'clamp',
                         }),
                       },
                     ],
@@ -837,6 +838,7 @@ export default function HomeScreen() {
                       translateX: fadeAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [-30, 0],
+                        extrapolate: 'clamp',
                       }),
                     },
                   ],
