@@ -116,7 +116,86 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
 
 
 
-  // Ensure all values are numbers before interpolation
+  // Create safe interpolations with proper error handling
+  const safeRotation = useMemo(() => {
+    try {
+      return rotationAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg'],
+        extrapolate: 'clamp',
+      });
+    } catch (error) {
+      console.log('Rotation interpolation error:', error);
+      return '0deg';
+    }
+  }, [rotationAnim]);
+
+  const safeCounterRotation = useMemo(() => {
+    try {
+      return counterRotationAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['360deg', '0deg'],
+        extrapolate: 'clamp',
+      });
+    } catch (error) {
+      console.log('Counter rotation interpolation error:', error);
+      return '0deg';
+    }
+  }, [counterRotationAnim]);
+
+  const safeScale = useMemo(() => {
+    try {
+      return geometryAnim.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0.8, 1.2, 0.8],
+        extrapolate: 'clamp',
+      });
+    } catch (error) {
+      console.log('Scale interpolation error:', error);
+      return 1;
+    }
+  }, [geometryAnim]);
+
+  const safeMandalaScale = useMemo(() => {
+    try {
+      return mandalaAnim.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [1, 1.3, 1],
+        extrapolate: 'clamp',
+      });
+    } catch (error) {
+      console.log('Mandala scale interpolation error:', error);
+      return 1;
+    }
+  }, [mandalaAnim]);
+
+  const safeFlowerOpacity = useMemo(() => {
+    try {
+      return flowerAnim.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0.3, 0.8, 0.3],
+        extrapolate: 'clamp',
+      });
+    } catch (error) {
+      console.log('Flower opacity interpolation error:', error);
+      return 0.5;
+    }
+  }, [flowerAnim]);
+
+  const safePulseScale = useMemo(() => {
+    try {
+      return pulseAnim.interpolate({
+        inputRange: [1, 1.2],
+        outputRange: [1, 1.2],
+        extrapolate: 'clamp',
+      });
+    } catch (error) {
+      console.log('Pulse scale interpolation error:', error);
+      return 1;
+    }
+  }, [pulseAnim]);
+
+  // Breathing animations with safe interpolation
   const safeBreathScale = useMemo(() => {
     if (!isPlaying || !breathingPhase) return 1;
     return breathingPhase === 'in' ? 1.4 : 0.6;
@@ -126,33 +205,6 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     if (!isPlaying || !breathingPhase) return 0.5;
     return breathingPhase === 'in' ? 0.9 : 0.3;
   }, [isPlaying, breathingPhase]);
-
-  // Create safe interpolations with proper error handling
-  const safeRotation = useMemo(() => {
-    if (!isPlaying) return '0deg';
-    return '0deg'; // Use static value to avoid interpolation errors
-  }, [isPlaying]);
-
-  const safeCounterRotation = useMemo(() => {
-    if (!isPlaying) return '0deg';
-    return '0deg'; // Use static value to avoid interpolation errors
-  }, [isPlaying]);
-
-  const safeScale = useMemo(() => {
-    return 1; // Use static value to avoid interpolation errors
-  }, []);
-
-  const safeMandalaScale = useMemo(() => {
-    return 1; // Use static value to avoid interpolation errors
-  }, []);
-
-  const safeFlowerOpacity = useMemo(() => {
-    return 0.5; // Use static value to avoid interpolation errors
-  }, []);
-
-  const safePulseScale = useMemo(() => {
-    return 1; // Use static value to avoid interpolation errors
-  }, []);
 
   return (
     <View style={styles.geometryContainer}>
@@ -350,12 +402,30 @@ export default function SessionScreen() {
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
   // Create safe interpolations for main animations at component level
   const safePulseOpacity = useMemo(() => {
-    return 0.2; // Use static value to avoid interpolation errors
-  }, []);
+    try {
+      return pulseAnim.interpolate({
+        inputRange: [1, 1.2],
+        outputRange: [0.1, 0.3],
+        extrapolate: 'clamp',
+      });
+    } catch (error) {
+      console.log('Pulse opacity interpolation error:', error);
+      return 0.2;
+    }
+  }, [pulseAnim]);
 
   const safeWaveOpacity = useMemo(() => {
-    return 0.3; // Use static value to avoid interpolation errors
-  }, []);
+    try {
+      return waveAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.2, 0.4],
+        extrapolate: 'clamp',
+      });
+    } catch (error) {
+      console.log('Wave opacity interpolation error:', error);
+      return 0.3;
+    }
+  }, [waveAnim]);
 
   const handleClose = useCallback(() => {
     Alert.alert(

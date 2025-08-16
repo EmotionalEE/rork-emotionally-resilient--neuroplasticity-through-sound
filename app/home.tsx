@@ -159,7 +159,8 @@ export default function HomeScreen() {
           outputRange: ['0deg', '360deg'],
           extrapolate: 'clamp',
         });
-      } catch {
+      } catch (error) {
+        console.log('Home rotation interpolation error:', error);
         return '0deg';
       }
     }, [rotationAnim]);
@@ -171,7 +172,8 @@ export default function HomeScreen() {
           outputRange: ['360deg', '0deg'],
           extrapolate: 'clamp',
         });
-      } catch {
+      } catch (error) {
+        console.log('Home counter rotation interpolation error:', error);
         return '0deg';
       }
     }, [counterRotationAnim]);
@@ -183,7 +185,8 @@ export default function HomeScreen() {
           outputRange: [0.8, 1.2, 0.8],
           extrapolate: 'clamp',
         });
-      } catch {
+      } catch (error) {
+        console.log('Home spiral scale interpolation error:', error);
         return 1;
       }
     }, [spiralAnim]);
@@ -195,7 +198,8 @@ export default function HomeScreen() {
           outputRange: [1, 1.4, 1],
           extrapolate: 'clamp',
         });
-      } catch {
+      } catch (error) {
+        console.log('Home wave scale interpolation error:', error);
         return 1;
       }
     }, [waveAnim]);
@@ -207,7 +211,8 @@ export default function HomeScreen() {
           outputRange: [1, 1.3],
           extrapolate: 'clamp',
         });
-      } catch {
+      } catch (error) {
+        console.log('Home pulse scale interpolation error:', error);
         return 1;
       }
     }, [pulseAnim]);
