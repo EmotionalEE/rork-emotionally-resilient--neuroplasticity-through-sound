@@ -116,12 +116,9 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
 
 
 
-  const breathScale = breathingPhase === 'in' ? 1.4 : 0.6;
-  const breathOpacity = breathingPhase === 'in' ? 0.9 : 0.3;
-
   // Ensure all values are numbers before interpolation
-  const safeBreathScale = typeof breathScale === 'number' ? breathScale : 1;
-  const safeBreathOpacity = typeof breathOpacity === 'number' ? breathOpacity : 0.5;
+  const safeBreathScale = breathingPhase === 'in' ? 1.4 : 0.6;
+  const safeBreathOpacity = breathingPhase === 'in' ? 0.9 : 0.3;
 
   // Ensure all animated values are numbers
   const safeRotation = rotationAnim.interpolate({
@@ -149,7 +146,12 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     outputRange: [0.2, 0.9, 0.2],
   });
 
-  const safePulseAnim = pulseAnim;
+  // Ensure pulseAnim is properly handled
+  const safePulseScale = pulseAnim.interpolate({
+    inputRange: [1, 1.2],
+    outputRange: [1, 1.2],
+    extrapolate: 'clamp',
+  });
 
   return (
     <View style={styles.geometryContainer}>
@@ -171,7 +173,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
               {
                 transform: [
                   { rotate: `${i * 22.5}deg` },
-                  { scale: safePulseAnim },
+                  { scale: safePulseScale },
                 ],
                 opacity: 0.6,
               },
@@ -185,7 +187,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
         style={[
           styles.outerRing,
           {
-            transform: [{ rotate: safeCounterRotation }, { scale: safePulseAnim }],
+            transform: [{ rotate: safeCounterRotation }, { scale: safePulseScale }],
             opacity: 0.6,
           },
         ]}
@@ -248,7 +250,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
                 transform: [
                   { rotate: `${i * 51.43}deg` },
                   { translateY: i === 0 ? 0 : -35 },
-                  { scale: safePulseAnim },
+                  { scale: safePulseScale },
                 ],
               },
             ]}
@@ -275,7 +277,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
                 transform: [
                   { rotate: `${i * 30}deg` },
                   { translateY: -50 - i * 6 },
-                  { scale: safePulseAnim },
+                  { scale: safePulseScale },
                 ],
               },
             ]}
