@@ -158,14 +158,11 @@ export default function WelcomeScreen() {
                   key={index}
                   style={[
                     styles.featureItem,
-                    showContent && {
+                    {
+                      opacity: fadeAnim,
                       transform: [
                         {
-                          translateY: slideAnim.interpolate({
-                            inputRange: [0, 50],
-                            outputRange: [0, 20 + index * 10],
-                            extrapolate: 'clamp',
-                          }),
+                          translateY: slideAnim,
                         },
                       ],
                     },
