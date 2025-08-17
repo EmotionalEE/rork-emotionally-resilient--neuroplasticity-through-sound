@@ -175,71 +175,36 @@ export default function HomeScreen() {
       };
     }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim, counterRotationAnim, waveAnim]);
 
-    // Create safe interpolations with proper error handling
-    const safeRotation = useMemo(() => {
-      try {
-        return rotationAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: ['0deg', '360deg'],
-          extrapolate: 'clamp',
-        });
-      } catch (error) {
-        console.log('Home rotation interpolation error:', error);
-        return '0deg';
-      }
-    }, [rotationAnim]);
+    // Create interpolations for animations
+    const rotationInterpolation = rotationAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg'],
+      extrapolate: 'clamp',
+    });
 
-    const safeCounterRotation = useMemo(() => {
-      try {
-        return counterRotationAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: ['360deg', '0deg'],
-          extrapolate: 'clamp',
-        });
-      } catch (error) {
-        console.log('Home counter rotation interpolation error:', error);
-        return '0deg';
-      }
-    }, [counterRotationAnim]);
+    const counterRotationInterpolation = counterRotationAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['360deg', '0deg'],
+      extrapolate: 'clamp',
+    });
 
-    const safeSpiralScale = useMemo(() => {
-      try {
-        return spiralAnim.interpolate({
-          inputRange: [0, 0.5, 1],
-          outputRange: [0.8, 1.2, 0.8],
-          extrapolate: 'clamp',
-        });
-      } catch (error) {
-        console.log('Home spiral scale interpolation error:', error);
-        return 1;
-      }
-    }, [spiralAnim]);
+    const spiralScaleInterpolation = spiralAnim.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0.8, 1.2, 0.8],
+      extrapolate: 'clamp',
+    });
 
-    const safeWaveScale = useMemo(() => {
-      try {
-        return waveAnim.interpolate({
-          inputRange: [0, 0.5, 1],
-          outputRange: [1, 1.4, 1],
-          extrapolate: 'clamp',
-        });
-      } catch (error) {
-        console.log('Home wave scale interpolation error:', error);
-        return 1;
-      }
-    }, [waveAnim]);
+    const waveScaleInterpolation = waveAnim.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [1, 1.4, 1],
+      extrapolate: 'clamp',
+    });
 
-    const safePulseScale = useMemo(() => {
-      try {
-        return pulseAnim.interpolate({
-          inputRange: [1, 1.3],
-          outputRange: [1, 1.3],
-          extrapolate: 'clamp',
-        });
-      } catch (error) {
-        console.log('Home pulse scale interpolation error:', error);
-        return 1;
-      }
-    }, [pulseAnim]);
+    const pulseScaleInterpolation = pulseAnim.interpolate({
+      inputRange: [1, 1.3],
+      outputRange: [1, 1.3],
+      extrapolate: 'clamp',
+    });
 
     const icons: Record<string, LucideIcon> = {
       anxious: Cloud,
@@ -267,8 +232,8 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
                     ],
                     opacity: baseOpacity * 0.6,
                   },
@@ -292,8 +257,8 @@ export default function HomeScreen() {
                   styles.iconSpiral,
                   {
                     transform: [
-                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
-                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
                     ],
                     opacity: 0.6 * baseOpacity,
                   },
@@ -327,8 +292,8 @@ export default function HomeScreen() {
                   styles.iconTriangles,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
                     ],
                     opacity: 0.7 * baseOpacity,
                   },
@@ -352,8 +317,8 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [
-                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
-                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
                     ],
                     opacity: baseOpacity * 0.6,
                   },
@@ -385,8 +350,8 @@ export default function HomeScreen() {
                   styles.iconFlower,
                   {
                     transform: [
-                      { scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }, 
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }
+                      { scale: waveScaleInterpolation }, 
+                      { rotate: rotationInterpolation }
                     ],
                     opacity: baseOpacity * 0.6,
                   },
@@ -413,8 +378,8 @@ export default function HomeScreen() {
                   styles.iconSpiral,
                   {
                     transform: [
-                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
-                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
                     ],
                     opacity: 0.5 * baseOpacity,
                   },
@@ -448,8 +413,8 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
                     ],
                     opacity: baseOpacity * 0.6,
                   },
@@ -475,8 +440,8 @@ export default function HomeScreen() {
                   styles.iconTriangles,
                   {
                     transform: [
-                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
-                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
                     ],
                     opacity: 0.8 * baseOpacity,
                   },
@@ -509,7 +474,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }],
+                    transform: [{ scale: waveScaleInterpolation }],
                     opacity: baseOpacity * 0.6,
                   },
                 ]}
@@ -536,8 +501,8 @@ export default function HomeScreen() {
                   styles.iconSpiral,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
                     ],
                     opacity: 0.6 * baseOpacity,
                   },
@@ -572,8 +537,8 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
                     ],
                     opacity: baseOpacity * 0.6,
                   },
@@ -599,8 +564,8 @@ export default function HomeScreen() {
                   styles.iconTriangles,
                   {
                     transform: [
-                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
-                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
                     ],
                     opacity: 0.7 * baseOpacity,
                   },
@@ -623,7 +588,7 @@ export default function HomeScreen() {
                 style={[
                   styles.iconFlower,
                   {
-                    transform: [{ scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }],
+                    transform: [{ scale: waveScaleInterpolation }],
                     opacity: 0.4 * baseOpacity,
                   },
                 ]}
@@ -658,8 +623,8 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
                     ],
                     opacity: baseOpacity * 0.6,
                   },
@@ -685,8 +650,8 @@ export default function HomeScreen() {
                   styles.iconFlower,
                   {
                     transform: [
-                      { scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }, 
-                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }
+                      { scale: waveScaleInterpolation }, 
+                      { rotate: counterRotationInterpolation }
                     ],
                     opacity: 0.7 * baseOpacity,
                   },
@@ -721,8 +686,8 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
                     ],
                     opacity: baseOpacity * 0.6,
                   },
@@ -748,8 +713,8 @@ export default function HomeScreen() {
                   styles.iconSpiral,
                   {
                     transform: [
-                      { rotate: typeof safeCounterRotation === 'string' ? safeCounterRotation : '0deg' }, 
-                      { scale: typeof safeSpiralScale === 'number' ? safeSpiralScale : 1 }
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
                     ],
                     opacity: 0.8 * baseOpacity,
                   },
@@ -778,8 +743,8 @@ export default function HomeScreen() {
                   styles.iconTriangles,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safeWaveScale === 'number' ? safeWaveScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: waveScaleInterpolation }
                     ],
                     opacity: 0.6 * baseOpacity,
                   },
@@ -813,8 +778,8 @@ export default function HomeScreen() {
                   styles.iconMandala,
                   {
                     transform: [
-                      { rotate: typeof safeRotation === 'string' ? safeRotation : '0deg' }, 
-                      { scale: typeof safePulseScale === 'number' ? safePulseScale : 1 }
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
                     ],
                     opacity: baseOpacity * 0.6,
                   },
@@ -847,7 +812,7 @@ export default function HomeScreen() {
           style={[
             styles.mainIcon,
             {
-              transform: [{ scale: isSelected ? (typeof safePulseScale === 'number' ? safePulseScale : 1) : 1 }],
+              transform: [{ scale: isSelected ? pulseScaleInterpolation : 1 }],
             },
           ]}
         >
