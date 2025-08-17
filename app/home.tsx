@@ -94,24 +94,34 @@ export default function HomeScreen() {
     const waveAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
+      // Initialize all animation values to ensure they start from a known state
+      rotationAnim.setValue(0);
+      counterRotationAnim.setValue(0);
+      pulseAnim.setValue(1);
+      mandalaAnim.setValue(0);
+      spiralAnim.setValue(0);
+      waveAnim.setValue(0);
+
       // Always start animations for all icons
-      Animated.loop(
+      const rotationAnimation = Animated.loop(
         Animated.timing(rotationAnim, {
           toValue: 1,
           duration: 8000 + Math.random() * 4000, // Vary duration for each icon
           useNativeDriver: true,
         })
-      ).start();
+      );
+      rotationAnimation.start();
 
-      Animated.loop(
+      const counterRotationAnimation = Animated.loop(
         Animated.timing(counterRotationAnim, {
           toValue: 1,
           duration: 12000 + Math.random() * 6000, // Vary duration for each icon
           useNativeDriver: true,
         })
-      ).start();
+      );
+      counterRotationAnimation.start();
 
-      Animated.loop(
+      const pulseAnimation = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
             toValue: isSelected ? 1.3 : 1.1,
@@ -124,31 +134,45 @@ export default function HomeScreen() {
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
+      pulseAnimation.start();
 
-      Animated.loop(
+      const mandalaAnimation = Animated.loop(
         Animated.timing(mandalaAnim, {
           toValue: 1,
           duration: 3000 + Math.random() * 2000, // Vary duration for each icon
           useNativeDriver: true,
         })
-      ).start();
+      );
+      mandalaAnimation.start();
 
-      Animated.loop(
+      const spiralAnimation = Animated.loop(
         Animated.timing(spiralAnim, {
           toValue: 1,
           duration: 5000 + Math.random() * 3000, // Vary duration for each icon
           useNativeDriver: true,
         })
-      ).start();
+      );
+      spiralAnimation.start();
 
-      Animated.loop(
+      const waveAnimation = Animated.loop(
         Animated.timing(waveAnim, {
           toValue: 1,
           duration: 2000 + Math.random() * 1000, // Vary duration for each icon
           useNativeDriver: true,
         })
-      ).start();
+      );
+      waveAnimation.start();
+
+      // Cleanup function to stop animations when component unmounts
+      return () => {
+        rotationAnimation.stop();
+        counterRotationAnimation.stop();
+        pulseAnimation.stop();
+        mandalaAnimation.stop();
+        spiralAnimation.stop();
+        waveAnimation.stop();
+      };
     }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim, counterRotationAnim, waveAnim]);
 
     // Create safe interpolations with proper error handling
