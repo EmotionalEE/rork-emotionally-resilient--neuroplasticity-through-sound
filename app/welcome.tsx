@@ -133,7 +133,7 @@ export default function WelcomeScreen() {
               <Text style={styles.title}>Harmonia</Text>
             </LinearGradient>
             <Text style={styles.subtitle}>
-              Transform your emotional landscape through the power of sound frequencies and sacred geometry
+              Transform your emotional landscape through the power of sound frequencies and music
             </Text>
           </Animated.View>
 
@@ -149,7 +149,7 @@ export default function WelcomeScreen() {
           >
             {[
               { icon: Waves, text: "Binaural Beats" },
-              { icon: Sparkles, text: "Sacred Geometry" },
+              { icon: Sparkles, text: "Music" },
               { icon: Heart, text: "Emotional Healing" },
             ].map((feature, index) => {
               const Icon = feature.icon;
