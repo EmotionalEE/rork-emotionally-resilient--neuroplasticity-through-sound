@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Sparkles, Waves, Heart, ArrowRight } from "lucide-react-native";
+import { Circle, Triangle, Hexagon, ArrowRight } from "lucide-react-native";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import * as Haptics from "expo-haptics";
 
@@ -108,7 +108,7 @@ export default function WelcomeScreen() {
               end={{ x: 1, y: 1 }}
             >
               <View style={styles.logoInner}>
-                <Waves size={40} color="#fff" />
+                <Circle size={40} color="#fff" />
               </View>
             </LinearGradient>
           </Animated.View>
@@ -148,9 +148,9 @@ export default function WelcomeScreen() {
             ]}
           >
             {[
-              { icon: Waves, text: "Binaural Beats" },
-              { icon: Sparkles, text: "Music" },
-              { icon: Heart, text: "Emotional Healing" },
+              { icon: Circle, text: "Binaural Beats" },
+              { icon: Triangle, text: "Music" },
+              { icon: Hexagon, text: "Emotional Healing" },
             ].map((feature, index) => {
               const Icon = feature.icon;
               return (
