@@ -34,82 +34,38 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   const flowerAnim = useRef(new Animated.Value(0)).current;
   const counterRotationAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const animationsRef = useRef<Animated.CompositeAnimation[]>([]);
-
-  // Initialize animations properly
-  useEffect(() => {
-    // Reset all values to initial state
-    geometryAnim.setValue(0);
-    rotationAnim.setValue(0);
-    mandalaAnim.setValue(0);
-    flowerAnim.setValue(0);
-    counterRotationAnim.setValue(0);
-    pulseAnim.setValue(1);
-    console.log('Sacred geometry animations initialized');
-  }, []);
 
   useEffect(() => {
-    console.log('Sacred geometry effect triggered, isPlaying:', isPlaying);
-    
-    // Stop all previous animations
-    animationsRef.current.forEach(anim => {
-      try {
-        anim.stop();
-      } catch (error) {
-        console.log('Error stopping animation:', error);
-      }
-    });
-    animationsRef.current = [];
-
-    // Always start animations regardless of isPlaying state
-    // This ensures the sacred geometry is always rotating
-    console.log('Starting sacred geometry animations (always on)');
-    
-    // Reset all values before starting new animations
-    geometryAnim.setValue(0);
-    rotationAnim.setValue(0);
-    mandalaAnim.setValue(0);
-    flowerAnim.setValue(0);
-    counterRotationAnim.setValue(0);
-    pulseAnim.setValue(1);
-    
-    // Add a small delay to ensure values are set
-    setTimeout(() => {
+    if (isPlaying) {
       // Main geometry animation
-      const geometryAnimation = Animated.loop(
+      Animated.loop(
         Animated.timing(geometryAnim, {
           toValue: 1,
           duration: 8000,
           useNativeDriver: true,
         })
-      );
-      geometryAnimation.start();
-      animationsRef.current.push(geometryAnimation);
+      ).start();
 
       // Rotation animation (clockwise)
-      const rotationAnimation = Animated.loop(
+      Animated.loop(
         Animated.timing(rotationAnim, {
           toValue: 1,
           duration: 15000,
           useNativeDriver: true,
         })
-      );
-      rotationAnimation.start();
-      animationsRef.current.push(rotationAnimation);
+      ).start();
 
       // Counter rotation (counter-clockwise)
-      const counterRotationAnimation = Animated.loop(
+      Animated.loop(
         Animated.timing(counterRotationAnim, {
           toValue: 1,
           duration: 20000,
           useNativeDriver: true,
         })
-      );
-      counterRotationAnimation.start();
-      animationsRef.current.push(counterRotationAnimation);
+      ).start();
 
       // Mandala pulsing
-      const mandalaAnimation = Animated.loop(
+      Animated.loop(
         Animated.sequence([
           Animated.timing(mandalaAnim, {
             toValue: 1,
@@ -122,26 +78,22 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
             useNativeDriver: true,
           }),
         ])
-      );
-      mandalaAnimation.start();
-      animationsRef.current.push(mandalaAnimation);
+      ).start();
 
       // Flower of Life animation
-      const flowerAnimation = Animated.loop(
+      Animated.loop(
         Animated.timing(flowerAnim, {
           toValue: 1,
           duration: 10000,
           useNativeDriver: true,
         })
-      );
-      flowerAnimation.start();
-      animationsRef.current.push(flowerAnimation);
+      ).start();
 
-      // Pulse animation - make it more intense when playing
-      const pulseAnimation = Animated.loop(
+      // Pulse animation
+      Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: isPlaying ? 1.3 : 1.1,
+            toValue: 1.2,
             duration: 1500,
             useNativeDriver: true,
           }),
@@ -151,23 +103,16 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
             useNativeDriver: true,
           }),
         ])
-      );
-      pulseAnimation.start();
-      animationsRef.current.push(pulseAnimation);
-      
-      console.log('All sacred geometry animations started, count:', animationsRef.current.length);
-    }, 100);
-
-    return () => {
-      animationsRef.current.forEach(anim => {
-        try {
-          anim.stop();
-        } catch (error) {
-          console.log('Error stopping animation in cleanup:', error);
-        }
-      });
-    };
-  }, [isPlaying]);
+      ).start();
+    } else {
+      geometryAnim.setValue(0);
+      rotationAnim.setValue(0);
+      mandalaAnim.setValue(0);
+      flowerAnim.setValue(0);
+      counterRotationAnim.setValue(0);
+      pulseAnim.setValue(1);
+    }
+  }, [isPlaying, geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim]);
 
 
 
