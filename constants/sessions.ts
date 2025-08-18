@@ -45,14 +45,14 @@ export const emotionalStates: EmotionalState[] = [
 
 export const sessions: Session[] = [
   {
-    id: "anxious-to-joy",
-    title: "Anxious → Joy",
-    description: "3-5 min journey from anxiety to joy. A4=432Hz, 88→118 BPM. B minor/Dorian → G Mixolydian → D Major/Lydian with 40Hz gamma shimmer finale.",
-    duration: 5,
-    frequency: "432",
-    gradient: ["#FF6B6B", "#fee140"],
-    targetEmotions: ["anxious", "happy"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+    id: "alpha-waves",
+    title: "Alpha Wave Meditation",
+    description: "Promotes relaxation and reduces anxiety with 10Hz alpha waves",
+    duration: 15,
+    frequency: "10",
+    gradient: ["#667eea", "#764ba2"],
+    targetEmotions: ["anxious", "stressed", "calm"],
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
   },
   {
     id: "theta-healing",
@@ -62,7 +62,7 @@ export const sessions: Session[] = [
     frequency: "6",
     gradient: ["#f093fb", "#f5576c"],
     targetEmotions: ["sad", "anxious", "calm"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
   },
   {
     id: "beta-focus",
@@ -72,7 +72,7 @@ export const sessions: Session[] = [
     frequency: "20",
     gradient: ["#4facfe", "#00f2fe"],
     targetEmotions: ["focused", "energized"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
   },
   {
     id: "delta-sleep",
@@ -82,7 +82,7 @@ export const sessions: Session[] = [
     frequency: "2",
     gradient: ["#a8edea", "#fed6e3"],
     targetEmotions: ["anxious", "stressed", "calm"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
   },
   {
     id: "gamma-insight",
@@ -92,7 +92,7 @@ export const sessions: Session[] = [
     frequency: "40",
     gradient: ["#ffecd2", "#fcb69f"],
     targetEmotions: ["focused", "energized", "happy"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
   },
   {
     id: "528hz-love",
@@ -102,7 +102,7 @@ export const sessions: Session[] = [
     frequency: "528",
     gradient: ["#ff9a9e", "#fecfef"],
     targetEmotions: ["sad", "angry", "happy", "calm"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
   },
   {
     id: "396hz-release",
@@ -112,7 +112,7 @@ export const sessions: Session[] = [
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
   },
   {
     id: "741hz-detox",
@@ -122,6 +122,6 @@ export const sessions: Session[] = [
     frequency: "741",
     gradient: ["#d299c2", "#fef9d7"],
     targetEmotions: ["angry", "sad", "stressed"],
-    audioUrl: "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
   },
 ];

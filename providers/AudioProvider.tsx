@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Audio } from "expo-av";
-import { Platform } from "react-native";
 import createContextHook from "@nkzw/create-context-hook";
 
 interface AudioContextType {
@@ -15,17 +14,13 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    // Configure audio mode - skip for web
-    if (Platform.OS !== 'web') {
-      Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        shouldDuckAndroid: true,
-      }).catch((error) => {
-        console.log("Audio mode configuration error:", error);
-      });
-    }
+    // Configure audio mode
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: true,
+      shouldDuckAndroid: true,
+    });
 
     return () => {
       if (sound) {
@@ -55,62 +50,23 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
       console.log("Loading sound from:", url);
       
-      // Web-specific handling
-      if (Platform.OS === 'web') {
-        try {
-          // For web, we'll use a more compatible approach
-          const { sound: newSound } = await Audio.Sound.createAsync(
-            { uri: url },
-            { 
-              shouldPlay: true, 
-              isLooping: true,
-              // Web-specific options
-              volume: 0.5,
-            }
-          );
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true, isLooping: true }
+      );
 
-          setSound(newSound);
-          setIsPlaying(true);
+      setSound(newSound);
+      setIsPlaying(true);
 
-          // Set up playback status update
-          newSound.setOnPlaybackStatusUpdate((status) => {
-            if (status.isLoaded) {
-              setIsPlaying(status.isPlaying);
-            }
-          });
-        } catch (webError) {
-          console.warn("Web audio error, using fallback:", webError);
-          // For web fallback, just simulate playing
-          setIsPlaying(true);
-          console.log("Audio simulation started for web compatibility");
+      // Set up playback status update
+      newSound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded) {
+          setIsPlaying(status.isPlaying);
         }
-      } else {
-        // Native mobile handling
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: url },
-          { shouldPlay: true, isLooping: true }
-        );
-
-        setSound(newSound);
-        setIsPlaying(true);
-
-        // Set up playback status update
-        newSound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded) {
-            setIsPlaying(status.isPlaying);
-          }
-        });
-      }
+      });
     } catch (error) {
       console.error("Error playing sound:", error);
-      
-      // Fallback for any platform - simulate playing
-      if (Platform.OS === 'web') {
-        console.log("Using web audio fallback - simulating playback");
-        setIsPlaying(true);
-      } else {
-        setIsPlaying(false);
-      }
+      setIsPlaying(false);
     }
   }, [sound]);
 
