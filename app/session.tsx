@@ -36,83 +36,91 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (isPlaying) {
-      // Main geometry animation
-      Animated.loop(
-        Animated.timing(geometryAnim, {
+    // Start all animations immediately when component mounts
+    // Main geometry animation
+    const geometryAnimation = Animated.loop(
+      Animated.timing(geometryAnim, {
+        toValue: 1,
+        duration: 8000,
+        useNativeDriver: true,
+      })
+    );
+    geometryAnimation.start();
+
+    // Rotation animation (clockwise)
+    const rotationAnimation = Animated.loop(
+      Animated.timing(rotationAnim, {
+        toValue: 1,
+        duration: 15000,
+        useNativeDriver: true,
+      })
+    );
+    rotationAnimation.start();
+
+    // Counter rotation (counter-clockwise)
+    const counterRotationAnimation = Animated.loop(
+      Animated.timing(counterRotationAnim, {
+        toValue: 1,
+        duration: 20000,
+        useNativeDriver: true,
+      })
+    );
+    counterRotationAnimation.start();
+
+    // Mandala pulsing
+    const mandalaAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(mandalaAnim, {
           toValue: 1,
-          duration: 8000,
+          duration: 2500,
           useNativeDriver: true,
-        })
-      ).start();
+        }),
+        Animated.timing(mandalaAnim, {
+          toValue: 0,
+          duration: 2500,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    mandalaAnimation.start();
 
-      // Rotation animation (clockwise)
-      Animated.loop(
-        Animated.timing(rotationAnim, {
+    // Flower of Life animation
+    const flowerAnimation = Animated.loop(
+      Animated.timing(flowerAnim, {
+        toValue: 1,
+        duration: 10000,
+        useNativeDriver: true,
+      })
+    );
+    flowerAnimation.start();
+
+    // Pulse animation
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 15000,
+          duration: 1500,
           useNativeDriver: true,
-        })
-      ).start();
+        }),
+      ])
+    );
+    pulseAnimation.start();
 
-      // Counter rotation (counter-clockwise)
-      Animated.loop(
-        Animated.timing(counterRotationAnim, {
-          toValue: 1,
-          duration: 20000,
-          useNativeDriver: true,
-        })
-      ).start();
-
-      // Mandala pulsing
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(mandalaAnim, {
-            toValue: 1,
-            duration: 2500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(mandalaAnim, {
-            toValue: 0,
-            duration: 2500,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-
-      // Flower of Life animation
-      Animated.loop(
-        Animated.timing(flowerAnim, {
-          toValue: 1,
-          duration: 10000,
-          useNativeDriver: true,
-        })
-      ).start();
-
-      // Pulse animation
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.2,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    } else {
-      geometryAnim.setValue(0);
-      rotationAnim.setValue(0);
-      mandalaAnim.setValue(0);
-      flowerAnim.setValue(0);
-      counterRotationAnim.setValue(0);
-      pulseAnim.setValue(1);
-    }
-  }, [isPlaying, geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim]);
+    // Cleanup function to stop all animations
+    return () => {
+      geometryAnimation.stop();
+      rotationAnimation.stop();
+      counterRotationAnimation.stop();
+      mandalaAnimation.stop();
+      flowerAnimation.stop();
+      pulseAnimation.stop();
+    };
+  }, [geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim]);
 
 
 
