@@ -52,7 +52,7 @@ export const sessions: Session[] = [
     frequency: "432",
     gradient: ["#FF6B6B", "#fee140"],
     targetEmotions: ["anxious", "happy"],
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    audioUrl: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kevin_MacLeod/Impact/Kevin_MacLeod_-_01_-_Anxiety.mp3",
   },
   {
     id: "theta-healing",
