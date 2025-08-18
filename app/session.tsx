@@ -34,10 +34,12 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   const flowerAnim = useRef(new Animated.Value(0)).current;
   const counterRotationAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-
+  const [animationsStarted, setAnimationsStarted] = useState(false);
 
   useEffect(() => {
     console.log('Sacred geometry component mounted, starting animations...');
+    
+    if (animationsStarted) return;
     
     // Reset all values first
     geometryAnim.setValue(0);
@@ -52,8 +54,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     const geometryAnimation = Animated.loop(
       Animated.timing(geometryAnim, {
         toValue: 1,
-        duration: 6000, // Faster for more visible movement
-        useNativeDriver: false,
+        duration: 4000, // Even faster for more visible movement
+        useNativeDriver: Platform.OS !== 'web',
       })
     );
     geometryAnimation.start();
@@ -62,8 +64,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     const rotationAnimation = Animated.loop(
       Animated.timing(rotationAnim, {
         toValue: 1,
-        duration: 8000, // Faster rotation for more visible movement
-        useNativeDriver: false,
+        duration: 6000, // Faster rotation for more visible movement
+        useNativeDriver: Platform.OS !== 'web',
       })
     );
     rotationAnimation.start();
@@ -72,8 +74,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     const counterRotationAnimation = Animated.loop(
       Animated.timing(counterRotationAnim, {
         toValue: 1,
-        duration: 10000, // Faster counter rotation
-        useNativeDriver: false,
+        duration: 8000, // Faster counter rotation
+        useNativeDriver: Platform.OS !== 'web',
       })
     );
     counterRotationAnimation.start();
@@ -83,13 +85,13 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
       Animated.sequence([
         Animated.timing(mandalaAnim, {
           toValue: 1,
-          duration: 1500, // Faster pulsing for more visible effect
-          useNativeDriver: false,
+          duration: 1000, // Even faster pulsing for more visible effect
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(mandalaAnim, {
           toValue: 0,
-          duration: 1500,
-          useNativeDriver: false,
+          duration: 1000,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ])
     );
@@ -99,8 +101,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     const flowerAnimation = Animated.loop(
       Animated.timing(flowerAnim, {
         toValue: 1,
-        duration: 5000, // Faster flower animation
-        useNativeDriver: false,
+        duration: 3000, // Faster flower animation
+        useNativeDriver: Platform.OS !== 'web',
       })
     );
     flowerAnimation.start();
@@ -109,19 +111,20 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     const pulseAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.4, // More pronounced pulse
-          duration: 1000,
-          useNativeDriver: false,
+          toValue: 1.6, // More pronounced pulse
+          duration: 800,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 1000,
-          useNativeDriver: false,
+          duration: 800,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ])
     );
     pulseAnimation.start();
     
+    setAnimationsStarted(true);
     console.log('All sacred geometry animations started!');
 
     // Cleanup function to stop all animations
@@ -133,13 +136,15 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
       mandalaAnimation.stop();
       flowerAnimation.stop();
       pulseAnimation.stop();
+      setAnimationsStarted(false);
     };
-  }, [geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim]);
+  }, [geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim, animationsStarted]);
 
 
 
   // Create safe interpolations with proper error handling
   const safeRotation = useMemo(() => {
+    if (!animationsStarted) return '0deg';
     try {
       return rotationAnim.interpolate({
         inputRange: [0, 1],
@@ -150,9 +155,10 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
       console.log('Rotation interpolation error:', error);
       return '0deg';
     }
-  }, [rotationAnim]);
+  }, [rotationAnim, animationsStarted]);
 
   const safeCounterRotation = useMemo(() => {
+    if (!animationsStarted) return '0deg';
     try {
       return counterRotationAnim.interpolate({
         inputRange: [0, 1],
@@ -163,59 +169,63 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
       console.log('Counter rotation interpolation error:', error);
       return '0deg';
     }
-  }, [counterRotationAnim]);
+  }, [counterRotationAnim, animationsStarted]);
 
   const safeScale = useMemo(() => {
+    if (!animationsStarted) return 1;
     try {
       return geometryAnim.interpolate({
         inputRange: [0, 0.5, 1],
-        outputRange: [0.8, 1.4, 0.8], // More pronounced scaling
+        outputRange: [0.6, 1.6, 0.6], // Even more pronounced scaling
         extrapolate: 'clamp',
       });
     } catch (error) {
       console.log('Scale interpolation error:', error);
       return 1;
     }
-  }, [geometryAnim]);
+  }, [geometryAnim, animationsStarted]);
 
   const safeMandalaScale = useMemo(() => {
+    if (!animationsStarted) return 1;
     try {
       return mandalaAnim.interpolate({
         inputRange: [0, 0.5, 1],
-        outputRange: [1, 1.5, 1], // More pronounced mandala scaling
+        outputRange: [0.8, 1.8, 0.8], // More pronounced mandala scaling
         extrapolate: 'clamp',
       });
     } catch (error) {
       console.log('Mandala scale interpolation error:', error);
       return 1;
     }
-  }, [mandalaAnim]);
+  }, [mandalaAnim, animationsStarted]);
 
   const safeFlowerOpacity = useMemo(() => {
+    if (!animationsStarted) return 0.6;
     try {
       return flowerAnim.interpolate({
         inputRange: [0, 0.5, 1],
-        outputRange: [0.3, 1.0, 0.3], // More pronounced opacity changes
+        outputRange: [0.2, 1.0, 0.2], // More pronounced opacity changes
         extrapolate: 'clamp',
       });
     } catch (error) {
       console.log('Flower opacity interpolation error:', error);
       return 0.6;
     }
-  }, [flowerAnim]);
+  }, [flowerAnim, animationsStarted]);
 
   const safePulseScale = useMemo(() => {
+    if (!animationsStarted) return 1;
     try {
       return pulseAnim.interpolate({
-        inputRange: [1, 1.4],
-        outputRange: [1, 1.4],
+        inputRange: [1, 1.6],
+        outputRange: [1, 1.6],
         extrapolate: 'clamp',
       });
     } catch (error) {
       console.log('Pulse scale interpolation error:', error);
       return 1;
     }
-  }, [pulseAnim]);
+  }, [pulseAnim, animationsStarted]);
 
   // Breathing animations with safe interpolation
   const safeBreathScale = useMemo(() => {
@@ -819,11 +829,15 @@ const styles = StyleSheet.create({
   },
   mandalaLine: {
     position: "absolute",
-    width: 2,
+    width: 3,
     height: 140,
-    backgroundColor: "rgba(255,255,255,0.4)",
+    backgroundColor: "rgba(255,255,255,0.7)",
     top: 0,
-    borderRadius: 1,
+    borderRadius: 1.5,
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
   },
   outerRing: {
     position: "absolute",
@@ -834,10 +848,14 @@ const styles = StyleSheet.create({
   },
   ringDot: {
     position: "absolute",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(255,255,255,0.6)",
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 6,
   },
   hexagonContainer: {
     position: "absolute",
@@ -848,10 +866,15 @@ const styles = StyleSheet.create({
   },
   hexagonSide: {
     position: "absolute",
-    width: 2,
+    width: 3,
     height: 80,
-    backgroundColor: "rgba(255,255,255,0.4)",
+    backgroundColor: "rgba(255,255,255,0.6)",
     top: 0,
+    borderRadius: 1.5,
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 3,
   },
   flowerContainer: {
     position: "absolute",
@@ -865,8 +888,12 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 22.5,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.7)",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
   },
   spiralContainer: {
     position: "absolute",
@@ -877,10 +904,14 @@ const styles = StyleSheet.create({
   },
   spiralDot: {
     position: "absolute",
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "rgba(255,255,255,0.7)",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 5,
   },
   triangleContainer: {
     position: "absolute",
