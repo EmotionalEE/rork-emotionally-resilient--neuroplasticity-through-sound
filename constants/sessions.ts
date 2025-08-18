@@ -45,13 +45,13 @@ export const emotionalStates: EmotionalState[] = [
 
 export const sessions: Session[] = [
   {
-    id: "alpha-waves",
-    title: "Alpha Wave Meditation",
-    description: "Promotes relaxation and reduces anxiety with 10Hz alpha waves",
-    duration: 15,
-    frequency: "10",
-    gradient: ["#667eea", "#764ba2"],
-    targetEmotions: ["anxious", "stressed", "calm"],
+    id: "anxious-to-joy",
+    title: "Anxious → Joy",
+    description: "3-5 min journey from anxiety to joy. A4=432Hz, 88→118 BPM. B minor/Dorian → G Mixolydian → D Major/Lydian with 40Hz gamma shimmer finale.",
+    duration: 5,
+    frequency: "432",
+    gradient: ["#FF6B6B", "#fee140"],
+    targetEmotions: ["anxious", "happy"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
   },
   {
