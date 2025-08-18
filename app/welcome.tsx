@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Circle, Triangle, Hexagon, ArrowRight } from "lucide-react-native";
+import { Circle, Triangle, Hexagon, ArrowRight, LogIn, UserPlus } from "lucide-react-native";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import * as Haptics from "expo-haptics";
 
@@ -71,13 +71,25 @@ export default function WelcomeScreen() {
     }
     
     await completeWelcome();
-    
-    // Navigate based on onboarding status
-    if (!hasCompletedOnboarding) {
-      router.replace("/onboarding");
-    } else {
-      router.replace("/");
+    router.replace("/login");
+  };
+
+  const handleLogin = async () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+    
+    await completeWelcome();
+    router.replace("/login");
+  };
+
+  const handleRegister = async () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    
+    await completeWelcome();
+    router.replace("/register");
   };
 
 
@@ -177,7 +189,7 @@ export default function WelcomeScreen() {
             })}
           </Animated.View>
 
-          {/* Get Started Button */}
+          {/* Auth Buttons */}
           <Animated.View
             style={[
               styles.buttonContainer,
@@ -187,21 +199,43 @@ export default function WelcomeScreen() {
               },
             ]}
           >
+            {/* Get Started Button */}
             <TouchableOpacity
-              style={styles.button}
+              style={styles.primaryButton}
               onPress={handleGetStarted}
               activeOpacity={0.8}
             >
               <LinearGradient
                 colors={["#667eea", "#764ba2"]}
-                style={styles.buttonGradient}
+                style={styles.primaryButtonGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               >
-                <Text style={styles.buttonText}>Begin Your Journey</Text>
+                <Text style={styles.primaryButtonText}>Begin Your Journey</Text>
                 <ArrowRight size={20} color="#fff" />
               </LinearGradient>
             </TouchableOpacity>
+
+            {/* Auth Options */}
+            <View style={styles.authOptionsContainer}>
+              <TouchableOpacity
+                style={styles.authButton}
+                onPress={handleLogin}
+                activeOpacity={0.8}
+              >
+                <LogIn size={18} color="#667eea" />
+                <Text style={styles.authButtonText}>Sign In</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.authButton}
+                onPress={handleRegister}
+                activeOpacity={0.8}
+              >
+                <UserPlus size={18} color="#667eea" />
+                <Text style={styles.authButtonText}>Create Account</Text>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         </View>
       </SafeAreaView>
@@ -307,10 +341,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 50,
   },
-  button: {
+  primaryButton: {
     width: '100%',
+    marginBottom: 20,
   },
-  buttonGradient: {
+  primaryButtonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -325,10 +360,32 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 8,
   },
-  buttonText: {
+  primaryButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600' as const,
     marginRight: 8,
+  },
+  authOptionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 15,
+  },
+  authButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(102, 126, 234, 0.3)',
+  },
+  authButtonText: {
+    color: '#667eea',
+    fontSize: 16,
+    fontWeight: '500' as const,
+    marginLeft: 8,
   },
 });

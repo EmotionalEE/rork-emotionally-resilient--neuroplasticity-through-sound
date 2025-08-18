@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AudioProvider } from "@/providers/AudioProvider";
 import { UserProgressProvider } from "@/providers/UserProgressProvider";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,6 +16,8 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="welcome" />
       <Stack.Screen name="onboarding" />
+      <Stack.Screen name="login" options={{ presentation: "modal" }} />
+      <Stack.Screen name="register" options={{ presentation: "modal" }} />
       <Stack.Screen name="index" />
       <Stack.Screen name="home" />
       <Stack.Screen name="session" options={{ presentation: "modal" }} />
@@ -30,11 +33,13 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <UserProgressProvider>
-          <AudioProvider>
-            <RootLayoutNav />
-          </AudioProvider>
-        </UserProgressProvider>
+        <AuthProvider>
+          <UserProgressProvider>
+            <AudioProvider>
+              <RootLayoutNav />
+            </AudioProvider>
+          </UserProgressProvider>
+        </AuthProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>
   );

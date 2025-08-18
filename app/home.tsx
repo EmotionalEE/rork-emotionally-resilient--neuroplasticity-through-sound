@@ -21,16 +21,19 @@ import {
   Sun,
   Cloud,
   Zap,
+  LogOut,
   LucideIcon,
 } from "lucide-react-native";
 import { emotionalStates, sessions } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
+import { useAuth } from "@/providers/AuthProvider";
 import { EmotionalState, Session } from "@/types/session";
 import * as Haptics from "expo-haptics";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { progress } = useUserProgress();
+  const { user, logout } = useAuth();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
@@ -83,6 +86,14 @@ export default function HomeScreen() {
       params: { sessionId: session.id },
     });
   }, [router]);
+
+  const handleLogout = useCallback(async () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    await logout();
+    router.replace("/welcome");
+  }, [logout, router]);
 
   // Sacred Geometry Icon Component
   const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
@@ -859,8 +870,19 @@ export default function HomeScreen() {
               },
             ]}
           >
-            <Text style={styles.greeting}>Welcome back</Text>
-            <Text style={styles.title}>How are you feeling?</Text>
+            <View style={styles.headerTop}>
+              <View style={styles.headerText}>
+                <Text style={styles.greeting}>Welcome back{user?.name ? `, ${user.name}` : ''}</Text>
+                <Text style={styles.title}>How are you feeling?</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+                activeOpacity={0.7}
+              >
+                <LogOut size={20} color="rgba(255, 255, 255, 0.7)" />
+              </TouchableOpacity>
+            </View>
           </Animated.View>
 
           <ScrollView
@@ -1020,6 +1042,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 10,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  headerText: {
+    flex: 1,
+  },
+  logoutButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 16,
   },
   greeting: {
     fontSize: 16,
