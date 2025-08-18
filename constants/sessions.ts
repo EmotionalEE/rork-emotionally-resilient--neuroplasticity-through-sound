@@ -46,8 +46,8 @@ export const emotionalStates: EmotionalState[] = [
 export const sessions: Session[] = [
   {
     id: "alpha-waves",
-    title: "Alpha Wave Meditation",
-    description: "Promotes relaxation and reduces anxiety with 10Hz alpha waves",
+    title: "Anxiousness to Peace",
+    description: "Transform anxiety into deep peace with 10Hz alpha waves",
     duration: 15,
     frequency: "10",
     gradient: ["#667eea", "#764ba2"],
@@ -56,8 +56,8 @@ export const sessions: Session[] = [
   },
   {
     id: "theta-healing",
-    title: "Theta Healing Session",
-    description: "Deep meditation and emotional healing with 6Hz theta waves",
+    title: "Anxiousness to Calm",
+    description: "Journey from anxiety to deep calm with 6Hz theta waves",
     duration: 20,
     frequency: "6",
     gradient: ["#f093fb", "#f5576c"],
@@ -76,8 +76,8 @@ export const sessions: Session[] = [
   },
   {
     id: "delta-sleep",
-    title: "Delta Deep Sleep",
-    description: "Prepare for restful sleep with 2Hz delta waves",
+    title: "Anxiousness to Joy",
+    description: "Transform anxiety into joyful tranquility with 2Hz delta waves",
     duration: 30,
     frequency: "2",
     gradient: ["#a8edea", "#fed6e3"],
@@ -106,8 +106,8 @@ export const sessions: Session[] = [
   },
   {
     id: "396hz-release",
-    title: "396Hz Liberation",
-    description: "Release fear and guilt with this powerful solfeggio frequency",
+    title: "Anxiousness to Happy",
+    description: "Release anxiety and embrace happiness with this powerful solfeggio frequency",
     duration: 15,
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
