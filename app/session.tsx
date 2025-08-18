@@ -51,18 +51,12 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   useEffect(() => {
     console.log('Sacred geometry effect triggered, isPlaying:', isPlaying);
     
-    // Stop all previous animations
-    animationsRef.current.forEach(anim => {
-      try {
-        anim.stop();
-      } catch (error) {
-        console.log('Error stopping animation:', error);
-      }
-    });
-    animationsRef.current = [];
+    // Only initialize animations once, don't restart them
+    if (animationsRef.current.length > 0) {
+      console.log('Animations already running, skipping initialization');
+      return;
+    }
 
-    // Always start animations regardless of isPlaying state
-    // This ensures the sacred geometry is always rotating
     console.log('Starting sacred geometry animations (always on)');
     
     // Reset all values before starting new animations
@@ -73,92 +67,91 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     counterRotationAnim.setValue(0);
     pulseAnim.setValue(1);
     
-    // Add a small delay to ensure values are set
-    setTimeout(() => {
-      // Main geometry animation
-      const geometryAnimation = Animated.loop(
-        Animated.timing(geometryAnim, {
+    // Start all animations immediately
+    // Main geometry animation
+    const geometryAnimation = Animated.loop(
+      Animated.timing(geometryAnim, {
+        toValue: 1,
+        duration: 8000,
+        useNativeDriver: true,
+      })
+    );
+    geometryAnimation.start();
+    animationsRef.current.push(geometryAnimation);
+
+    // Rotation animation (clockwise)
+    const rotationAnimation = Animated.loop(
+      Animated.timing(rotationAnim, {
+        toValue: 1,
+        duration: 15000,
+        useNativeDriver: true,
+      })
+    );
+    rotationAnimation.start();
+    animationsRef.current.push(rotationAnimation);
+
+    // Counter rotation (counter-clockwise)
+    const counterRotationAnimation = Animated.loop(
+      Animated.timing(counterRotationAnim, {
+        toValue: 1,
+        duration: 20000,
+        useNativeDriver: true,
+      })
+    );
+    counterRotationAnimation.start();
+    animationsRef.current.push(counterRotationAnimation);
+
+    // Mandala pulsing
+    const mandalaAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(mandalaAnim, {
           toValue: 1,
-          duration: 8000,
+          duration: 2500,
           useNativeDriver: true,
-        })
-      );
-      geometryAnimation.start();
-      animationsRef.current.push(geometryAnimation);
+        }),
+        Animated.timing(mandalaAnim, {
+          toValue: 0,
+          duration: 2500,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    mandalaAnimation.start();
+    animationsRef.current.push(mandalaAnimation);
 
-      // Rotation animation (clockwise)
-      const rotationAnimation = Animated.loop(
-        Animated.timing(rotationAnim, {
+    // Flower of Life animation
+    const flowerAnimation = Animated.loop(
+      Animated.timing(flowerAnim, {
+        toValue: 1,
+        duration: 10000,
+        useNativeDriver: true,
+      })
+    );
+    flowerAnimation.start();
+    animationsRef.current.push(flowerAnimation);
+
+    // Pulse animation - make it more intense when playing
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 15000,
+          duration: 1500,
           useNativeDriver: true,
-        })
-      );
-      rotationAnimation.start();
-      animationsRef.current.push(rotationAnimation);
-
-      // Counter rotation (counter-clockwise)
-      const counterRotationAnimation = Animated.loop(
-        Animated.timing(counterRotationAnim, {
-          toValue: 1,
-          duration: 20000,
-          useNativeDriver: true,
-        })
-      );
-      counterRotationAnimation.start();
-      animationsRef.current.push(counterRotationAnimation);
-
-      // Mandala pulsing
-      const mandalaAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(mandalaAnim, {
-            toValue: 1,
-            duration: 2500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(mandalaAnim, {
-            toValue: 0,
-            duration: 2500,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      mandalaAnimation.start();
-      animationsRef.current.push(mandalaAnimation);
-
-      // Flower of Life animation
-      const flowerAnimation = Animated.loop(
-        Animated.timing(flowerAnim, {
-          toValue: 1,
-          duration: 10000,
-          useNativeDriver: true,
-        })
-      );
-      flowerAnimation.start();
-      animationsRef.current.push(flowerAnimation);
-
-      // Pulse animation - make it more intense when playing
-      const pulseAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: isPlaying ? 1.3 : 1.1,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      pulseAnimation.start();
-      animationsRef.current.push(pulseAnimation);
-      
-      console.log('All sacred geometry animations started, count:', animationsRef.current.length);
-    }, 100);
+        }),
+      ])
+    );
+    pulseAnimation.start();
+    animationsRef.current.push(pulseAnimation);
+    
+    console.log('All sacred geometry animations started, count:', animationsRef.current.length);
 
     return () => {
+      console.log('Cleaning up sacred geometry animations');
       animationsRef.current.forEach(anim => {
         try {
           anim.stop();
@@ -166,8 +159,9 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
           console.log('Error stopping animation in cleanup:', error);
         }
       });
+      animationsRef.current = [];
     };
-  }, [isPlaying]);
+  }, []);
 
 
 
