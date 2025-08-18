@@ -49,15 +49,17 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   }, []);
 
   useEffect(() => {
-    console.log('Sacred geometry effect triggered, isPlaying:', isPlaying);
+    console.log('Sacred geometry effect triggered, starting animations');
     
-    // Only initialize animations once, don't restart them
-    if (animationsRef.current.length > 0) {
-      console.log('Animations already running, skipping initialization');
-      return;
-    }
-
-    console.log('Starting sacred geometry animations (always on)');
+    // Clean up any existing animations first
+    animationsRef.current.forEach(anim => {
+      try {
+        anim.stop();
+      } catch (error) {
+        console.log('Error stopping existing animation:', error);
+      }
+    });
+    animationsRef.current = [];
     
     // Reset all values before starting new animations
     geometryAnim.setValue(0);
@@ -66,6 +68,8 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     flowerAnim.setValue(0);
     counterRotationAnim.setValue(0);
     pulseAnim.setValue(1);
+    
+    console.log('Starting sacred geometry animations');
     
     // Start all animations immediately
     // Main geometry animation
@@ -161,7 +165,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
       });
       animationsRef.current = [];
     };
-  }, []);
+  }, [geometryAnim, rotationAnim, mandalaAnim, flowerAnim, counterRotationAnim, pulseAnim]);
 
 
 
