@@ -128,7 +128,7 @@ export default function LoginScreen() {
               </TouchableOpacity>
               
               <View style={styles.headerTextContainer}>
-                <Text style={styles.headerTitle}>Welcome Back</Text>
+                <Text style={styles.headerTitle}>Welcome Back to Harmonia</Text>
                 <Text style={styles.headerSubtitle}>Sign in to continue your journey</Text>
               </View>
             </Animated.View>
