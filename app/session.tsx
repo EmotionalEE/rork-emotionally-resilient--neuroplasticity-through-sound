@@ -471,11 +471,21 @@ export default function SessionScreen() {
               console.log("Error stopping sound during close:", error);
             }
             // Force navigation back to home screen
-            router.push("/");
+            router.replace("/");
           },
         },
       ]
     );
+  }, [stopSound, router]);
+
+  const handleQuickExit = useCallback(async () => {
+    try {
+      await stopSound();
+    } catch (error) {
+      console.log("Error stopping sound during quick exit:", error);
+    }
+    // Force navigation back to home screen
+    router.replace("/");
   }, [stopSound, router]);
 
   useEffect(() => {
@@ -564,7 +574,7 @@ export default function SessionScreen() {
           text: "Continue",
           onPress: () => {
             // Force navigation back to home screen
-            router.push("/");
+            router.replace("/");
           },
         },
       ]
@@ -629,7 +639,7 @@ export default function SessionScreen() {
     <LinearGradient colors={session.gradient as unknown as readonly [string, string, ...string[]]} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={handleQuickExit} style={styles.closeButton}>
             <X size={28} color="#fff" />
           </TouchableOpacity>
         </View>
