@@ -4,6 +4,15 @@ export interface EmotionalState {
   gradient: string[];
 }
 
+export interface GeometryConfig {
+  type: 'mandala' | 'flower' | 'spiral' | 'triangle' | 'hexagon' | 'star' | 'lotus' | 'merkaba';
+  elements: number;
+  layers: number;
+  rotationSpeed: number;
+  pulseIntensity: number;
+  colors: string[];
+}
+
 export interface Session {
   id: string;
   title: string;
@@ -13,6 +22,7 @@ export interface Session {
   gradient: string[];
   targetEmotions: string[];
   audioUrl: string;
+  geometry: GeometryConfig;
 }
 
 export interface SessionProgress {

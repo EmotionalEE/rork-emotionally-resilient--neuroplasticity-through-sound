@@ -53,6 +53,14 @@ export const sessions: Session[] = [
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+    geometry: {
+      type: 'spiral',
+      elements: 12,
+      layers: 3,
+      rotationSpeed: 6000,
+      pulseIntensity: 1.4,
+      colors: ['rgba(161,196,253,0.8)', 'rgba(194,233,251,0.6)', 'rgba(255,255,255,0.9)']
+    },
   },
   {
     id: "741hz-detox",
@@ -63,6 +71,14 @@ export const sessions: Session[] = [
     gradient: ["#d299c2", "#fef9d7"],
     targetEmotions: ["angry", "sad", "stressed"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+    geometry: {
+      type: 'triangle',
+      elements: 9,
+      layers: 4,
+      rotationSpeed: 8000,
+      pulseIntensity: 1.6,
+      colors: ['rgba(210,153,194,0.8)', 'rgba(254,249,215,0.6)', 'rgba(255,255,255,0.7)']
+    },
   },
   {
     id: "theta-healing",
@@ -73,6 +89,14 @@ export const sessions: Session[] = [
     gradient: ["#f093fb", "#f5576c"],
     targetEmotions: ["sad", "anxious", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    geometry: {
+      type: 'lotus',
+      elements: 8,
+      layers: 5,
+      rotationSpeed: 4000,
+      pulseIntensity: 1.8,
+      colors: ['rgba(240,147,251,0.8)', 'rgba(245,87,108,0.6)', 'rgba(255,255,255,0.9)']
+    },
   },
   {
     id: "delta-sleep",
@@ -83,6 +107,14 @@ export const sessions: Session[] = [
     gradient: ["#a8edea", "#fed6e3"],
     targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+    geometry: {
+      type: 'mandala',
+      elements: 16,
+      layers: 3,
+      rotationSpeed: 12000,
+      pulseIntensity: 1.2,
+      colors: ['rgba(168,237,234,0.8)', 'rgba(254,214,227,0.6)', 'rgba(255,255,255,0.8)']
+    },
   },
   {
     id: "alpha-waves",
@@ -93,6 +125,14 @@ export const sessions: Session[] = [
     gradient: ["#667eea", "#764ba2"],
     targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    geometry: {
+      type: 'hexagon',
+      elements: 6,
+      layers: 4,
+      rotationSpeed: 7000,
+      pulseIntensity: 1.3,
+      colors: ['rgba(102,126,234,0.8)', 'rgba(118,75,162,0.6)', 'rgba(255,255,255,0.7)']
+    },
   },
   {
     id: "528hz-love",
@@ -103,6 +143,14 @@ export const sessions: Session[] = [
     gradient: ["#ff9a9e", "#fecfef"],
     targetEmotions: ["sad", "angry", "happy", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+    geometry: {
+      type: 'flower',
+      elements: 12,
+      layers: 6,
+      rotationSpeed: 5000,
+      pulseIntensity: 2.0,
+      colors: ['rgba(255,154,158,0.8)', 'rgba(254,207,239,0.6)', 'rgba(255,255,255,0.9)']
+    },
   },
   {
     id: "beta-focus",
@@ -113,6 +161,14 @@ export const sessions: Session[] = [
     gradient: ["#4facfe", "#00f2fe"],
     targetEmotions: ["focused", "energized"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    geometry: {
+      type: 'star',
+      elements: 8,
+      layers: 3,
+      rotationSpeed: 3000,
+      pulseIntensity: 1.7,
+      colors: ['rgba(79,172,254,0.8)', 'rgba(0,242,254,0.6)', 'rgba(255,255,255,0.8)']
+    },
   },
   {
     id: "gamma-insight",
@@ -123,5 +179,13 @@ export const sessions: Session[] = [
     gradient: ["#ffecd2", "#fcb69f"],
     targetEmotions: ["focused", "energized", "happy"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+    geometry: {
+      type: 'merkaba',
+      elements: 6,
+      layers: 2,
+      rotationSpeed: 4500,
+      pulseIntensity: 1.9,
+      colors: ['rgba(255,236,210,0.8)', 'rgba(252,182,159,0.6)', 'rgba(255,255,255,0.9)']
+    },
   },
 ];

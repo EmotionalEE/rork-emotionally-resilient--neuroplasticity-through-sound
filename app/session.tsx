@@ -27,7 +27,15 @@ import { useUserProgress } from "@/providers/UserProgressProvider";
 import * as Haptics from "expo-haptics";
 
 // Sacred Geometry Component
-const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; breathingPhase: 'in' | 'out' }) => {
+const SacredGeometry = ({ 
+  isPlaying, 
+  breathingPhase, 
+  geometry 
+}: { 
+  isPlaying: boolean; 
+  breathingPhase: 'in' | 'out';
+  geometry: import('@/types/session').GeometryConfig;
+}) => {
   const geometryAnim = useRef(new Animated.Value(0)).current;
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const mandalaAnim = useRef(new Animated.Value(0)).current;
@@ -36,7 +44,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    console.log('Sacred geometry component mounted, starting animations...');
+    console.log('Sacred geometry component mounted, starting animations...', geometry.type);
     
     // Reset all values first
     geometryAnim.setValue(0);
@@ -57,11 +65,11 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     );
     geometryAnimation.start();
 
-    // Rotation animation (clockwise)
+    // Rotation animation (clockwise) - use geometry config speed
     const rotationAnimation = Animated.loop(
       Animated.timing(rotationAnim, {
         toValue: 1,
-        duration: 6000,
+        duration: geometry.rotationSpeed,
         useNativeDriver: false,
       })
     );
@@ -71,7 +79,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     const counterRotationAnimation = Animated.loop(
       Animated.timing(counterRotationAnim, {
         toValue: 1,
-        duration: 8000,
+        duration: geometry.rotationSpeed + 2000,
         useNativeDriver: false,
       })
     );
@@ -104,11 +112,11 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
     );
     flowerAnimation.start();
 
-    // Pulse animation
+    // Pulse animation - use geometry config intensity
     const pulseAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.6,
+          toValue: geometry.pulseIntensity,
           duration: 800,
           useNativeDriver: false,
         }),
@@ -133,7 +141,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
       flowerAnimation.stop();
       pulseAnimation.stop();
     };
-  }, []);
+  }, [geometry]);
 
   // Create interpolations for animations
   const rotation = rotationAnim.interpolate({
@@ -170,188 +178,331 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
   const breathScale = breathingPhase === 'in' ? 1.3 : 0.7;
   const breathOpacity = breathingPhase === 'in' ? 0.8 : 0.4;
 
+  // Render different geometry patterns based on type
+  const renderGeometry = () => {
+    const primaryColor = geometry.colors[0] || 'rgba(255,255,255,0.8)';
+    const secondaryColor = geometry.colors[1] || 'rgba(255,255,255,0.6)';
+    const accentColor = geometry.colors[2] || 'rgba(255,255,255,0.9)';
+
+    switch (geometry.type) {
+      case 'mandala':
+        return (
+          <>
+            {/* Mandala rays */}
+            <Animated.View
+              style={[
+                styles.mandalaOuter,
+                {
+                  transform: [{ rotate: rotation }, { scale: mandalaScale }],
+                  opacity: flowerOpacity,
+                },
+              ]}
+            >
+              {[...Array(geometry.elements)].map((_, i) => (
+                <Animated.View
+                  key={i}
+                  style={[
+                    styles.mandalaLine,
+                    {
+                      backgroundColor: primaryColor,
+                      transform: [
+                        { rotate: `${i * (360 / geometry.elements)}deg` },
+                        { scale: pulseScale },
+                      ],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+            {/* Outer dots */}
+            <Animated.View
+              style={[
+                styles.outerRing,
+                {
+                  transform: [{ rotate: counterRotation }, { scale: pulseScale }],
+                },
+              ]}
+            >
+              {[...Array(geometry.elements / 2)].map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.ringDot,
+                    {
+                      backgroundColor: secondaryColor,
+                      transform: [
+                        { rotate: `${i * (360 / (geometry.elements / 2))}deg` },
+                        { translateY: -120 },
+                      ],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+          </>
+        );
+
+      case 'flower':
+        return (
+          <Animated.View
+            style={[
+              styles.flowerContainer,
+              {
+                opacity: flowerOpacity,
+                transform: [{ scale: scale }, { rotate: rotation }],
+              },
+            ]}
+          >
+            {[...Array(geometry.elements)].map((_, i) => (
+              <Animated.View
+                key={i}
+                style={[
+                  styles.flowerCircle,
+                  {
+                    borderColor: i % 2 === 0 ? primaryColor : secondaryColor,
+                    transform: [
+                      { rotate: `${i * (360 / geometry.elements)}deg` },
+                      { translateY: i === 0 ? 0 : -35 },
+                      { scale: pulseScale },
+                    ],
+                  },
+                ]}
+              />
+            ))}
+          </Animated.View>
+        );
+
+      case 'spiral':
+        return (
+          <Animated.View
+            style={[
+              styles.spiralContainer,
+              {
+                transform: [{ rotate: rotation }, { scale: mandalaScale }],
+                opacity: 0.8,
+              },
+            ]}
+          >
+            {[...Array(geometry.elements)].map((_, i) => (
+              <Animated.View
+                key={i}
+                style={[
+                  styles.spiralDot,
+                  {
+                    backgroundColor: i % 3 === 0 ? accentColor : i % 3 === 1 ? primaryColor : secondaryColor,
+                    transform: [
+                      { rotate: `${i * (360 / geometry.elements)}deg` },
+                      { translateY: -50 - i * 6 },
+                      { scale: pulseScale },
+                    ],
+                  },
+                ]}
+              />
+            ))}
+          </Animated.View>
+        );
+
+      case 'triangle':
+        return (
+          <>
+            {[...Array(geometry.layers)].map((layer) => (
+              <Animated.View
+                key={layer}
+                style={[
+                  styles.triangleContainer,
+                  {
+                    transform: [
+                      { rotate: layer % 2 === 0 ? rotation : counterRotation },
+                      { scale: breathScale * (1 + layer * 0.2) },
+                    ],
+                    opacity: breathOpacity * (1 - layer * 0.1),
+                  },
+                ]}
+              >
+                {[...Array(geometry.elements)].map((_, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.innerTriangle,
+                      {
+                        borderBottomColor: layer % 2 === 0 ? primaryColor : secondaryColor,
+                        transform: [{ rotate: `${i * (360 / geometry.elements)}deg` }],
+                      },
+                    ]}
+                  />
+                ))}
+              </Animated.View>
+            ))}
+          </>
+        );
+
+      case 'hexagon':
+        return (
+          <Animated.View
+            style={[
+              styles.hexagonContainer,
+              {
+                transform: [{ rotate: counterRotation }, { scale: scale }],
+              },
+            ]}
+          >
+            {[...Array(geometry.elements)].map((_, i) => (
+              <Animated.View
+                key={i}
+                style={[
+                  styles.hexagonSide,
+                  {
+                    backgroundColor: primaryColor,
+                    transform: [{ rotate: `${i * (360 / geometry.elements)}deg` }],
+                    opacity: 0.8,
+                  },
+                ]}
+              />
+            ))}
+          </Animated.View>
+        );
+
+      case 'star':
+        return (
+          <>
+            {[...Array(geometry.layers)].map((layer) => (
+              <Animated.View
+                key={layer}
+                style={[
+                  styles.starContainer,
+                  {
+                    transform: [
+                      { rotate: layer % 2 === 0 ? rotation : counterRotation },
+                      { scale: (scale as any) * (1 - layer * 0.15) },
+                    ],
+                    opacity: 0.9 - layer * 0.2,
+                  },
+                ]}
+              >
+                {[...Array(geometry.elements)].map((_, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.starPoint,
+                      {
+                        backgroundColor: layer === 0 ? accentColor : layer === 1 ? primaryColor : secondaryColor,
+                        transform: [
+                          { rotate: `${i * (360 / geometry.elements)}deg` },
+                          { translateY: -60 - layer * 10 },
+                        ],
+                      },
+                    ]}
+                  />
+                ))}
+              </Animated.View>
+            ))}
+          </>
+        );
+
+      case 'lotus':
+        return (
+          <>
+            {[...Array(geometry.layers)].map((layer) => (
+              <Animated.View
+                key={layer}
+                style={[
+                  styles.lotusLayer,
+                  {
+                    transform: [
+                      { rotate: `${layer * 15}deg` },
+                      { scale: (scale as any) * (1 - layer * 0.1) },
+                    ],
+                    opacity: (flowerOpacity as any) * (1 - layer * 0.1),
+                  },
+                ]}
+              >
+                {[...Array(geometry.elements)].map((_, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.lotusPetal,
+                      {
+                        backgroundColor: layer % 3 === 0 ? primaryColor : layer % 3 === 1 ? secondaryColor : accentColor,
+                        transform: [
+                          { rotate: `${i * (360 / geometry.elements)}deg` },
+                          { translateY: -40 - layer * 8 },
+                        ],
+                      },
+                    ]}
+                  />
+                ))}
+              </Animated.View>
+            ))}
+          </>
+        );
+
+      case 'merkaba':
+        return (
+          <>
+            {/* Upper tetrahedron */}
+            <Animated.View
+              style={[
+                styles.merkabaContainer,
+                {
+                  transform: [{ rotate: rotation }, { scale: scale }],
+                  opacity: 0.8,
+                },
+              ]}
+            >
+              {[...Array(geometry.elements)].map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.merkabaTriangle,
+                    {
+                      borderBottomColor: primaryColor,
+                      transform: [{ rotate: `${i * (360 / geometry.elements)}deg` }],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+            {/* Lower tetrahedron */}
+            <Animated.View
+              style={[
+                styles.merkabaContainer,
+                {
+                  transform: [{ rotate: counterRotation }, { scale: scale }, { rotateX: '180deg' }],
+                  opacity: 0.6,
+                },
+              ]}
+            >
+              {[...Array(geometry.elements)].map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.merkabaTriangle,
+                    {
+                      borderBottomColor: secondaryColor,
+                      transform: [{ rotate: `${i * (360 / geometry.elements)}deg` }],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <View style={styles.geometryContainer}>
-      {/* Outer rotating mandala */}
-      <Animated.View
-        style={[
-          styles.mandalaOuter,
-          {
-            transform: [
-              { rotate: rotation }, 
-              { scale: mandalaScale }
-            ],
-            opacity: flowerOpacity,
-          },
-        ]}
-      >
-        {[...Array(16)].map((_, i) => (
-          <Animated.View
-            key={i}
-            style={[
-              styles.mandalaLine,
-              {
-                transform: [
-                  { rotate: `${i * 22.5}deg` },
-                  { scale: pulseScale },
-                ],
-                opacity: 0.8,
-              },
-            ]}
-          />
-        ))}
-      </Animated.View>
-
-      {/* Counter-rotating outer ring */}
-      <Animated.View
-        style={[
-          styles.outerRing,
-          {
-            transform: [
-              { rotate: counterRotation }, 
-              { scale: pulseScale }
-            ],
-            opacity: 0.8,
-          },
-        ]}
-      >
-        {[...Array(8)].map((_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.ringDot,
-              {
-                transform: [
-                  { rotate: `${i * 45}deg` },
-                  { translateY: -120 },
-                ],
-              },
-            ]}
-          />
-        ))}
-      </Animated.View>
-
-      {/* Middle hexagon pattern */}
-      <Animated.View
-        style={[
-          styles.hexagonContainer,
-          {
-            transform: [
-              { rotate: counterRotation }, 
-              { scale: scale }
-            ],
-          },
-        ]}
-      >
-        {[...Array(6)].map((_, i) => (
-          <Animated.View
-            key={i}
-            style={[
-              styles.hexagonSide,
-              {
-                transform: [{ rotate: `${i * 60}deg` }],
-                opacity: 0.8,
-              },
-            ]}
-          />
-        ))}
-      </Animated.View>
-
-      {/* Flower of Life pattern */}
-      <Animated.View
-        style={[
-          styles.flowerContainer,
-          {
-            opacity: flowerOpacity,
-            transform: [
-              { scale: scale }, 
-              { rotate: rotation }
-            ],
-          },
-        ]}
-      >
-        {[...Array(7)].map((_, i) => (
-          <Animated.View
-            key={i}
-            style={[
-              styles.flowerCircle,
-              {
-                transform: [
-                  { rotate: `${i * 51.43}deg` },
-                  { translateY: i === 0 ? 0 : -35 },
-                  { scale: pulseScale },
-                ],
-              },
-            ]}
-          />
-        ))}
-      </Animated.View>
-
-      {/* Sacred spiral */}
-      <Animated.View
-        style={[
-          styles.spiralContainer,
-          {
-            transform: [
-              { rotate: rotation }, 
-              { scale: mandalaScale }
-            ],
-            opacity: 0.8,
-          },
-        ]}
-      >
-        {[...Array(12)].map((_, i) => (
-          <Animated.View
-            key={i}
-            style={[
-              styles.spiralDot,
-              {
-                transform: [
-                  { rotate: `${i * 30}deg` },
-                  { translateY: -50 - i * 6 },
-                  { scale: pulseScale },
-                ],
-              },
-            ]}
-          />
-        ))}
-      </Animated.View>
-
-      {/* Inner rotating triangles */}
-      <Animated.View
-        style={[
-          styles.triangleContainer,
-          {
-            transform: [
-              { rotate: counterRotation }, 
-              { scale: breathScale }
-            ],
-            opacity: breathOpacity,
-          },
-        ]}
-      >
-        {[...Array(3)].map((_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.innerTriangle,
-              {
-                transform: [{ rotate: `${i * 120}deg` }],
-              },
-            ]}
-          />
-        ))}
-      </Animated.View>
-
+      {renderGeometry()}
+      
       {/* Breathing sync geometry */}
       <Animated.View
         style={[
           styles.breathGeometry,
           {
-            transform: [
-              { scale: breathScale }, 
-              { rotate: rotation }
-            ],
+            transform: [{ scale: breathScale }, { rotate: rotation }],
             opacity: breathOpacity,
           },
         ]}
@@ -362,6 +513,7 @@ const SacredGeometry = ({ isPlaying, breathingPhase }: { isPlaying: boolean; bre
             style={[
               styles.breathTriangle,
               {
+                borderBottomColor: geometry.colors[0] || 'rgba(255,255,255,0.4)',
                 transform: [{ rotate: `${i * 90}deg` }],
               },
             ]}
@@ -624,7 +776,7 @@ export default function SessionScreen() {
 
           <View style={styles.visualizer}>
             {/* Sacred Geometry Background */}
-            <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} />
+            <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} geometry={session.geometry} />
             
             <Animated.View
               style={[
@@ -1002,5 +1154,60 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     textAlign: "center",
+  },
+  starContainer: {
+    position: "absolute",
+    width: 200,
+    height: 200,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  starPoint: {
+    position: "absolute",
+    width: 6,
+    height: 20,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+  },
+  lotusLayer: {
+    position: "absolute",
+    width: 180,
+    height: 180,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lotusPetal: {
+    position: "absolute",
+    width: 8,
+    height: 25,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.7)",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 3,
+  },
+  merkabaContainer: {
+    position: "absolute",
+    width: 150,
+    height: 150,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  merkabaTriangle: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: 18,
+    borderRightWidth: 18,
+    borderBottomWidth: 30,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "rgba(255,255,255,0.6)",
+    top: -15,
   },
 });
