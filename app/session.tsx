@@ -157,21 +157,25 @@ const SacredGeometry = ({
   const scale = geometryAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0.8, 1.4, 0.8],
+    extrapolate: 'clamp',
   });
 
   const mandalaScale = mandalaAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0.9, 1.3, 0.9],
+    extrapolate: 'clamp',
   });
 
   const flowerOpacity = flowerAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0.3, 0.9, 0.3],
+    extrapolate: 'clamp',
   });
 
   const pulseScale = pulseAnim.interpolate({
-    inputRange: [1, 1.6],
-    outputRange: [1, 1.6],
+    inputRange: [1, geometry.pulseIntensity || 1.6],
+    outputRange: [1, geometry.pulseIntensity || 1.6],
+    extrapolate: 'clamp',
   });
 
   // Breathing animations
@@ -200,7 +204,7 @@ const SacredGeometry = ({
             >
               {[...Array(geometry.elements)].map((_, i) => (
                 <Animated.View
-                  key={i}
+                  key={`mandala-line-${i}`}
                   style={[
                     styles.mandalaLine,
                     {
@@ -223,15 +227,15 @@ const SacredGeometry = ({
                 },
               ]}
             >
-              {[...Array(geometry.elements / 2)].map((_, i) => (
+              {[...Array(Math.floor(geometry.elements / 2))].map((_, i) => (
                 <View
-                  key={i}
+                  key={`ring-dot-${i}`}
                   style={[
                     styles.ringDot,
                     {
                       backgroundColor: secondaryColor,
                       transform: [
-                        { rotate: `${i * (360 / (geometry.elements / 2))}deg` },
+                        { rotate: `${i * (360 / Math.floor(geometry.elements / 2))}deg` },
                         { translateY: -120 },
                       ],
                     },
@@ -255,7 +259,7 @@ const SacredGeometry = ({
           >
             {[...Array(geometry.elements)].map((_, i) => (
               <Animated.View
-                key={i}
+                key={`flower-circle-${i}`}
                 style={[
                   styles.flowerCircle,
                   {
@@ -285,7 +289,7 @@ const SacredGeometry = ({
           >
             {[...Array(geometry.elements)].map((_, i) => (
               <Animated.View
-                key={i}
+                key={`spiral-dot-${i}`}
                 style={[
                   styles.spiralDot,
                   {
@@ -305,9 +309,9 @@ const SacredGeometry = ({
       case 'triangle':
         return (
           <>
-            {[...Array(geometry.layers)].map((layer) => (
+            {[...Array(geometry.layers || 3)].map((_, layer) => (
               <Animated.View
-                key={layer}
+                key={`triangle-layer-${layer}`}
                 style={[
                   styles.triangleContainer,
                   {
@@ -321,7 +325,7 @@ const SacredGeometry = ({
               >
                 {[...Array(geometry.elements)].map((_, i) => (
                   <View
-                    key={i}
+                    key={`triangle-element-${layer}-${i}`}
                     style={[
                       styles.innerTriangle,
                       {
@@ -348,7 +352,7 @@ const SacredGeometry = ({
           >
             {[...Array(geometry.elements)].map((_, i) => (
               <Animated.View
-                key={i}
+                key={`hexagon-side-${i}`}
                 style={[
                   styles.hexagonSide,
                   {
@@ -365,23 +369,23 @@ const SacredGeometry = ({
       case 'star':
         return (
           <>
-            {[...Array(geometry.layers)].map((layer) => (
+            {[...Array(geometry.layers || 3)].map((_, layer) => (
               <Animated.View
-                key={layer}
+                key={`star-layer-${layer}`}
                 style={[
                   styles.starContainer,
                   {
                     transform: [
                       { rotate: layer % 2 === 0 ? rotation : counterRotation },
-                      { scale: (scale as any) * (1 - layer * 0.15) },
+                      { scale: Animated.multiply(scale, 1 - layer * 0.15) },
                     ],
-                    opacity: 0.9 - layer * 0.2,
+                    opacity: Math.max(0.1, 0.9 - layer * 0.2),
                   },
                 ]}
               >
                 {[...Array(geometry.elements)].map((_, i) => (
                   <View
-                    key={i}
+                    key={`star-point-${layer}-${i}`}
                     style={[
                       styles.starPoint,
                       {
@@ -402,23 +406,23 @@ const SacredGeometry = ({
       case 'lotus':
         return (
           <>
-            {[...Array(geometry.layers)].map((layer) => (
+            {[...Array(geometry.layers || 3)].map((_, layer) => (
               <Animated.View
-                key={layer}
+                key={`lotus-layer-${layer}`}
                 style={[
                   styles.lotusLayer,
                   {
                     transform: [
                       { rotate: `${layer * 15}deg` },
-                      { scale: (scale as any) * (1 - layer * 0.1) },
+                      { scale: Animated.multiply(scale, 1 - layer * 0.1) },
                     ],
-                    opacity: (flowerOpacity as any) * (1 - layer * 0.1),
+                    opacity: Animated.multiply(flowerOpacity, Math.max(0.1, 1 - layer * 0.1)),
                   },
                 ]}
               >
                 {[...Array(geometry.elements)].map((_, i) => (
                   <View
-                    key={i}
+                    key={`lotus-petal-${layer}-${i}`}
                     style={[
                       styles.lotusPetal,
                       {
@@ -451,7 +455,7 @@ const SacredGeometry = ({
             >
               {[...Array(geometry.elements)].map((_, i) => (
                 <View
-                  key={i}
+                  key={`merkaba-upper-${i}`}
                   style={[
                     styles.merkabaTriangle,
                     {
@@ -474,7 +478,7 @@ const SacredGeometry = ({
             >
               {[...Array(geometry.elements)].map((_, i) => (
                 <View
-                  key={i}
+                  key={`merkaba-lower-${i}`}
                   style={[
                     styles.merkabaTriangle,
                     {
@@ -509,7 +513,7 @@ const SacredGeometry = ({
       >
         {[...Array(4)].map((_, i) => (
           <View
-            key={i}
+            key={`breath-triangle-${i}`}
             style={[
               styles.breathTriangle,
               {
