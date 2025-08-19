@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   Dimensions,
   SafeAreaView,
+  Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { ArrowLeft, User, Calendar, Clock, Flame, TrendingUp } from "lucide-react-native";
+import { ArrowLeft, User, Calendar, Clock, Flame, TrendingUp, Award, Target } from "lucide-react-native";
 import { useAuth } from "@/providers/AuthProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { emotionalStates } from "@/constants/sessions";
@@ -23,6 +24,69 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { progress } = useUserProgress();
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const [progressAnimations, setProgressAnimations] = useState<{[key: string]: Animated.Value}>({});
+  
+  // Initialize progress animations
+  useEffect(() => {
+    const animations: {[key: string]: Animated.Value} = {};
+    progress.emotionProgress.forEach((emotion) => {
+      animations[emotion.emotionId] = new Animated.Value(0);
+    });
+    setProgressAnimations(animations);
+  }, [progress.emotionProgress]);
+  
+  // Start entrance animations
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 100,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    
+    // Animate progress circles
+    Object.entries(progressAnimations).forEach(([emotionId, animation], index) => {
+      const emotionProgress = progress.emotionProgress.find(e => e.emotionId === emotionId);
+      if (emotionProgress) {
+        Animated.timing(animation, {
+          toValue: emotionProgress.improvementPercentage / 100,
+          duration: 1000 + (index * 200),
+          delay: 400 + (index * 100),
+          useNativeDriver: false,
+        }).start();
+      }
+    });
+    
+    // Continuous rotation for avatar
+    const rotateAnimation = Animated.loop(
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 20000,
+        useNativeDriver: true,
+      })
+    );
+    rotateAnimation.start();
+    
+    return () => rotateAnimation.stop();
+  }, [fadeAnim, slideAnim, scaleAnim, rotateAnim, progressAnimations, progress.emotionProgress]);
 
   const handleLogout = async () => {
     await logout();
@@ -56,6 +120,27 @@ export default function ProfileScreen() {
   const sortedEmotionProgress = progress.emotionProgress
     .sort((a, b) => b.improvementPercentage - a.improvementPercentage)
     .slice(0, 6); // Show top 6 emotions
+    
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+  
+  const handleStatPress = (statType: string) => {
+    const pulseAnim = new Animated.Value(1);
+    Animated.sequence([
+      Animated.timing(pulseAnim, {
+        toValue: 1.1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(pulseAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -73,48 +158,246 @@ export default function ProfileScreen() {
           </View>
 
           {/* User Info */}
-          <View style={styles.userSection}>
+          <Animated.View 
+            style={[
+              styles.userSection,
+              {
+                opacity: fadeAnim,
+                transform: [
+                  { translateY: slideAnim },
+                  { scale: scaleAnim }
+                ]
+              }
+            ]}
+          >
             <View style={styles.avatarContainer}>
-              <LinearGradient colors={["#667eea", "#764ba2"]} style={styles.avatar}>
-                <User size={32} color="#ffffff" />
-              </LinearGradient>
+              <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                <LinearGradient colors={["#667eea", "#764ba2"]} style={styles.avatar}>
+                  <User size={32} color="#ffffff" />
+                </LinearGradient>
+              </Animated.View>
+              <View style={styles.statusIndicator}>
+                <Animated.View 
+                  style={[
+                    styles.statusDot,
+                    {
+                      transform: [{
+                        scale: fadeAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, 1],
+                        })
+                      }]
+                    }
+                  ]}
+                />
+              </View>
             </View>
-            <Text style={styles.userName}>{user?.name || "User"}</Text>
-            <Text style={styles.userEmail}>{user?.email}</Text>
-          </View>
+            <Animated.Text 
+              style={[
+                styles.userName,
+                {
+                  opacity: fadeAnim,
+                  transform: [{
+                    translateY: slideAnim.interpolate({
+                      inputRange: [0, 50],
+                      outputRange: [0, 20],
+                    })
+                  }]
+                }
+              ]}
+            >
+              {user?.name || "User"}
+            </Animated.Text>
+            <Animated.Text 
+              style={[
+                styles.userEmail,
+                {
+                  opacity: fadeAnim,
+                  transform: [{
+                    translateY: slideAnim.interpolate({
+                      inputRange: [0, 50],
+                      outputRange: [0, 30],
+                    })
+                  }]
+                }
+              ]}
+            >
+              {user?.email}
+            </Animated.Text>
+          </Animated.View>
 
           {/* Stats Overview */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <Calendar size={24} color="#4facfe" />
-              <Text style={styles.statNumber}>{progress.totalSessions}</Text>
+          <Animated.View 
+            style={[
+              styles.statsContainer,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
+            <TouchableOpacity 
+              style={styles.statCard} 
+              onPress={() => handleStatPress('sessions')}
+              activeOpacity={0.8}
+            >
+              <Animated.View
+                style={{
+                  transform: [{
+                    scale: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.5, 1],
+                    })
+                  }]
+                }}
+              >
+                <Calendar size={24} color="#4facfe" />
+              </Animated.View>
+              <Animated.Text 
+                style={[
+                  styles.statNumber,
+                  {
+                    transform: [{
+                      scale: fadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.8, 1],
+                      })
+                    }]
+                  }
+                ]}
+              >
+                {progress.totalSessions}
+              </Animated.Text>
               <Text style={styles.statLabel}>Sessions</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Clock size={24} color="#43e97b" />
-              <Text style={styles.statNumber}>{formatDuration(progress.totalMinutes)}</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.statCard} 
+              onPress={() => handleStatPress('time')}
+              activeOpacity={0.8}
+            >
+              <Animated.View
+                style={{
+                  transform: [{
+                    scale: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.5, 1],
+                    })
+                  }]
+                }}
+              >
+                <Clock size={24} color="#43e97b" />
+              </Animated.View>
+              <Animated.Text 
+                style={[
+                  styles.statNumber,
+                  {
+                    transform: [{
+                      scale: fadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.8, 1],
+                      })
+                    }]
+                  }
+                ]}
+              >
+                {formatDuration(progress.totalMinutes)}
+              </Animated.Text>
               <Text style={styles.statLabel}>Total Time</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Flame size={24} color="#fa709a" />
-              <Text style={styles.statNumber}>{progress.streak}</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.statCard} 
+              onPress={() => handleStatPress('streak')}
+              activeOpacity={0.8}
+            >
+              <Animated.View
+                style={{
+                  transform: [{
+                    scale: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.5, 1],
+                    }),
+                    rotate: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '360deg'],
+                    })
+                  }]
+                }}
+              >
+                <Flame size={24} color="#fa709a" />
+              </Animated.View>
+              <Animated.Text 
+                style={[
+                  styles.statNumber,
+                  {
+                    transform: [{
+                      scale: fadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.8, 1],
+                      })
+                    }]
+                  }
+                ]}
+              >
+                {progress.streak}
+              </Animated.Text>
               <Text style={styles.statLabel}>Day Streak</Text>
-            </View>
-          </View>
+            </TouchableOpacity>
+          </Animated.View>
 
           {/* Emotion Progress */}
-          <View style={styles.section}>
+          <Animated.View 
+            style={[
+              styles.section,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
             <View style={styles.sectionHeader}>
-              <TrendingUp size={20} color="#ffffff" />
+              <Animated.View
+                style={{
+                  transform: [{
+                    rotate: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '360deg'],
+                    })
+                  }]
+                }}
+              >
+                <TrendingUp size={20} color="#ffffff" />
+              </Animated.View>
               <Text style={styles.sectionTitle}>Emotional Progress</Text>
             </View>
             
             {sortedEmotionProgress.length > 0 ? (
               <View style={styles.emotionGrid}>
-                {sortedEmotionProgress.map((emotionProgress) => {
+                {sortedEmotionProgress.map((emotionProgress, index) => {
                   const gradient = getEmotionGradient(emotionProgress.emotionId);
+                  const progressAnim = progressAnimations[emotionProgress.emotionId] || new Animated.Value(0);
+                  
                   return (
-                    <View key={emotionProgress.emotionId} style={styles.emotionCard}>
+                    <Animated.View 
+                      key={emotionProgress.emotionId} 
+                      style={[
+                        styles.emotionCard,
+                        {
+                          opacity: fadeAnim,
+                          transform: [{
+                            translateY: slideAnim.interpolate({
+                              inputRange: [0, 50],
+                              outputRange: [0, 20 + (index * 10)],
+                            }),
+                            scale: scaleAnim.interpolate({
+                              inputRange: [0.8, 1],
+                              outputRange: [0.9, 1],
+                            })
+                          }]
+                        }
+                      ]}
+                    >
                       <LinearGradient colors={gradient} style={styles.emotionCardGradient}>
                         <View style={styles.emotionCardContent}>
                           <Text style={styles.emotionName}>
@@ -122,50 +405,127 @@ export default function ProfileScreen() {
                           </Text>
                           <View style={styles.progressContainer}>
                             <View style={styles.progressCircle}>
-                              <Text style={styles.progressPercentage}>
-                                {Math.round(emotionProgress.improvementPercentage)}%
-                              </Text>
+                              <Animated.View
+                                style={[
+                                  styles.progressRing,
+                                  {
+                                    transform: [{
+                                      rotate: progressAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ['0deg', '360deg'],
+                                      })
+                                    }]
+                                  }
+                                ]}
+                              />
+                              <View style={styles.progressInner}>
+                                <Text style={styles.progressPercentage}>
+                                  {Math.round(emotionProgress.improvementPercentage)}%
+                                </Text>
+                              </View>
                             </View>
                           </View>
                           <View style={styles.emotionStats}>
-                            <Text style={styles.emotionStatText}>
-                              {emotionProgress.sessionsCompleted} sessions
-                            </Text>
-                            <Text style={styles.emotionStatText}>
-                              {formatDuration(emotionProgress.totalMinutes)}
-                            </Text>
-                            <Text style={styles.emotionStatText}>
-                              Last: {formatDate(emotionProgress.lastWorkedOn)}
-                            </Text>
+                            <View style={styles.statRow}>
+                              <Award size={12} color="rgba(255,255,255,0.8)" />
+                              <Text style={styles.emotionStatText}>
+                                {emotionProgress.sessionsCompleted} sessions
+                              </Text>
+                            </View>
+                            <View style={styles.statRow}>
+                              <Clock size={12} color="rgba(255,255,255,0.8)" />
+                              <Text style={styles.emotionStatText}>
+                                {formatDuration(emotionProgress.totalMinutes)}
+                              </Text>
+                            </View>
+                            <View style={styles.statRow}>
+                              <Target size={12} color="rgba(255,255,255,0.8)" />
+                              <Text style={styles.emotionStatText}>
+                                {formatDate(emotionProgress.lastWorkedOn)}
+                              </Text>
+                            </View>
                           </View>
                         </View>
                       </LinearGradient>
-                    </View>
+                    </Animated.View>
                   );
                 })}
               </View>
             ) : (
-              <View style={styles.emptyState}>
+              <Animated.View 
+                style={[
+                  styles.emptyState,
+                  {
+                    opacity: fadeAnim,
+                    transform: [{ scale: scaleAnim }]
+                  }
+                ]}
+              >
                 <Text style={styles.emptyStateText}>Start your first session to see progress</Text>
-              </View>
+              </Animated.View>
             )}
-          </View>
+          </Animated.View>
 
           {/* Recent Activity */}
-          <View style={styles.section}>
+          <Animated.View 
+            style={[
+              styles.section,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
             <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <View style={styles.activityCard}>
-              <Text style={styles.activityText}>
-                Last session: {formatDate(progress.lastSessionDate)}
-              </Text>
-              <Text style={styles.activityText}>
-                Total sessions completed: {progress.totalSessions}
-              </Text>
-              <Text style={styles.activityText}>
-                Emotions worked on: {progress.emotionProgress.length}
-              </Text>
-            </View>
-          </View>
+            <Animated.View 
+              style={[
+                styles.activityCard,
+                {
+                  transform: [{ scale: scaleAnim }]
+                }
+              ]}
+            >
+              <Animated.Text 
+                style={[
+                  styles.activityText,
+                  {
+                    opacity: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 1],
+                    })
+                  }
+                ]}
+              >
+                <Text>Last session: </Text>{formatDate(progress.lastSessionDate)}
+              </Animated.Text>
+              <Animated.Text 
+                style={[
+                  styles.activityText,
+                  {
+                    opacity: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 1],
+                    })
+                  }
+                ]}
+              >
+                <Text>Total sessions completed: </Text>{progress.totalSessions}
+              </Animated.Text>
+              <Animated.Text 
+                style={[
+                  styles.activityText,
+                  {
+                    opacity: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 1],
+                    })
+                  }
+                ]}
+              >
+                <Text>Emotions worked on: </Text>{progress.emotionProgress.length}
+              </Animated.Text>
+            </Animated.View>
+          </Animated.View>
         </ScrollView>
       </LinearGradient>
     </SafeAreaView>
@@ -220,6 +580,28 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#667eea",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  statusIndicator: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#1a1a2e",
+    borderRadius: 12,
+    padding: 2,
+  },
+  statusDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#43e97b",
   },
   userName: {
     fontSize: 24,
@@ -245,6 +627,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   statNumber: {
     fontSize: 20,
@@ -282,6 +672,14 @@ const styles = StyleSheet.create({
     width: (width - 52) / 2,
     borderRadius: 16,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   emotionCardGradient: {
     padding: 16,
@@ -305,11 +703,26 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+  progressRing: {
+    position: "absolute",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: "rgba(255,255,255,0.6)",
+    borderTopColor: "transparent",
+  },
+  progressInner: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.4)",
   },
   progressPercentage: {
     color: "#ffffff",
@@ -318,12 +731,17 @@ const styles = StyleSheet.create({
   },
   emotionStats: {
     alignItems: "center",
+    gap: 4,
+  },
+  statRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   emotionStatText: {
     fontSize: 11,
     color: "rgba(255,255,255,0.8)",
     textAlign: "center",
-    marginBottom: 2,
   },
   emptyState: {
     backgroundColor: "rgba(255,255,255,0.05)",
