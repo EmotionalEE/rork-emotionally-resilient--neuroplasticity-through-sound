@@ -430,11 +430,13 @@ export default function SessionScreen() {
             } catch (error) {
               console.log("Error stopping sound during close:", error);
             }
-            // Use router.dismiss() for modal navigation
+            // Use router.dismiss() for modal navigation, fallback to replace
             if (router.canDismiss()) {
               router.dismiss();
-            } else {
+            } else if (router.canGoBack()) {
               router.back();
+            } else {
+              router.replace("/home");
             }
           },
         },
@@ -448,11 +450,13 @@ export default function SessionScreen() {
     } catch (error) {
       console.log("Error stopping sound during quick exit:", error);
     }
-    // Use router.dismiss() for modal navigation
+    // Use router.dismiss() for modal navigation, fallback to replace
     if (router.canDismiss()) {
       router.dismiss();
-    } else {
+    } else if (router.canGoBack()) {
       router.back();
+    } else {
+      router.replace("/home");
     }
   }, [stopSound, router]);
 
@@ -541,11 +545,13 @@ export default function SessionScreen() {
         {
           text: "Continue",
           onPress: () => {
-            // Use router.dismiss() for modal navigation
+            // Use router.dismiss() for modal navigation, fallback to replace
             if (router.canDismiss()) {
               router.dismiss();
-            } else {
+            } else if (router.canGoBack()) {
               router.back();
+            } else {
+              router.replace("/home");
             }
           },
         },

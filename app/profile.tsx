@@ -148,7 +148,13 @@ export default function ProfileScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <TouchableOpacity onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/home");
+              }
+            }} style={styles.backButton}>
               <ArrowLeft size={24} color="#ffffff" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Profile</Text>
