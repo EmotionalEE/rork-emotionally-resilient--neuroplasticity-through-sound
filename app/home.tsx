@@ -22,6 +22,7 @@ import {
   Cloud,
   Zap,
   LogOut,
+  User,
   LucideIcon,
 } from "lucide-react-native";
 import { emotionalStates, sessions } from "@/constants/sessions";
@@ -875,13 +876,22 @@ export default function HomeScreen() {
                 <Text style={styles.greeting}>Welcome back{user?.name ? `, ${user.name}` : ''}</Text>
                 <Text style={styles.title}>How are you feeling?</Text>
               </View>
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={handleLogout}
-                activeOpacity={0.7}
-              >
-                <LogOut size={20} color="rgba(255, 255, 255, 0.7)" />
-              </TouchableOpacity>
+              <View style={styles.headerButtons}>
+                <TouchableOpacity
+                  style={styles.profileButton}
+                  onPress={() => router.push('/profile')}
+                  activeOpacity={0.7}
+                >
+                  <User size={20} color="rgba(255, 255, 255, 0.7)" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.logoutButton}
+                  onPress={handleLogout}
+                  activeOpacity={0.7}
+                >
+                  <LogOut size={20} color="rgba(255, 255, 255, 0.7)" />
+                </TouchableOpacity>
+              </View>
             </View>
           </Animated.View>
 
@@ -1051,6 +1061,18 @@ const styles = StyleSheet.create({
   headerText: {
     flex: 1,
   },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   logoutButton: {
     width: 40,
     height: 40,
@@ -1058,7 +1080,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 16,
   },
   greeting: {
     fontSize: 16,

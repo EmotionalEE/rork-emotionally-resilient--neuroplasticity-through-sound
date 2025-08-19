@@ -2,12 +2,21 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import createContextHook from "@nkzw/create-context-hook";
 
+interface EmotionProgress {
+  emotionId: string;
+  sessionsCompleted: number;
+  totalMinutes: number;
+  improvementPercentage: number;
+  lastWorkedOn: string | null;
+}
+
 interface UserProgress {
   totalSessions: number;
   totalMinutes: number;
   streak: number;
   lastSessionDate: string | null;
   completedSessions: string[];
+  emotionProgress: EmotionProgress[];
 }
 
 interface UserProgressContextType {
@@ -16,8 +25,9 @@ interface UserProgressContextType {
   hasSeenWelcome: boolean;
   completeOnboarding: () => Promise<void>;
   completeWelcome: () => Promise<void>;
-  addSession: (sessionId: string, duration: number) => Promise<void>;
+  addSession: (sessionId: string, duration: number, targetEmotions: string[]) => Promise<void>;
   resetProgress: () => Promise<void>;
+  getEmotionProgress: (emotionId: string) => EmotionProgress | null;
 }
 
 const PROGRESS_KEY = "user_progress";
@@ -30,6 +40,7 @@ const defaultProgress: UserProgress = {
   streak: 0,
   lastSessionDate: null,
   completedSessions: [],
+  emotionProgress: [],
 };
 
 export const [UserProgressProvider, useUserProgress] = createContextHook<UserProgressContextType>(() => {
@@ -99,7 +110,7 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     }
   }, []);
 
-  const addSession = useCallback(async (sessionId: string, duration: number) => {
+  const addSession = useCallback(async (sessionId: string, duration: number, targetEmotions: string[] = []) => {
     const today = new Date().toDateString();
     const lastDate = progress.lastSessionDate;
     
@@ -119,12 +130,45 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
       newStreak = 1;
     }
 
+    // Update emotion progress
+    const updatedEmotionProgress = [...progress.emotionProgress];
+    
+    targetEmotions.forEach(emotionId => {
+      const existingIndex = updatedEmotionProgress.findIndex(ep => ep.emotionId === emotionId);
+      
+      if (existingIndex >= 0) {
+        const existing = updatedEmotionProgress[existingIndex];
+        const newSessionsCompleted = existing.sessionsCompleted + 1;
+        const newTotalMinutes = existing.totalMinutes + duration;
+        
+        // Calculate improvement percentage based on sessions completed (max 100%)
+        const improvementPercentage = Math.min(newSessionsCompleted * 12.5, 100);
+        
+        updatedEmotionProgress[existingIndex] = {
+          ...existing,
+          sessionsCompleted: newSessionsCompleted,
+          totalMinutes: newTotalMinutes,
+          improvementPercentage,
+          lastWorkedOn: today,
+        };
+      } else {
+        updatedEmotionProgress.push({
+          emotionId,
+          sessionsCompleted: 1,
+          totalMinutes: duration,
+          improvementPercentage: 12.5,
+          lastWorkedOn: today,
+        });
+      }
+    });
+
     const newProgress: UserProgress = {
       totalSessions: progress.totalSessions + 1,
       totalMinutes: progress.totalMinutes + duration,
       streak: newStreak,
       lastSessionDate: today,
       completedSessions: [...progress.completedSessions, sessionId],
+      emotionProgress: updatedEmotionProgress,
     };
 
     await saveProgress(newProgress);
@@ -134,6 +178,10 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     await saveProgress(defaultProgress);
   }, [saveProgress]);
 
+  const getEmotionProgress = useCallback((emotionId: string): EmotionProgress | null => {
+    return progress.emotionProgress.find(ep => ep.emotionId === emotionId) || null;
+  }, [progress.emotionProgress]);
+
   return useMemo(() => ({
     progress,
     hasCompletedOnboarding,
@@ -142,5 +190,6 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     completeWelcome,
     addSession,
     resetProgress,
-  }), [progress, hasCompletedOnboarding, hasSeenWelcome, completeOnboarding, completeWelcome, addSession, resetProgress]);
+    getEmotionProgress,
+  }), [progress, hasCompletedOnboarding, hasSeenWelcome, completeOnboarding, completeWelcome, addSession, resetProgress, getEmotionProgress]);
 });

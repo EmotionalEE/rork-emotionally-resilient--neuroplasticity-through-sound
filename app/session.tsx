@@ -525,7 +525,7 @@ export default function SessionScreen() {
     }
     
     if (session) {
-      await addSession(session.id, Math.floor(timeElapsed / 60));
+      await addSession(session.id, Math.floor(timeElapsed / 60), session.targetEmotions);
     }
     
     try {

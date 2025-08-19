@@ -20,6 +20,7 @@ function RootLayoutNav() {
       <Stack.Screen name="register" options={{ presentation: "modal" }} />
       <Stack.Screen name="index" />
       <Stack.Screen name="home" />
+      <Stack.Screen name="profile" />
       <Stack.Screen name="session" options={{ presentation: "modal" }} />
     </Stack>
   );
