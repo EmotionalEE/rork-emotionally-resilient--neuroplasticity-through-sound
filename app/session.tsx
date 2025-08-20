@@ -542,12 +542,20 @@ export default function SessionScreen() {
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
   
+  // Icon animation values
+  const heartAnim = useRef(new Animated.Value(1)).current;
+  const activityAnim = useRef(new Animated.Value(0)).current;
+  const volumeAnim = useRef(new Animated.Value(1)).current;
+  
   // Initialize animated values with proper numbers
   useEffect(() => {
     pulseAnim.setValue(1);
     waveAnim.setValue(0);
     breathAnim.setValue(0);
-  }, [pulseAnim, waveAnim, breathAnim]);
+    heartAnim.setValue(1);
+    activityAnim.setValue(0);
+    volumeAnim.setValue(1);
+  }, [pulseAnim, waveAnim, breathAnim, heartAnim, activityAnim, volumeAnim]);
 
   // Create interpolations for main animations
   const pulseOpacity = pulseAnim.interpolate({
@@ -569,6 +577,24 @@ export default function SessionScreen() {
   const breathIndicatorOpacity = breathAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0.3, 0.8],
+  });
+
+  // Icon animations
+  const heartScale = heartAnim.interpolate({
+    inputRange: [0.8, 1, 1.2],
+    outputRange: [0.8, 1, 1.2],
+    extrapolate: 'clamp',
+  });
+
+  const activityRotation = activityAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const volumeScale = volumeAnim.interpolate({
+    inputRange: [0.9, 1, 1.1],
+    outputRange: [0.9, 1, 1.1],
+    extrapolate: 'clamp',
   });
 
   const handleClose = useCallback(() => {
@@ -643,6 +669,52 @@ export default function SessionScreen() {
         duration: 3000,
         useNativeDriver: false,
       })
+    ).start();
+
+    // Heart beating animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(heartAnim, {
+          toValue: 1.2,
+          duration: 600,
+          useNativeDriver: false,
+        }),
+        Animated.timing(heartAnim, {
+          toValue: 0.8,
+          duration: 600,
+          useNativeDriver: false,
+        }),
+        Animated.timing(heartAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+
+    // Activity pulse animation
+    Animated.loop(
+      Animated.timing(activityAnim, {
+        toValue: 1,
+        duration: 4000,
+        useNativeDriver: false,
+      })
+    ).start();
+
+    // Volume wave animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(volumeAnim, {
+          toValue: 1.1,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+        Animated.timing(volumeAnim, {
+          toValue: 0.9,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+      ])
     ).start();
 
     const breathAnimation = Animated.loop(
@@ -851,15 +923,21 @@ export default function SessionScreen() {
 
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
-              <Heart size={20} color="#fff" />
+              <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+                <Heart size={20} color="#fff" />
+              </Animated.View>
               <Text style={styles.infoText}>Reduces Stress</Text>
             </View>
             <View style={styles.infoCard}>
-              <Activity size={20} color="#fff" />
+              <Animated.View style={{ transform: [{ rotate: activityRotation }] }}>
+                <Activity size={20} color="#fff" />
+              </Animated.View>
               <Text style={styles.infoText}>Balances Energy</Text>
             </View>
             <View style={styles.infoCard}>
-              <Volume2 size={20} color="#fff" />
+              <Animated.View style={{ transform: [{ scale: volumeScale }] }}>
+                <Volume2 size={20} color="#fff" />
+              </Animated.View>
               <Text style={styles.infoText}>Binaural Beats</Text>
             </View>
           </View>
