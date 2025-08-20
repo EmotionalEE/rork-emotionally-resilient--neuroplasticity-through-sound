@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -21,6 +21,69 @@ export default function WelcomeScreen() {
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
   const slideAnim = useMemo(() => new Animated.Value(50), []);
+  
+  // Breathing animation values
+  const breatheScale = useRef(new Animated.Value(1)).current;
+  const breatheOpacity = useRef(new Animated.Value(0.3)).current;
+  const pulseScale = useRef(new Animated.Value(1)).current;
+
+  const startBreathingAnimation = useCallback(() => {
+    // Breathing cycle: 4 seconds in, 4 seconds out
+    const breathingCycle = () => {
+      Animated.sequence([
+        // Inhale - expand
+        Animated.parallel([
+          Animated.timing(breatheScale, {
+            toValue: 1.3,
+            duration: 4000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(breatheOpacity, {
+            toValue: 0.8,
+            duration: 4000,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Exhale - contract
+        Animated.parallel([
+          Animated.timing(breatheScale, {
+            toValue: 1,
+            duration: 4000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(breatheOpacity, {
+            toValue: 0.3,
+            duration: 4000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start(() => {
+        // Loop the animation
+        breathingCycle();
+      });
+    };
+    
+    // Subtle pulse animation for the inner circle
+    const pulseAnimation = () => {
+      Animated.sequence([
+        Animated.timing(pulseScale, {
+          toValue: 1.1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseScale, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        pulseAnimation();
+      });
+    };
+    
+    breathingCycle();
+    pulseAnimation();
+  }, [breatheScale, breatheOpacity, pulseScale]);
 
   useEffect(() => {
     // If user has already seen welcome, redirect immediately
@@ -62,8 +125,13 @@ export default function WelcomeScreen() {
           useNativeDriver: true,
         }),
       ]).start();
+      
+      // Start breathing animation after content loads
+      setTimeout(() => {
+        startBreathingAnimation();
+      }, 1500);
     }
-  }, [showContent, fadeAnim, scaleAnim, slideAnim]);
+  }, [showContent, fadeAnim, scaleAnim, slideAnim, startBreathingAnimation]);
 
   const handleGetStarted = async () => {
     if (Platform.OS !== "web") {
@@ -113,16 +181,54 @@ export default function WelcomeScreen() {
               },
             ]}
           >
+            {/* Breathing outer ring */}
+            <Animated.View
+              style={[
+                styles.breathingRing,
+                {
+                  transform: [{ scale: breatheScale }],
+                  opacity: breatheOpacity,
+                },
+              ]}
+            >
+              <LinearGradient
+                colors={["rgba(102, 126, 234, 0.3)", "rgba(118, 75, 162, 0.3)", "rgba(240, 147, 251, 0.3)"]}
+                style={styles.breathingGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              />
+            </Animated.View>
+            
+            {/* Main logo */}
             <LinearGradient
               colors={["#667eea", "#764ba2", "#f093fb"]}
               style={styles.logoGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <View style={styles.logoInner}>
+              <Animated.View 
+                style={[
+                  styles.logoInner,
+                  {
+                    transform: [{ scale: pulseScale }],
+                  },
+                ]}
+              >
                 <Circle size={40} color="#fff" />
-              </View>
+              </Animated.View>
             </LinearGradient>
+            
+            {/* Breathing instruction text */}
+            <Animated.View
+              style={[
+                styles.breathingTextContainer,
+                {
+                  opacity: fadeAnim,
+                },
+              ]}
+            >
+              <Text style={styles.breathingText}>Breathe with the circle</Text>
+            </Animated.View>
           </Animated.View>
 
           {/* Main Content */}
@@ -263,8 +369,33 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 40,
+    marginBottom: 60,
     position: 'relative',
+  },
+  breathingRing: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    zIndex: 1,
+  },
+  breathingGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 80,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  breathingTextContainer: {
+    position: 'absolute',
+    bottom: -35,
+    alignItems: 'center',
+  },
+  breathingText: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 12,
+    fontWeight: '300' as const,
+    textAlign: 'center',
   },
   mainContent: {
     flex: 1,
