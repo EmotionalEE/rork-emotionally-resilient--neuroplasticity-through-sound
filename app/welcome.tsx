@@ -125,69 +125,72 @@ export default function WelcomeScreen() {
             </LinearGradient>
           </Animated.View>
 
-          {/* Welcome Text */}
-          <Animated.View
-            style={[
-              styles.textContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            <Text style={styles.welcomeText}>Welcome to</Text>
-            <LinearGradient
-              colors={["#667eea", "#764ba2", "#f093fb"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.titleGradient}
+          {/* Main Content */}
+          <View style={styles.mainContent}>
+            {/* Welcome Text */}
+            <Animated.View
+              style={[
+                styles.textContainer,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
             >
-              <Text style={styles.title}>Harmonia</Text>
-            </LinearGradient>
-            <Text style={styles.subtitle}>
-              Transform your emotional landscape through the power of sound frequencies and music
-            </Text>
-          </Animated.View>
+              <Text style={styles.welcomeText}>Welcome to</Text>
+              <LinearGradient
+                colors={["#667eea", "#764ba2", "#f093fb"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.titleGradient}
+              >
+                <Text style={styles.title}>Harmonia</Text>
+              </LinearGradient>
+              <Text style={styles.subtitle}>
+                Transform your emotional landscape through the power of sound frequencies and music
+              </Text>
+            </Animated.View>
 
-          {/* Features */}
-          <Animated.View
-            style={[
-              styles.featuresContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            {[
-              { icon: Circle, text: "Binaural Beats" },
-              { icon: Triangle, text: "Music" },
-              { icon: Hexagon, text: "Emotional Healing" },
-            ].map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <Animated.View
-                  key={index}
-                  style={[
-                    styles.featureItem,
-                    {
-                      opacity: fadeAnim,
-                      transform: [
-                        {
-                          translateY: slideAnim,
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  <View style={styles.featureIcon}>
-                    <Icon size={20} color="#fff" />
-                  </View>
-                  <Text style={styles.featureText}>{feature.text}</Text>
-                </Animated.View>
-              );
-            })}
-          </Animated.View>
+            {/* Features */}
+            <Animated.View
+              style={[
+                styles.featuresContainer,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+            >
+              {[
+                { icon: Circle, text: "Binaural Beats" },
+                { icon: Triangle, text: "Music" },
+                { icon: Hexagon, text: "Emotional Healing" },
+              ].map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <Animated.View
+                    key={index}
+                    style={[
+                      styles.featureItem,
+                      {
+                        opacity: fadeAnim,
+                        transform: [
+                          {
+                            translateY: slideAnim,
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    <View style={styles.featureIcon}>
+                      <Icon size={20} color="#fff" />
+                    </View>
+                    <Text style={styles.featureText}>{feature.text}</Text>
+                  </Animated.View>
+                );
+              })}
+            </Animated.View>
+          </View>
 
           {/* Auth Buttons */}
           <Animated.View
@@ -253,15 +256,20 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingTop: 40,
+    paddingBottom: 40,
   },
 
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 60,
+    marginBottom: 40,
     position: 'relative',
+  },
+  mainContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoGradient: {
     width: 100,
@@ -282,7 +290,7 @@ const styles = StyleSheet.create({
 
   textContainer: {
     alignItems: 'center',
-    marginBottom: 50,
+    marginBottom: 40,
   },
   welcomeText: {
     fontSize: 18,
@@ -313,7 +321,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    marginBottom: 60,
+    marginBottom: 20,
   },
   featureItem: {
     alignItems: 'center',
@@ -338,12 +346,11 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: '100%',
-    position: 'absolute',
-    bottom: 50,
+    paddingHorizontal: 0,
   },
   primaryButton: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   primaryButtonGradient: {
     flexDirection: 'row',
@@ -369,23 +376,23 @@ const styles = StyleSheet.create({
   authOptionsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 15,
+    gap: 12,
   },
   authButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 25,
+    paddingVertical: 12,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderWidth: 1,
     borderColor: 'rgba(102, 126, 234, 0.3)',
   },
   authButtonText: {
     color: '#667eea',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500' as const,
-    marginLeft: 8,
+    marginLeft: 6,
   },
 });
