@@ -26,6 +26,38 @@ export default function WelcomeScreen() {
   const breatheScale = useRef(new Animated.Value(1)).current;
   const breatheOpacity = useRef(new Animated.Value(0.3)).current;
   const pulseScale = useRef(new Animated.Value(1)).current;
+  
+  // Feature icon animations - individual refs
+  const feature1Scale = useRef(new Animated.Value(1)).current;
+  const feature1Rotate = useRef(new Animated.Value(0)).current;
+  const feature1Glow = useRef(new Animated.Value(0.3)).current;
+  
+  const feature2Scale = useRef(new Animated.Value(1)).current;
+  const feature2Rotate = useRef(new Animated.Value(0)).current;
+  const feature2Glow = useRef(new Animated.Value(0.3)).current;
+  
+  const feature3Scale = useRef(new Animated.Value(1)).current;
+  const feature3Rotate = useRef(new Animated.Value(0)).current;
+  const feature3Glow = useRef(new Animated.Value(0.3)).current;
+  
+  // Feature animations array
+  const featureAnimations = useMemo(() => [
+    {
+      scale: feature1Scale,
+      rotate: feature1Rotate,
+      glow: feature1Glow,
+    },
+    {
+      scale: feature2Scale,
+      rotate: feature2Rotate,
+      glow: feature2Glow,
+    },
+    {
+      scale: feature3Scale,
+      rotate: feature3Rotate,
+      glow: feature3Glow,
+    },
+  ], [feature1Scale, feature1Rotate, feature1Glow, feature2Scale, feature2Rotate, feature2Glow, feature3Scale, feature3Rotate, feature3Glow]);
 
   const startBreathingAnimation = useCallback(() => {
     // Breathing cycle: 4 seconds in, 4 seconds out
@@ -84,6 +116,116 @@ export default function WelcomeScreen() {
     breathingCycle();
     pulseAnimation();
   }, [breatheScale, breatheOpacity, pulseScale]);
+  
+  const startFeatureAnimations = useCallback(() => {
+    featureAnimations.forEach((anim, index) => {
+      // Different animation patterns for each feature
+      const delay = index * 800; // Stagger the animations
+      
+      setTimeout(() => {
+        if (index === 0) {
+          // Binaural Beats - Pulsing circle
+          const pulseAnimation = () => {
+            Animated.sequence([
+              Animated.parallel([
+                Animated.timing(anim.scale, {
+                  toValue: 1.2,
+                  duration: 1500,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(anim.glow, {
+                  toValue: 0.8,
+                  duration: 1500,
+                  useNativeDriver: true,
+                }),
+              ]),
+              Animated.parallel([
+                Animated.timing(anim.scale, {
+                  toValue: 1,
+                  duration: 1500,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(anim.glow, {
+                  toValue: 0.3,
+                  duration: 1500,
+                  useNativeDriver: true,
+                }),
+              ]),
+            ]).start(() => pulseAnimation());
+          };
+          pulseAnimation();
+        } else if (index === 1) {
+          // Music - Gentle rotation with scale
+          const musicAnimation = () => {
+            Animated.parallel([
+              Animated.timing(anim.rotate, {
+                toValue: 1,
+                duration: 8000,
+                useNativeDriver: true,
+              }),
+              Animated.sequence([
+                Animated.timing(anim.scale, {
+                  toValue: 1.15,
+                  duration: 2000,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(anim.scale, {
+                  toValue: 1,
+                  duration: 2000,
+                  useNativeDriver: true,
+                }),
+              ]),
+            ]).start(() => {
+              anim.rotate.setValue(0);
+              musicAnimation();
+            });
+          };
+          musicAnimation();
+        } else if (index === 2) {
+          // Emotional Healing - Breathing-like hexagon
+          const healingAnimation = () => {
+            Animated.sequence([
+              Animated.parallel([
+                Animated.timing(anim.scale, {
+                  toValue: 1.1,
+                  duration: 3000,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(anim.glow, {
+                  toValue: 0.9,
+                  duration: 3000,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(anim.rotate, {
+                  toValue: 0.1,
+                  duration: 3000,
+                  useNativeDriver: true,
+                }),
+              ]),
+              Animated.parallel([
+                Animated.timing(anim.scale, {
+                  toValue: 1,
+                  duration: 3000,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(anim.glow, {
+                  toValue: 0.3,
+                  duration: 3000,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(anim.rotate, {
+                  toValue: 0,
+                  duration: 3000,
+                  useNativeDriver: true,
+                }),
+              ]),
+            ]).start(() => healingAnimation());
+          };
+          healingAnimation();
+        }
+      }, delay);
+    });
+  }, [featureAnimations]);
 
   useEffect(() => {
     // If user has already seen welcome, redirect immediately
@@ -130,8 +272,13 @@ export default function WelcomeScreen() {
       setTimeout(() => {
         startBreathingAnimation();
       }, 1500);
+      
+      // Start feature animations after breathing animation
+      setTimeout(() => {
+        startFeatureAnimations();
+      }, 2500);
     }
-  }, [showContent, fadeAnim, scaleAnim, slideAnim, startBreathingAnimation]);
+  }, [showContent, fadeAnim, scaleAnim, slideAnim, startBreathingAnimation, startFeatureAnimations]);
 
   const handleGetStarted = async () => {
     if (Platform.OS !== "web") {
@@ -273,6 +420,7 @@ export default function WelcomeScreen() {
                 { icon: Hexagon, text: "Emotional Healing" },
               ].map((feature, index) => {
                 const Icon = feature.icon;
+                const anim = featureAnimations[index];
                 return (
                   <Animated.View
                     key={index}
@@ -288,9 +436,45 @@ export default function WelcomeScreen() {
                       },
                     ]}
                   >
-                    <View style={styles.featureIcon}>
-                      <Icon size={20} color="#fff" />
-                    </View>
+                    <Animated.View 
+                      style={[
+                        styles.featureIcon,
+                        {
+                          transform: [
+                            { scale: anim.scale },
+                            { 
+                              rotate: anim.rotate.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ['0deg', '360deg'],
+                              })
+                            },
+                          ],
+                          opacity: anim.glow,
+                          shadowColor: '#667eea',
+                          shadowOffset: {
+                            width: 0,
+                            height: 4,
+                          },
+                          shadowOpacity: 0.3,
+                          shadowRadius: 8,
+                          elevation: 8,
+                        },
+                      ]}
+                    >
+                      <LinearGradient
+                        colors={[
+                          index === 0 ? 'rgba(102, 126, 234, 0.8)' : 
+                          index === 1 ? 'rgba(118, 75, 162, 0.8)' : 
+                          'rgba(240, 147, 251, 0.8)',
+                          'rgba(255, 255, 255, 0.1)'
+                        ]}
+                        style={styles.featureIconGradient}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                      >
+                        <Icon size={20} color="#fff" />
+                      </LinearGradient>
+                    </Animated.View>
                     <Text style={styles.featureText}>{feature.text}</Text>
                   </Animated.View>
                 );
@@ -462,12 +646,16 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 12,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  featureIconGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   featureText: {
     color: 'rgba(255, 255, 255, 0.8)',
