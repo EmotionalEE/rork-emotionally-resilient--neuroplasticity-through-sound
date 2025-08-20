@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 40,
   },
   featureItem: {
     alignItems: 'center',
