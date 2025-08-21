@@ -44,7 +44,12 @@ const SacredGeometry = ({
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    console.log('Sacred geometry component mounted, starting animations...', geometry.type);
+    console.log('Sacred geometry component mounted, starting animations...', {
+      type: geometry.type,
+      elements: geometry.elements,
+      rotationSpeed: geometry.rotationSpeed,
+      pulseIntensity: geometry.pulseIntensity
+    });
     
     // Reset all values first
     geometryAnim.setValue(0);
@@ -55,12 +60,12 @@ const SacredGeometry = ({
     pulseAnim.setValue(1);
     
     // Start all animations immediately when component mounts
-    // Main geometry animation
+    // Main geometry animation - varies by geometry type
     const geometryAnimation = Animated.loop(
       Animated.timing(geometryAnim, {
         toValue: 1,
-        duration: 4000,
-        useNativeDriver: false, // Always use JS driver for consistent behavior
+        duration: geometry.type === 'spiral' ? 6000 : geometry.type === 'star' ? 3000 : 4000,
+        useNativeDriver: false,
       })
     );
     geometryAnimation.start();
@@ -75,61 +80,62 @@ const SacredGeometry = ({
     );
     rotationAnimation.start();
 
-    // Counter rotation (counter-clockwise)
+    // Counter rotation (counter-clockwise) - different speed for visual variety
     const counterRotationAnimation = Animated.loop(
       Animated.timing(counterRotationAnim, {
         toValue: 1,
-        duration: geometry.rotationSpeed + 2000,
+        duration: geometry.rotationSpeed + (geometry.elements * 200), // Varies by element count
         useNativeDriver: false,
       })
     );
     counterRotationAnimation.start();
 
-    // Mandala pulsing
+    // Mandala/Flower pulsing - varies by geometry type
     const mandalaAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(mandalaAnim, {
           toValue: 1,
-          duration: 1000,
+          duration: geometry.type === 'lotus' ? 1500 : geometry.type === 'flower' ? 800 : 1000,
           useNativeDriver: false,
         }),
         Animated.timing(mandalaAnim, {
           toValue: 0,
-          duration: 1000,
+          duration: geometry.type === 'lotus' ? 1500 : geometry.type === 'flower' ? 800 : 1000,
           useNativeDriver: false,
         }),
       ])
     );
     mandalaAnimation.start();
 
-    // Flower of Life animation
+    // Flower of Life animation - varies by element count
     const flowerAnimation = Animated.loop(
       Animated.timing(flowerAnim, {
         toValue: 1,
-        duration: 3000,
+        duration: 2000 + (geometry.elements * 100), // More elements = slower animation
         useNativeDriver: false,
       })
     );
     flowerAnimation.start();
 
-    // Pulse animation - use geometry config intensity
+    // Pulse animation - use geometry config intensity and type-specific timing
+    const pulseDuration = geometry.type === 'merkaba' ? 600 : geometry.type === 'triangle' ? 1000 : 800;
     const pulseAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: geometry.pulseIntensity,
-          duration: 800,
+          duration: pulseDuration,
           useNativeDriver: false,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 800,
+          duration: pulseDuration,
           useNativeDriver: false,
         }),
       ])
     );
     pulseAnimation.start();
     
-    console.log('All sacred geometry animations started!');
+    console.log(`Sacred geometry animations started for ${geometry.type} with ${geometry.elements} elements!`);
 
     // Cleanup function to stop all animations
     return () => {
@@ -143,7 +149,7 @@ const SacredGeometry = ({
     };
   }, [geometry]);
 
-  // Create interpolations for animations
+  // Create interpolations for animations - customized per geometry type
   const rotation = rotationAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
@@ -154,21 +160,34 @@ const SacredGeometry = ({
     outputRange: ['360deg', '0deg'],
   });
 
+  // Scale varies by geometry type for unique visual effects
+  const scaleRange = geometry.type === 'spiral' ? [0.6, 1.8, 0.6] : 
+                   geometry.type === 'star' ? [0.9, 1.2, 0.9] :
+                   geometry.type === 'merkaba' ? [0.7, 1.5, 0.7] : [0.8, 1.4, 0.8];
+  
   const scale = geometryAnim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0.8, 1.4, 0.8],
+    outputRange: scaleRange,
     extrapolate: 'clamp',
   });
 
+  // Mandala scale varies by type
+  const mandalaScaleRange = geometry.type === 'lotus' ? [0.8, 1.5, 0.8] :
+                           geometry.type === 'mandala' ? [0.9, 1.3, 0.9] : [0.85, 1.4, 0.85];
+  
   const mandalaScale = mandalaAnim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0.9, 1.3, 0.9],
+    outputRange: mandalaScaleRange,
     extrapolate: 'clamp',
   });
 
+  // Opacity varies by geometry type
+  const opacityRange = geometry.type === 'flower' ? [0.2, 1.0, 0.2] :
+                      geometry.type === 'lotus' ? [0.4, 0.9, 0.4] : [0.3, 0.9, 0.3];
+  
   const flowerOpacity = flowerAnim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0.3, 0.9, 0.3],
+    outputRange: opacityRange,
     extrapolate: 'clamp',
   });
 
