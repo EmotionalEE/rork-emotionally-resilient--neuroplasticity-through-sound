@@ -631,14 +631,8 @@ export default function SessionScreen() {
             } catch (error) {
               console.log("Error stopping sound during close:", error);
             }
-            // Use router.dismiss() for modal navigation, fallback to replace
-            if (router.canDismiss()) {
-              router.dismiss();
-            } else if (router.canGoBack()) {
-              router.back();
-            } else {
-              router.replace("/home");
-            }
+            // Always navigate to home to avoid GO_BACK errors
+            router.replace("/home");
           },
         },
       ]
@@ -651,14 +645,8 @@ export default function SessionScreen() {
     } catch (error) {
       console.log("Error stopping sound during quick exit:", error);
     }
-    // Use router.dismiss() for modal navigation, fallback to replace
-    if (router.canDismiss()) {
-      router.dismiss();
-    } else if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace("/home");
-    }
+    // Always navigate to home to avoid GO_BACK errors
+    router.replace("/home");
   }, [stopSound, router]);
 
   useEffect(() => {
@@ -792,14 +780,8 @@ export default function SessionScreen() {
         {
           text: "Continue",
           onPress: () => {
-            // Use router.dismiss() for modal navigation, fallback to replace
-            if (router.canDismiss()) {
-              router.dismiss();
-            } else if (router.canGoBack()) {
-              router.back();
-            } else {
-              router.replace("/home");
-            }
+            // Always navigate to home to avoid GO_BACK errors
+            router.replace("/home");
           },
         },
       ]
