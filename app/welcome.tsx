@@ -320,15 +320,15 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 30,
-    paddingTop: 40,
-    paddingBottom: 40,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
   },
 
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 60,
     position: 'relative',
+    flex: 1,
   },
   breathingRing: {
     position: 'absolute',
@@ -359,6 +359,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   logoGradient: {
     width: 100,
@@ -379,7 +380,6 @@ const styles = StyleSheet.create({
 
   textContainer: {
     alignItems: 'center',
-    marginBottom: 40,
   },
   welcomeText: {
     fontSize: 18,
@@ -410,6 +410,9 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: '100%',
     paddingHorizontal: 0,
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 20,
   },
   primaryButton: {
     width: '100%',
