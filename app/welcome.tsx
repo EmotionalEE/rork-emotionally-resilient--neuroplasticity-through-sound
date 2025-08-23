@@ -365,17 +365,7 @@ export default function WelcomeScreen() {
               </Animated.View>
             </LinearGradient>
             
-            {/* Breathing instruction text */}
-            <Animated.View
-              style={[
-                styles.breathingTextContainer,
-                {
-                  opacity: fadeAnim,
-                },
-              ]}
-            >
-              <Text style={styles.breathingText}>Breathe with the circle</Text>
-            </Animated.View>
+
           </Animated.View>
 
           {/* Main Content */}
