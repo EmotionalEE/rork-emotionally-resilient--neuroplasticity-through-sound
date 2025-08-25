@@ -95,11 +95,15 @@ export default function RegisterScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
+    console.log("Starting registration process...");
     const result = await register(name.trim(), email.trim(), password);
     
+    console.log("Registration result:", result);
     if (result.success) {
+      console.log("Registration successful, navigating to index");
       router.replace("/");
     } else {
+      console.log("Registration failed:", result.error);
       Alert.alert("Registration Failed", result.error || "Please try again");
     }
   };

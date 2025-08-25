@@ -29,9 +29,14 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
 
   const loadUser = useCallback(async () => {
     try {
+      console.log("Loading user from AsyncStorage...");
       const stored = await AsyncStorage.getItem(AUTH_KEY);
       if (stored) {
-        setUser(JSON.parse(stored));
+        const userData = JSON.parse(stored);
+        console.log("User loaded from storage:", userData);
+        setUser(userData);
+      } else {
+        console.log("No user found in storage");
       }
     } catch (error) {
       console.error("Error loading user:", error);
@@ -46,8 +51,10 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
 
   const saveUser = useCallback(async (userData: User) => {
     try {
+      console.log("Saving user to AsyncStorage:", userData);
       await AsyncStorage.setItem(AUTH_KEY, JSON.stringify(userData));
       setUser(userData);
+      console.log("User saved successfully and state updated");
     } catch (error) {
       console.error("Error saving user:", error);
     }
@@ -101,14 +108,17 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
   const register = useCallback(async (name: string, email: string, password: string) => {
     try {
       setIsLoading(true);
+      console.log("Starting registration for:", { name, email });
       
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const users = await getMockUsers();
+      console.log("Existing users:", users.length);
       const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
       if (existingUser) {
+        console.log("User already exists:", existingUser.email);
         return { success: false, error: "Email already exists" };
       }
       
@@ -119,10 +129,12 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
         createdAt: new Date().toISOString(),
       };
       
+      console.log("Creating new user:", newUser);
       const updatedUsers = [...users, newUser];
       await saveMockUsers(updatedUsers);
       await saveUser(newUser);
       
+      console.log("Registration successful, user saved:", newUser);
       return { success: true };
     } catch (error) {
       console.error("Registration error:", error);
