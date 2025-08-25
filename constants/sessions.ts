@@ -108,12 +108,12 @@ export const sessions: Session[] = [
     targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
     geometry: {
-      type: 'mandala',
-      elements: 16,
-      layers: 3,
-      rotationSpeed: 12000,
-      pulseIntensity: 1.2,
-      colors: ['rgba(168,237,234,0.8)', 'rgba(254,214,227,0.6)', 'rgba(255,255,255,0.8)']
+      type: 'sri_yantra',
+      elements: 9,
+      layers: 4,
+      rotationSpeed: 15000,
+      pulseIntensity: 1.3,
+      colors: ['rgba(168,237,234,0.9)', 'rgba(254,214,227,0.7)', 'rgba(255,255,255,0.8)']
     },
   },
   {

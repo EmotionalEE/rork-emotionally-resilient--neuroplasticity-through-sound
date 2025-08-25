@@ -511,6 +511,115 @@ const SacredGeometry = ({
           </>
         );
 
+      case 'sri_yantra':
+        return (
+          <>
+            {/* Central bindu (dot) */}
+            <Animated.View
+              style={[
+                styles.sriYantraBindu,
+                {
+                  backgroundColor: accentColor,
+                  transform: [{ scale: pulseScale }],
+                },
+              ]}
+            />
+            
+            {/* Inner triangles - upward pointing */}
+            <Animated.View
+              style={[
+                styles.sriYantraContainer,
+                {
+                  transform: [{ rotate: rotation }, { scale: scale }],
+                  opacity: 0.9,
+                },
+              ]}
+            >
+              {[...Array(4)].map((_, i) => (
+                <View
+                  key={`sri-yantra-up-${i}`}
+                  style={[
+                    styles.sriYantraTriangleUp,
+                    {
+                      borderBottomColor: primaryColor,
+                      transform: [
+                        { rotate: `${i * 90}deg` },
+                        { scale: 1 - i * 0.15 },
+                      ],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+            
+            {/* Outer triangles - downward pointing */}
+            <Animated.View
+              style={[
+                styles.sriYantraContainer,
+                {
+                  transform: [{ rotate: counterRotation }, { scale: mandalaScale }],
+                  opacity: 0.8,
+                },
+              ]}
+            >
+              {[...Array(5)].map((_, i) => (
+                <View
+                  key={`sri-yantra-down-${i}`}
+                  style={[
+                    styles.sriYantraTriangleDown,
+                    {
+                      borderTopColor: secondaryColor,
+                      transform: [
+                        { rotate: `${i * 72}deg` },
+                        { scale: 1.2 - i * 0.1 },
+                      ],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+            
+            {/* Outer lotus petals */}
+            <Animated.View
+              style={[
+                styles.sriYantraLotus,
+                {
+                  transform: [{ rotate: `${rotation}deg` }, { scale: flowerOpacity }],
+                  opacity: flowerOpacity,
+                },
+              ]}
+            >
+              {[...Array(geometry.elements)].map((_, i) => (
+                <View
+                  key={`sri-yantra-petal-${i}`}
+                  style={[
+                    styles.sriYantraPetal,
+                    {
+                      backgroundColor: i % 2 === 0 ? primaryColor : secondaryColor,
+                      transform: [
+                        { rotate: `${i * (360 / geometry.elements)}deg` },
+                        { translateY: -90 },
+                      ],
+                    },
+                  ]}
+                />
+              ))}
+            </Animated.View>
+            
+            {/* Outer square boundary */}
+            <Animated.View
+              style={[
+                styles.sriYantraSquare,
+                {
+                  borderColor: accentColor,
+                  transform: [{ rotate: `${counterRotation}deg` }, { scale: breathScale }],
+                  opacity: breathOpacity,
+                },
+              ]}
+            />
+          </>
+        );
+
       default:
         return null;
     }
@@ -1292,5 +1401,87 @@ const styles = StyleSheet.create({
     borderRightColor: "transparent",
     borderBottomColor: "rgba(255,255,255,0.6)",
     top: -15,
+  },
+  // Sri Yantra Sacred Geometry Styles
+  sriYantraBindu: {
+    position: "absolute",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    zIndex: 10,
+  },
+  sriYantraContainer: {
+    position: "absolute",
+    width: 200,
+    height: 200,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sriYantraTriangleUp: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: 20,
+    borderRightWidth: 20,
+    borderBottomWidth: 35,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "rgba(168,237,234,0.8)",
+    top: -17.5,
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
+  },
+  sriYantraTriangleDown: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftWidth: 16,
+    borderRightWidth: 16,
+    borderTopWidth: 28,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "rgba(254,214,227,0.7)",
+    bottom: -14,
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+  },
+  sriYantraLotus: {
+    position: "absolute",
+    width: 240,
+    height: 240,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sriYantraPetal: {
+    position: "absolute",
+    width: 6,
+    height: 30,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.6)",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+  },
+  sriYantraSquare: {
+    position: "absolute",
+    width: 280,
+    height: 280,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.4)",
+    backgroundColor: "transparent",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
 });
