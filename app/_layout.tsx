@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AudioProvider } from "@/providers/AudioProvider";
 import { UserProgressProvider } from "@/providers/UserProgressProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { PaymentProvider } from "@/providers/PaymentProvider";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,6 +23,8 @@ function RootLayoutNav() {
       <Stack.Screen name="home" />
       <Stack.Screen name="profile" />
       <Stack.Screen name="session" options={{ presentation: "modal" }} />
+      <Stack.Screen name="subscription" options={{ presentation: "modal" }} />
+      <Stack.Screen name="payment-methods" options={{ presentation: "modal" }} />
     </Stack>
   );
 }
@@ -35,11 +38,13 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <AuthProvider>
-          <UserProgressProvider>
-            <AudioProvider>
-              <RootLayoutNav />
-            </AudioProvider>
-          </UserProgressProvider>
+          <PaymentProvider>
+            <UserProgressProvider>
+              <AudioProvider>
+                <RootLayoutNav />
+              </AudioProvider>
+            </UserProgressProvider>
+          </PaymentProvider>
         </AuthProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>

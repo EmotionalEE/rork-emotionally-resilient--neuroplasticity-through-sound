@@ -24,11 +24,13 @@ import {
   LogOut,
   User,
   LucideIcon,
+  Crown,
 
 } from "lucide-react-native";
 import { emotionalStates, sessions } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useAuth } from "@/providers/AuthProvider";
+import { usePayment } from "@/providers/PaymentProvider";
 import { EmotionalState, Session } from "@/types/session";
 import * as Haptics from "expo-haptics";
 
@@ -36,6 +38,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { progress } = useUserProgress();
   const { user, logout } = useAuth();
+  const { isPremium, trialDaysLeft, subscription } = usePayment();
   const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
@@ -891,6 +894,15 @@ export default function HomeScreen() {
                 >
                   <User size={20} color="rgba(255, 255, 255, 0.7)" />
                 </TouchableOpacity>
+                {!isPremium && (
+                  <TouchableOpacity
+                    style={styles.premiumButton}
+                    onPress={() => router.push('/subscription')}
+                    activeOpacity={0.7}
+                  >
+                    <Crown size={20} color="#fbbf24" />
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
                   style={styles.logoutButton}
                   onPress={handleLogout}
@@ -1024,6 +1036,71 @@ export default function HomeScreen() {
             ))}
           </View>
 
+          {/* Premium Upgrade Prompt */}
+          {!isPremium && (
+            <Animated.View
+              style={[
+                styles.upgradePrompt,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }],
+                },
+              ]}
+            >
+              <TouchableOpacity
+                onPress={() => router.push('/subscription')}
+                activeOpacity={0.9}
+              >
+                <LinearGradient
+                  colors={["#667eea", "#764ba2"]}
+                  style={styles.upgradeGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={styles.upgradeContent}>
+                    <View style={styles.upgradeIcon}>
+                      <Sparkles size={24} color="#fff" />
+                    </View>
+                    <View style={styles.upgradeText}>
+                      <Text style={styles.upgradeTitle}>Unlock Premium Features</Text>
+                      <Text style={styles.upgradeSubtitle}>
+                        Advanced sacred geometry, binaural beats & more
+                      </Text>
+                    </View>
+                    <View style={styles.upgradeArrow}>
+                      <Text style={styles.upgradeArrowText}>→</Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+
+          {/* Trial Status */}
+          {subscription?.status === 'trialing' && trialDaysLeft > 0 && (
+            <Animated.View
+              style={[
+                styles.trialStatus,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }],
+                },
+              ]}
+            >
+              <LinearGradient
+                colors={["#4ade80", "#22c55e"]}
+                style={styles.trialGradient}
+              >
+                <View style={styles.trialContent}>
+                  <Heart size={20} color="#fff" />
+                  <Text style={styles.trialText}>
+                    {trialDaysLeft} days left in your free trial
+                  </Text>
+                </View>
+              </LinearGradient>
+            </Animated.View>
+          )}
+
           <View style={styles.statsContainer}>
             <Text style={styles.statsTitle}>Your Progress</Text>
             <View style={styles.statsRow}>
@@ -1089,6 +1166,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  premiumButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 191, 36, 0.3)',
   },
   greeting: {
     fontSize: 16,
@@ -1299,6 +1386,75 @@ const styles = StyleSheet.create({
     zIndex: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  upgradePrompt: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  upgradeGradient: {
+    padding: 20,
+  },
+  upgradeContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  upgradeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  upgradeText: {
+    flex: 1,
+  },
+  upgradeTitle: {
+    fontSize: 18,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 4,
+  },
+  upgradeSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.8)",
+    lineHeight: 20,
+  },
+  upgradeArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  upgradeArrowText: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "bold" as const,
+  },
+  trialStatus: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  trialGradient: {
+    padding: 16,
+  },
+  trialContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  trialText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "#fff",
   },
 
 });

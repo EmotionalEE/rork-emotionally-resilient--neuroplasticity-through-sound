@@ -11,9 +11,10 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { ArrowLeft, User, Calendar, Clock, Flame, TrendingUp, Award, Target } from "lucide-react-native";
+import { ArrowLeft, User, Calendar, Clock, Flame, TrendingUp, Award, Target, Crown, CreditCard, Settings } from "lucide-react-native";
 import { useAuth } from "@/providers/AuthProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
+import { usePayment } from "@/providers/PaymentProvider";
 import { emotionalStates } from "@/constants/sessions";
 
 const { width } = Dimensions.get("window");
@@ -24,6 +25,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { progress } = useUserProgress();
+  const { isPremium, subscription, trialDaysLeft } = usePayment();
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -472,6 +474,80 @@ export default function ProfileScreen() {
             )}
           </Animated.View>
 
+          {/* Subscription Status */}
+          <Animated.View 
+            style={[
+              styles.section,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
+            <View style={styles.sectionHeader}>
+              <Crown size={20} color={isPremium ? "#fbbf24" : "#ffffff"} />
+              <Text style={styles.sectionTitle}>Subscription</Text>
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.subscriptionCard}
+              onPress={() => router.push('/subscription')}
+              activeOpacity={0.8}
+            >
+              <LinearGradient 
+                colors={isPremium ? ["#fbbf24", "#f59e0b"] : ["#667eea", "#764ba2"]} 
+                style={styles.subscriptionGradient}
+              >
+                <View style={styles.subscriptionContent}>
+                  <View style={styles.subscriptionInfo}>
+                    <Text style={styles.subscriptionStatus}>
+                      {isPremium ? "Premium Active" : "Free Plan"}
+                    </Text>
+                    <Text style={styles.subscriptionDetails}>
+                      {isPremium 
+                        ? subscription?.status === 'trialing' 
+                          ? `${trialDaysLeft} days left in trial`
+                          : "All premium features unlocked"
+                        : "Upgrade to unlock all features"
+                      }
+                    </Text>
+                  </View>
+                  <Crown size={24} color="#fff" />
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Payment Methods */}
+          <Animated.View 
+            style={[
+              styles.section,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
+            <View style={styles.sectionHeader}>
+              <CreditCard size={20} color="#ffffff" />
+              <Text style={styles.sectionTitle}>Payment & Billing</Text>
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.settingCard}
+              onPress={() => router.push('/payment-methods')}
+              activeOpacity={0.8}
+            >
+              <View style={styles.settingContent}>
+                <View style={styles.settingInfo}>
+                  <Text style={styles.settingTitle}>Payment Methods</Text>
+                  <Text style={styles.settingSubtitle}>Manage your cards and billing</Text>
+                </View>
+                <Settings size={20} color="rgba(255,255,255,0.6)" />
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+
           {/* Recent Activity */}
           <Animated.View 
             style={[
@@ -773,5 +849,56 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 14,
     marginBottom: 8,
+  },
+  subscriptionCard: {
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 8,
+  },
+  subscriptionGradient: {
+    padding: 20,
+  },
+  subscriptionContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  subscriptionInfo: {
+    flex: 1,
+  },
+  subscriptionStatus: {
+    fontSize: 18,
+    fontWeight: "600" as const,
+    color: "#ffffff",
+    marginBottom: 4,
+  },
+  subscriptionDetails: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.8)",
+  },
+  settingCard: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  settingContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  settingInfo: {
+    flex: 1,
+  },
+  settingTitle: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "#ffffff",
+    marginBottom: 4,
+  },
+  settingSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
   },
 });
