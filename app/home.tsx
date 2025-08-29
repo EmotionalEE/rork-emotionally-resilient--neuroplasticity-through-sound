@@ -242,7 +242,7 @@ export default function HomeScreen() {
 
     // Render different sacred geometry based on emotion
     const renderSacredGeometry = () => {
-      const baseOpacity = isSelected ? 1 : 0.6; // Show geometry always, but dimmer when not selected
+      const baseOpacity = 1; // Always show geometry at full brightness
 
       switch (emotion.id) {
         case 'anxious':
