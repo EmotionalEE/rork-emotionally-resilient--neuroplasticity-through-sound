@@ -107,6 +107,8 @@ export const [PaymentProvider, usePayment] = createContextHook<PaymentContextTyp
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+
 
   const loadSubscription = useCallback(async () => {
     if (!user) return;

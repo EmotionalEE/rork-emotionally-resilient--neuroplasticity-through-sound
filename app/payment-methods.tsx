@@ -24,10 +24,12 @@ import {
   Shield,
 } from "lucide-react-native";
 import { usePayment, PaymentMethod } from "@/providers/PaymentProvider";
+import { useAuth } from "@/providers/AuthProvider";
 import * as Haptics from "expo-haptics";
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const {
     paymentMethods,
     addPaymentMethod,
@@ -50,7 +52,17 @@ export default function PaymentMethodsScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
+  
 
+  
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      console.log("User not authenticated, redirecting to login");
+      router.replace("/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+  
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -71,6 +83,19 @@ export default function PaymentMethodsScreen() {
       }),
     ]).start();
   }, [fadeAnim, scaleAnim, slideAnim]);
+  
+  // Show loading screen while checking authentication
+  if (!isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <LinearGradient colors={["#1a1a2e", "#16213e"]} style={styles.gradient}>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        </LinearGradient>
+      </SafeAreaView>
+    );
+  }
 
   const handleAddPaymentMethod = async () => {
     if (!formData.last4 || !formData.brand || !formData.expiryMonth || !formData.expiryYear) {
@@ -108,7 +133,7 @@ export default function PaymentMethodsScreen() {
       } else {
         Alert.alert("Error", result.error || "Failed to add payment method.");
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "Something went wrong. Please try again.");
     } finally {
       setIsProcessing(false);
@@ -724,5 +749,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "rgba(255,255,255,0.6)",
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 18,
+    color: "#ffffff",
+    fontWeight: "500" as const,
   },
 });
