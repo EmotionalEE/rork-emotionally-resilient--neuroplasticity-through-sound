@@ -1,5 +1,4 @@
 import React from 'react';
-import { View, Platform } from 'react-native';
 import Svg, { Circle, Path, Line, Polygon, G } from 'react-native-svg';
 
 interface SacredGeometryProps {
@@ -14,10 +13,6 @@ export const EggOfLife: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -41,10 +36,6 @@ export const FruitOfLife: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -76,10 +67,6 @@ export const MetatronsCube: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -119,10 +106,6 @@ export const VesicaPiscis: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -140,10 +123,6 @@ export const SeedOfLife: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -167,10 +146,6 @@ export const SixPetalRosette: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -193,10 +168,6 @@ export const TreeOfLife: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill={color}>
@@ -238,10 +209,6 @@ export const Merkabah: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -264,10 +231,6 @@ export const FlowerOfLife: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -301,10 +264,6 @@ export const Cubeoctahedron: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -336,10 +295,6 @@ export const VectorEquilibrium: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
@@ -371,10 +326,6 @@ export const TetrahedronGrid: React.FC<SacredGeometryProps> = ({
   color = 'rgba(255,255,255,0.6)', 
   strokeWidth = 1 
 }) => {
-  if (Platform.OS === 'web') {
-    return <View style={{ width: size, height: size }} />;
-  }
-  
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
