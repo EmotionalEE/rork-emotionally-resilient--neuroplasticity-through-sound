@@ -90,7 +90,7 @@ export default function SubscriptionScreen() {
           [
             {
               text: "Continue",
-              onPress: () => router.back(),
+              onPress: () => router.replace("/home"),
             },
           ]
         );
@@ -121,7 +121,7 @@ export default function SubscriptionScreen() {
           [
             {
               text: "Start Exploring",
-              onPress: () => router.back(),
+              onPress: () => router.replace("/home"),
             },
           ]
         );
@@ -308,7 +308,7 @@ export default function SubscriptionScreen() {
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => router.replace("/home")}
               style={styles.backButton}
             >
               <ArrowLeft size={24} color="#ffffff" />

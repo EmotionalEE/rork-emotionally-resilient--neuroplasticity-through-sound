@@ -112,7 +112,7 @@ export default function RegisterScreen() {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    router.back();
+    router.replace("/login");
   };
 
   const handleSignIn = () => {

@@ -151,11 +151,7 @@ export default function ProfileScreen() {
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={() => {
-              if (router.canGoBack()) {
-                router.back();
-              } else {
-                router.replace("/home");
-              }
+              router.replace("/home");
             }} style={styles.backButton}>
               <ArrowLeft size={24} color="#ffffff" />
             </TouchableOpacity>

@@ -359,7 +359,7 @@ export default function PaymentMethodsScreen() {
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => router.replace("/profile")}
               style={styles.backButton}
             >
               <ArrowLeft size={24} color="#ffffff" />
