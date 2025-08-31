@@ -27,6 +27,20 @@ import {
   Crown,
 
 } from "lucide-react-native";
+import {
+  EggOfLife,
+  FruitOfLife,
+  MetatronsCube,
+  VesicaPiscis,
+  SeedOfLife,
+  SixPetalRosette,
+  TreeOfLife,
+  Merkabah,
+  FlowerOfLife,
+  Cubeoctahedron,
+  VectorEquilibrium,
+  TetrahedronGrid,
+} from "@/components/SacredGeometry";
 import { emotionalStates, sessions } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -243,40 +257,30 @@ export default function HomeScreen() {
     // Render different sacred geometry based on emotion
     const renderSacredGeometry = () => {
       const baseOpacity = 1; // Always show geometry at full brightness
+      const geometryColor = getGeometryColor(emotion.id);
 
       switch (emotion.id) {
         case 'anxious':
-          // Chaotic swirling pattern for anxiety
+          // Chaotic swirling pattern for anxiety - using Tetrahedron Grid for dissolution
           return (
             <>
               <Animated.View
                 style={[
-                  styles.iconMandala,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: rotationInterpolation }, 
                       { scale: pulseScaleInterpolation }
                     ],
-                    opacity: baseOpacity * 0.6,
+                    opacity: baseOpacity * 0.8,
                   },
                 ]}
               >
-                {[...Array(12)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.mandalaRay,
-                      {
-                        transform: [{ rotate: `${i * 30}deg` }],
-                        backgroundColor: 'rgba(255,100,100,0.4)',
-                      },
-                    ]}
-                  />
-                ))}
+                <TetrahedronGrid size={50} color={geometryColor} strokeWidth={1.5} />
               </Animated.View>
               <Animated.View
                 style={[
-                  styles.iconSpiral,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: counterRotationInterpolation }, 
@@ -286,57 +290,32 @@ export default function HomeScreen() {
                   },
                 ]}
               >
-                {[...Array(8)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.spiralDot,
-                      {
-                        transform: [
-                          { rotate: `${i * 45}deg` },
-                          { translateY: -12 - i * 2 },
-                        ],
-                        backgroundColor: 'rgba(255,150,150,0.7)',
-                      },
-                    ]}
-                  />
-                ))}
+                <VesicaPiscis size={35} color={geometryColor} strokeWidth={1} />
               </Animated.View>
             </>
           );
 
         case 'stressed':
-          // Sharp, jagged patterns for stress
+          // Sharp, precise patterns for stress - using Merkabah
           return (
             <>
               <Animated.View
                 style={[
-                  styles.iconTriangles,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: rotationInterpolation }, 
                       { scale: pulseScaleInterpolation }
                     ],
-                    opacity: 0.7 * baseOpacity,
+                    opacity: 0.8 * baseOpacity,
                   },
                 ]}
               >
-                {[...Array(6)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.innerTriangle,
-                      {
-                        transform: [{ rotate: `${i * 60}deg` }],
-                        borderBottomColor: 'rgba(255,200,0,0.6)',
-                      },
-                    ]}
-                  />
-                ))}
+                <Merkabah size={45} color={geometryColor} strokeWidth={2} />
               </Animated.View>
               <Animated.View
                 style={[
-                  styles.iconMandala,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: counterRotationInterpolation }, 
@@ -346,58 +325,32 @@ export default function HomeScreen() {
                   },
                 ]}
               >
-                {[...Array(8)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.mandalaRay,
-                      {
-                        transform: [{ rotate: `${i * 45}deg` }],
-                        backgroundColor: 'rgba(255,180,0,0.5)',
-                        width: 2,
-                      },
-                    ]}
-                  />
-                ))}
+                <TreeOfLife size={30} color={geometryColor} strokeWidth={1} />
               </Animated.View>
             </>
           );
 
         case 'sad':
-          // Gentle, flowing downward patterns
+          // Gentle, flowing patterns - using Seed of Life
           return (
             <>
               <Animated.View
                 style={[
-                  styles.iconFlower,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { scale: waveScaleInterpolation }, 
                       { rotate: rotationInterpolation }
                     ],
-                    opacity: baseOpacity * 0.6,
+                    opacity: baseOpacity * 0.7,
                   },
                 ]}
               >
-                {[...Array(6)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.flowerPetal,
-                      {
-                        transform: [
-                          { rotate: `${i * 60}deg` },
-                          { translateY: -10 },
-                        ],
-                        borderColor: 'rgba(150,150,255,0.4)',
-                      },
-                    ]}
-                  />
-                ))}
+                <SeedOfLife size={45} color={geometryColor} strokeWidth={1.5} />
               </Animated.View>
               <Animated.View
                 style={[
-                  styles.iconSpiral,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: counterRotationInterpolation }, 
@@ -407,420 +360,218 @@ export default function HomeScreen() {
                   },
                 ]}
               >
-                {[...Array(5)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.spiralDot,
-                      {
-                        transform: [
-                          { rotate: `${i * 72}deg` },
-                          { translateY: -18 - i * 2 },
-                        ],
-                        backgroundColor: 'rgba(120,120,255,0.6)',
-                      },
-                    ]}
-                  />
-                ))}
+                <VesicaPiscis size={30} color={geometryColor} strokeWidth={1} />
               </Animated.View>
             </>
           );
 
         case 'angry':
-          // Intense, explosive patterns
+          // Intense, powerful patterns - using Metatron's Cube
           return (
             <>
               <Animated.View
                 style={[
-                  styles.iconMandala,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: rotationInterpolation }, 
                       { scale: pulseScaleInterpolation }
                     ],
-                    opacity: baseOpacity * 0.6,
+                    opacity: baseOpacity * 0.8,
                   },
                 ]}
               >
-                {[...Array(16)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.mandalaRay,
-                      {
-                        transform: [{ rotate: `${i * 22.5}deg` }],
-                        backgroundColor: 'rgba(255,80,120,0.6)',
-                        width: i % 2 === 0 ? 2 : 1,
-                        height: i % 2 === 0 ? 30 : 20,
-                      },
-                    ]}
-                  />
-                ))}
+                <MetatronsCube size={50} color={geometryColor} strokeWidth={2} />
               </Animated.View>
               <Animated.View
                 style={[
-                  styles.iconTriangles,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: counterRotationInterpolation }, 
                       { scale: spiralScaleInterpolation }
                     ],
-                    opacity: 0.8 * baseOpacity,
+                    opacity: 0.6 * baseOpacity,
                   },
                 ]}
               >
-                {[...Array(4)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.innerTriangle,
-                      {
-                        transform: [{ rotate: `${i * 90}deg` }],
-                        borderBottomColor: 'rgba(255,100,150,0.7)',
-                        borderLeftWidth: 6,
-                        borderRightWidth: 6,
-                        borderBottomWidth: 10,
-                      },
-                    ]}
-                  />
-                ))}
+                <Merkabah size={35} color={geometryColor} strokeWidth={1.5} />
               </Animated.View>
             </>
           );
 
         case 'calm':
-          // Smooth, flowing wave patterns
+          // Smooth, flowing patterns - using Flower of Life
           return (
             <>
               <Animated.View
                 style={[
-                  styles.iconFlower,
+                  styles.geometryContainer,
                   {
                     transform: [{ scale: waveScaleInterpolation }],
-                    opacity: baseOpacity * 0.6,
+                    opacity: baseOpacity * 0.7,
                   },
                 ]}
               >
-                {[...Array(8)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.flowerPetal,
-                      {
-                        transform: [
-                          { rotate: `${i * 45}deg` },
-                          { translateY: -12 },
-                        ],
-                        borderColor: 'rgba(100,200,255,0.4)',
-                        borderRadius: 8,
-                      },
-                    ]}
-                  />
-                ))}
+                <FlowerOfLife size={50} color={geometryColor} strokeWidth={1} />
               </Animated.View>
               <Animated.View
                 style={[
-                  styles.iconSpiral,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: rotationInterpolation }, 
                       { scale: spiralScaleInterpolation }
                     ],
-                    opacity: 0.6 * baseOpacity,
+                    opacity: 0.5 * baseOpacity,
                   },
                 ]}
               >
-                {[...Array(12)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.spiralDot,
-                      {
-                        transform: [
-                          { rotate: `${i * 30}deg` },
-                          { translateY: -8 - Math.sin(i * 0.5) * 8 },
-                        ],
-                        backgroundColor: 'rgba(150,220,255,0.6)',
-                        borderRadius: 2,
-                      },
-                    ]}
-                  />
-                ))}
+                <SeedOfLife size={30} color={geometryColor} strokeWidth={1} />
               </Animated.View>
             </>
           );
 
         case 'focused':
-          // Precise, geometric patterns
+          // Precise, geometric patterns - using Vector Equilibrium
           return (
             <>
               <Animated.View
                 style={[
-                  styles.iconMandala,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: rotationInterpolation }, 
                       { scale: pulseScaleInterpolation }
                     ],
-                    opacity: baseOpacity * 0.6,
+                    opacity: baseOpacity * 0.8,
                   },
                 ]}
               >
-                {[...Array(6)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.mandalaRay,
-                      {
-                        transform: [{ rotate: `${i * 60}deg` }],
-                        backgroundColor: 'rgba(100,255,150,0.5)',
-                        width: 2,
-                        height: 28,
-                      },
-                    ]}
-                  />
-                ))}
+                <VectorEquilibrium size={50} color={geometryColor} strokeWidth={1.5} />
               </Animated.View>
               <Animated.View
                 style={[
-                  styles.iconTriangles,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: counterRotationInterpolation }, 
                       { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: 0.7 * baseOpacity,
-                  },
-                ]}
-              >
-                {[...Array(3)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.innerTriangle,
-                      {
-                        transform: [{ rotate: `${i * 120}deg` }],
-                        borderBottomColor: 'rgba(120,255,180,0.6)',
-                      },
-                    ]}
-                  />
-                ))}
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.iconFlower,
-                  {
-                    transform: [{ scale: waveScaleInterpolation }],
-                    opacity: 0.4 * baseOpacity,
-                  },
-                ]}
-              >
-                {[...Array(4)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.flowerPetal,
-                      {
-                        transform: [
-                          { rotate: `${i * 90}deg` },
-                          { translateY: -6 },
-                        ],
-                        borderColor: 'rgba(150,255,200,0.4)',
-                        width: 8,
-                        height: 8,
-                      },
-                    ]}
-                  />
-                ))}
-              </Animated.View>
-            </>
-          );
-
-        case 'happy':
-          // Bright, radiating sun patterns
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.iconMandala,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.6,
-                  },
-                ]}
-              >
-                {[...Array(12)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.mandalaRay,
-                      {
-                        transform: [{ rotate: `${i * 30}deg` }],
-                        backgroundColor: 'rgba(255,200,100,0.6)',
-                        width: i % 3 === 0 ? 3 : 1,
-                        height: i % 3 === 0 ? 32 : 24,
-                      },
-                    ]}
-                  />
-                ))}
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.iconFlower,
-                  {
-                    transform: [
-                      { scale: waveScaleInterpolation }, 
-                      { rotate: counterRotationInterpolation }
-                    ],
-                    opacity: 0.7 * baseOpacity,
-                  },
-                ]}
-              >
-                {[...Array(8)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.flowerPetal,
-                      {
-                        transform: [
-                          { rotate: `${i * 45}deg` },
-                          { translateY: -10 },
-                        ],
-                        borderColor: 'rgba(255,220,120,0.5)',
-                        backgroundColor: 'rgba(255,240,150,0.2)',
-                      },
-                    ]}
-                  />
-                ))}
-              </Animated.View>
-            </>
-          );
-
-        case 'energized':
-          // Dynamic, electric patterns
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.iconMandala,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.6,
-                  },
-                ]}
-              >
-                {[...Array(10)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.mandalaRay,
-                      {
-                        transform: [{ rotate: `${i * 36}deg` }],
-                        backgroundColor: 'rgba(100,255,255,0.6)',
-                        width: 1.5,
-                        height: 26,
-                      },
-                    ]}
-                  />
-                ))}
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.iconSpiral,
-                  {
-                    transform: [
-                      { rotate: counterRotationInterpolation }, 
-                      { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: 0.8 * baseOpacity,
-                  },
-                ]}
-              >
-                {[...Array(8)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.spiralDot,
-                      {
-                        transform: [
-                          { rotate: `${i * 45}deg` },
-                          { translateY: -14 - i * 1.5 },
-                        ],
-                        backgroundColor: 'rgba(150,255,255,0.8)',
-                        width: 4,
-                        height: 4,
-                      },
-                    ]}
-                  />
-                ))}
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.iconTriangles,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: waveScaleInterpolation }
                     ],
                     opacity: 0.6 * baseOpacity,
                   },
                 ]}
               >
-                {[...Array(6)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.innerTriangle,
-                      {
-                        transform: [{ rotate: `${i * 60}deg` }],
-                        borderBottomColor: 'rgba(120,255,255,0.5)',
-                        borderLeftWidth: 3,
-                        borderRightWidth: 3,
-                        borderBottomWidth: 5,
-                      },
-                    ]}
-                  />
-                ))}
+                <Cubeoctahedron size={35} color={geometryColor} strokeWidth={1} />
               </Animated.View>
             </>
           );
 
-        default:
-          // Default pattern
+        case 'happy':
+          // Bright, radiating patterns - using Six-Petal Rosette
           return (
             <>
               <Animated.View
                 style={[
-                  styles.iconMandala,
+                  styles.geometryContainer,
                   {
                     transform: [
                       { rotate: rotationInterpolation }, 
                       { scale: pulseScaleInterpolation }
                     ],
-                    opacity: baseOpacity * 0.6,
+                    opacity: baseOpacity * 0.8,
                   },
                 ]}
               >
-                {[...Array(8)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.mandalaRay,
-                      {
-                        transform: [{ rotate: `${i * 45}deg` }],
-                      },
-                    ]}
-                  />
-                ))}
+                <SixPetalRosette size={50} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { scale: waveScaleInterpolation }, 
+                      { rotate: counterRotationInterpolation }
+                    ],
+                    opacity: 0.6 * baseOpacity,
+                  },
+                ]}
+              >
+                <FlowerOfLife size={35} color={geometryColor} strokeWidth={1} />
               </Animated.View>
             </>
           );
+
+        case 'energized':
+          // Dynamic, electric patterns - using Fruit of Life
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.8,
+                  },
+                ]}
+              >
+                <FruitOfLife size={50} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
+                    ],
+                    opacity: 0.7 * baseOpacity,
+                  },
+                ]}
+              >
+                <EggOfLife size={35} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+            </>
+          );
+
+        default:
+          // Default pattern - using Egg of Life
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.7,
+                  },
+                ]}
+              >
+                <EggOfLife size={45} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+            </>
+          );
+      }
+    };
+
+    // Get color based on emotion
+    const getGeometryColor = (emotionId: string): string => {
+      switch (emotionId) {
+        case 'anxious': return 'rgba(255,100,100,0.7)';
+        case 'stressed': return 'rgba(255,200,0,0.7)';
+        case 'sad': return 'rgba(150,150,255,0.7)';
+        case 'angry': return 'rgba(255,80,120,0.8)';
+        case 'calm': return 'rgba(100,200,255,0.7)';
+        case 'focused': return 'rgba(100,255,150,0.7)';
+        case 'happy': return 'rgba(255,200,100,0.8)';
+        case 'energized': return 'rgba(100,255,255,0.8)';
+        default: return 'rgba(255,255,255,0.6)';
       }
     };
 
@@ -1320,67 +1071,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     position: "relative",
   },
-  iconMandala: {
+  geometryContainer: {
     position: "absolute",
-    width: 50,
-    height: 50,
     alignItems: "center",
     justifyContent: "center",
-  },
-  mandalaRay: {
-    position: "absolute",
-    width: 1,
-    height: 25,
-    backgroundColor: "rgba(255,255,255,0.4)",
-    top: 0,
-  },
-  iconSpiral: {
-    position: "absolute",
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  spiralDot: {
-    position: "absolute",
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: "rgba(255,255,255,0.6)",
-  },
-  iconTriangles: {
-    position: "absolute",
-    width: 30,
-    height: 30,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  innerTriangle: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderBottomWidth: 7,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "rgba(255,255,255,0.5)",
-    top: -3.5,
-  },
-  iconFlower: {
-    position: "absolute",
-    width: 35,
-    height: 35,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  flowerPetal: {
-    position: "absolute",
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
   },
   mainIcon: {
     zIndex: 10,

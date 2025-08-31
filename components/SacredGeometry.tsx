@@ -1,366 +1,397 @@
-import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Animated } from 'react-native';
-import Svg, { Circle, Path, Polygon, G, Defs, LinearGradient, Stop } from 'react-native-svg';
+import React from 'react';
+import { View, Platform } from 'react-native';
+import Svg, { Circle, Path, Line, Polygon, G } from 'react-native-svg';
 
 interface SacredGeometryProps {
-  type: 'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral';
   size?: number;
   color?: string;
-  animated?: boolean;
-  opacity?: number;
+  strokeWidth?: number;
 }
 
-export default function SacredGeometry({ 
-  type, 
-  size = 200, 
-  color = '#ffffff', 
-  animated = true,
-  opacity = 0.3 
-}: SacredGeometryProps) {
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (animated) {
-      // Rotation animation
-      Animated.loop(
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: 30000,
-          useNativeDriver: true,
-        })
-      ).start();
-
-      // Pulse animation
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.1,
-            duration: 3000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 3000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    }
-  }, [animated, rotateAnim, pulseAnim]);
-
-  const rotation = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const renderFlowerOfLife = () => {
-    const radius = size / 8;
-    const centerX = size / 2;
-    const centerY = size / 2;
-    
-    const circles = [];
-    
-    // Center circle
-    circles.push(
-      <Circle
-        key="center"
-        cx={centerX}
-        cy={centerY}
-        r={radius}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        opacity={opacity}
-      />
-    );
-    
-    // Six surrounding circles
-    for (let i = 0; i < 6; i++) {
-      const angle = (i * 60) * (Math.PI / 180);
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
-      
-      circles.push(
-        <Circle
-          key={`circle-${i}`}
-          cx={x}
-          cy={y}
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          opacity={opacity}
-        />
-      );
-    }
-    
-    // Outer ring of circles
-    for (let i = 0; i < 12; i++) {
-      const angle = (i * 30) * (Math.PI / 180);
-      const distance = radius * 2;
-      const x = centerX + distance * Math.cos(angle);
-      const y = centerY + distance * Math.sin(angle);
-      
-      circles.push(
-        <Circle
-          key={`outer-${i}`}
-          cx={x}
-          cy={y}
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth="1.5"
-          opacity={opacity * 0.7}
-        />
-      );
-    }
-    
-    return circles;
-  };
-
-  const renderMetatronsCube = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 6;
-    
-    const points: React.ReactElement[] = [];
-    const lines: React.ReactElement[] = [];
-    
-    // Generate 13 circles (Metatron's Cube)
-    const positions = [
-      { x: centerX, y: centerY }, // Center
-      // Inner hexagon
-      ...Array.from({ length: 6 }, (_, i) => {
-        const angle = (i * 60) * (Math.PI / 180);
-        return {
-          x: centerX + radius * Math.cos(angle),
-          y: centerY + radius * Math.sin(angle)
-        };
-      }),
-      // Outer hexagon
-      ...Array.from({ length: 6 }, (_, i) => {
-        const angle = (i * 60) * (Math.PI / 180);
-        return {
-          x: centerX + radius * 2 * Math.cos(angle),
-          y: centerY + radius * 2 * Math.sin(angle)
-        };
-      })
-    ];
-    
-    // Draw circles
-    positions.forEach((pos, index) => {
-      points.push(
-        <Circle
-          key={`point-${index}`}
-          cx={pos.x}
-          cy={pos.y}
-          r={8}
-          fill={color}
-          opacity={opacity}
-        />
-      );
-    });
-    
-    // Draw connecting lines
-    for (let i = 0; i < positions.length; i++) {
-      for (let j = i + 1; j < positions.length; j++) {
-        lines.push(
-          <Path
-            key={`line-${i}-${j}`}
-            d={`M ${positions[i].x} ${positions[i].y} L ${positions[j].x} ${positions[j].y}`}
-            stroke={color}
-            strokeWidth="1"
-            opacity={opacity * 0.5}
-          />
-        );
-      }
-    }
-    
-    return [...lines, ...points];
-  };
-
-  const renderSriYantra = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const baseSize = size / 3;
-    
-    const triangles: React.ReactElement[] = [];
-    
-    // Upward triangles (Shiva)
-    for (let i = 0; i < 5; i++) {
-      const scale = 1 - (i * 0.15);
-      const triangleSize = baseSize * scale;
-      const points = `${centerX},${centerY - triangleSize} ${centerX - triangleSize * 0.866},${centerY + triangleSize * 0.5} ${centerX + triangleSize * 0.866},${centerY + triangleSize * 0.5}`;
-      
-      triangles.push(
-        <Polygon
-          key={`up-${i}`}
-          points={points}
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          opacity={opacity - (i * 0.05)}
-        />
-      );
-    }
-    
-    // Downward triangles (Shakti)
-    for (let i = 0; i < 4; i++) {
-      const scale = 0.9 - (i * 0.15);
-      const triangleSize = baseSize * scale;
-      const points = `${centerX},${centerY + triangleSize} ${centerX - triangleSize * 0.866},${centerY - triangleSize * 0.5} ${centerX + triangleSize * 0.866},${centerY - triangleSize * 0.5}`;
-      
-      triangles.push(
-        <Polygon
-          key={`down-${i}`}
-          points={points}
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          opacity={opacity - (i * 0.05)}
-        />
-      );
-    }
-    
-    return triangles;
-  };
-
-  const renderVesicaPiscis = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 4;
-    const offset = radius * 0.6;
-    
-    return [
-      <Circle
-        key="left"
-        cx={centerX - offset}
-        cy={centerY}
-        r={radius}
-        fill="none"
-        stroke={color}
-        strokeWidth="3"
-        opacity={opacity}
-      />,
-      <Circle
-        key="right"
-        cx={centerX + offset}
-        cy={centerY}
-        r={radius}
-        fill="none"
-        stroke={color}
-        strokeWidth="3"
-        opacity={opacity}
-      />
-    ];
-  };
-
-  const renderGoldenSpiral = () => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const phi = 1.618033988749;
-    
-    let pathData = '';
-    let currentSize = 5;
-    let x = centerX;
-    let y = centerY;
-    
-    for (let i = 0; i < 8; i++) {
-      const nextSize = currentSize * phi;
-      
-      // Create quarter circle arc
-      const direction = i % 4;
-      let startX = x, startY = y, endX = x, endY = y;
-      
-      switch (direction) {
-        case 0: // Right
-          endX = x + currentSize;
-          pathData += `M ${startX} ${startY} A ${currentSize} ${currentSize} 0 0 1 ${endX} ${endY}`;
-          x = endX;
-          break;
-        case 1: // Down
-          endY = y + currentSize;
-          pathData += ` A ${currentSize} ${currentSize} 0 0 1 ${endX} ${endY}`;
-          y = endY;
-          break;
-        case 2: // Left
-          endX = x - currentSize;
-          pathData += ` A ${currentSize} ${currentSize} 0 0 1 ${endX} ${endY}`;
-          x = endX;
-          break;
-        case 3: // Up
-          endY = y - currentSize;
-          pathData += ` A ${currentSize} ${currentSize} 0 0 1 ${endX} ${endY}`;
-          y = endY;
-          break;
-      }
-      
-      currentSize = nextSize;
-    }
-    
-    return [
-      <Path
-        key="spiral"
-        d={pathData}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        opacity={opacity}
-      />
-    ];
-  };
-
-  const renderGeometry = () => {
-    switch (type) {
-      case 'flowerOfLife':
-        return renderFlowerOfLife();
-      case 'metatronsCube':
-        return renderMetatronsCube();
-      case 'sriYantra':
-        return renderSriYantra();
-      case 'vesicaPiscis':
-        return renderVesicaPiscis();
-      case 'goldenSpiral':
-        return renderGoldenSpiral();
-      default:
-        return renderFlowerOfLife();
-    }
-  };
-
+// Egg of Life
+export const EggOfLife: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          width: size,
-          height: size,
-          transform: [
-            { rotate: animated ? rotation : '0deg' },
-            { scale: animated ? pulseAnim : 1 }
-          ]
-        }
-      ]}
-    >
-      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <Defs>
-          <LinearGradient id="geometryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <Stop offset="0%" stopColor={color} stopOpacity={opacity} />
-            <Stop offset="100%" stopColor={color} stopOpacity={opacity * 0.5} />
-          </LinearGradient>
-        </Defs>
-        <G>
-          {renderGeometry()}
-        </G>
-      </Svg>
-    </Animated.View>
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Center circle */}
+        <Circle cx="50" cy="50" r="12" />
+        {/* Surrounding circles */}
+        <Circle cx="50" cy="26" r="12" />
+        <Circle cx="71" cy="38" r="12" />
+        <Circle cx="71" cy="62" r="12" />
+        <Circle cx="50" cy="74" r="12" />
+        <Circle cx="29" cy="62" r="12" />
+        <Circle cx="29" cy="38" r="12" />
+      </G>
+    </Svg>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+// Fruit of Life
+export const FruitOfLife: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Inner Egg of Life */}
+        <Circle cx="50" cy="50" r="8" />
+        <Circle cx="50" cy="34" r="8" />
+        <Circle cx="64" cy="42" r="8" />
+        <Circle cx="64" cy="58" r="8" />
+        <Circle cx="50" cy="66" r="8" />
+        <Circle cx="36" cy="58" r="8" />
+        <Circle cx="36" cy="42" r="8" />
+        {/* Outer ring */}
+        <Circle cx="50" cy="18" r="8" />
+        <Circle cx="72" cy="26" r="8" />
+        <Circle cx="82" cy="50" r="8" />
+        <Circle cx="72" cy="74" r="8" />
+        <Circle cx="50" cy="82" r="8" />
+        <Circle cx="28" cy="74" r="8" />
+        <Circle cx="18" cy="50" r="8" />
+        <Circle cx="28" cy="26" r="8" />
+      </G>
+    </Svg>
+  );
+};
+
+// Metatron's Cube
+export const MetatronsCube: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Outer circles */}
+        <Circle cx="50" cy="15" r="6" />
+        <Circle cx="75" cy="25" r="6" />
+        <Circle cx="85" cy="50" r="6" />
+        <Circle cx="75" cy="75" r="6" />
+        <Circle cx="50" cy="85" r="6" />
+        <Circle cx="25" cy="75" r="6" />
+        <Circle cx="15" cy="50" r="6" />
+        <Circle cx="25" cy="25" r="6" />
+        {/* Inner circles */}
+        <Circle cx="50" cy="35" r="6" />
+        <Circle cx="65" cy="50" r="6" />
+        <Circle cx="50" cy="65" r="6" />
+        <Circle cx="35" cy="50" r="6" />
+        <Circle cx="50" cy="50" r="6" />
+        {/* Connecting lines */}
+        <Line x1="50" y1="15" x2="50" y2="85" />
+        <Line x1="15" y1="50" x2="85" y2="50" />
+        <Line x1="25" y1="25" x2="75" y2="75" />
+        <Line x1="75" y1="25" x2="25" y2="75" />
+        {/* Inner connections */}
+        <Line x1="50" y1="35" x2="65" y2="50" />
+        <Line x1="65" y1="50" x2="50" y2="65" />
+        <Line x1="50" y1="65" x2="35" y2="50" />
+        <Line x1="35" y1="50" x2="50" y2="35" />
+      </G>
+    </Svg>
+  );
+};
+
+// Vesica Piscis
+export const VesicaPiscis: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        <Circle cx="40" cy="50" r="25" />
+        <Circle cx="60" cy="50" r="25" />
+        <Circle cx="50" cy="50" r="8" />
+      </G>
+    </Svg>
+  );
+};
+
+// Seed of Life
+export const SeedOfLife: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Center circle */}
+        <Circle cx="50" cy="50" r="15" />
+        {/* Six petals */}
+        <Circle cx="50" cy="35" r="15" />
+        <Circle cx="63" cy="42.5" r="15" />
+        <Circle cx="63" cy="57.5" r="15" />
+        <Circle cx="50" cy="65" r="15" />
+        <Circle cx="37" cy="57.5" r="15" />
+        <Circle cx="37" cy="42.5" r="15" />
+      </G>
+    </Svg>
+  );
+};
+
+// Six-Petal Rosette
+export const SixPetalRosette: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        <Circle cx="50" cy="50" r="30" />
+        {/* Six petals */}
+        <Path d="M 50 20 A 15 15 0 0 1 65 35 A 15 15 0 0 1 50 50 A 15 15 0 0 1 35 35 A 15 15 0 0 1 50 20" />
+        <Path d="M 65 35 A 15 15 0 0 1 80 50 A 15 15 0 0 1 65 65 A 15 15 0 0 1 50 50 A 15 15 0 0 1 65 35" />
+        <Path d="M 65 65 A 15 15 0 0 1 50 80 A 15 15 0 0 1 35 65 A 15 15 0 0 1 50 50 A 15 15 0 0 1 65 65" />
+        <Path d="M 35 65 A 15 15 0 0 1 20 50 A 15 15 0 0 1 35 35 A 15 15 0 0 1 50 50 A 15 15 0 0 1 35 65" />
+        <Path d="M 35 35 A 15 15 0 0 1 50 20 A 15 15 0 0 1 65 35 A 15 15 0 0 1 50 50 A 15 15 0 0 1 35 35" />
+        <Path d="M 65 35 A 15 15 0 0 1 80 50 A 15 15 0 0 1 65 65 A 15 15 0 0 1 50 50 A 15 15 0 0 1 65 35" />
+      </G>
+    </Svg>
+  );
+};
+
+// Tree of Life
+export const TreeOfLife: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill={color}>
+        {/* Sephiroth (circles) */}
+        <Circle cx="50" cy="15" r="4" />
+        <Circle cx="35" cy="25" r="4" />
+        <Circle cx="65" cy="25" r="4" />
+        <Circle cx="50" cy="35" r="4" />
+        <Circle cx="25" cy="45" r="4" />
+        <Circle cx="75" cy="45" r="4" />
+        <Circle cx="50" cy="55" r="4" />
+        <Circle cx="35" cy="70" r="4" />
+        <Circle cx="65" cy="70" r="4" />
+        <Circle cx="50" cy="85" r="4" />
+        {/* Paths connecting the sephiroth */}
+        <Line x1="50" y1="15" x2="35" y2="25" />
+        <Line x1="50" y1="15" x2="65" y2="25" />
+        <Line x1="35" y1="25" x2="65" y2="25" />
+        <Line x1="35" y1="25" x2="50" y2="35" />
+        <Line x1="65" y1="25" x2="50" y2="35" />
+        <Line x1="50" y1="35" x2="25" y2="45" />
+        <Line x1="50" y1="35" x2="75" y2="45" />
+        <Line x1="25" y1="45" x2="75" y2="45" />
+        <Line x1="25" y1="45" x2="50" y2="55" />
+        <Line x1="75" y1="45" x2="50" y2="55" />
+        <Line x1="50" y1="55" x2="35" y2="70" />
+        <Line x1="50" y1="55" x2="65" y2="70" />
+        <Line x1="35" y1="70" x2="65" y2="70" />
+        <Line x1="35" y1="70" x2="50" y2="85" />
+        <Line x1="65" y1="70" x2="50" y2="85" />
+      </G>
+    </Svg>
+  );
+};
+
+// Merkabah (Star Tetrahedron)
+export const Merkabah: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Upward triangle */}
+        <Polygon points="50,20 20,70 80,70" />
+        {/* Downward triangle */}
+        <Polygon points="50,80 20,30 80,30" />
+        {/* Inner lines */}
+        <Line x1="50" y1="20" x2="50" y2="80" />
+        <Line x1="20" y1="30" x2="80" y2="70" />
+        <Line x1="80" y1="30" x2="20" y2="70" />
+      </G>
+    </Svg>
+  );
+};
+
+// Flower of Life
+export const FlowerOfLife: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Outer circle */}
+        <Circle cx="50" cy="50" r="40" />
+        {/* Inner pattern - simplified version */}
+        <Circle cx="50" cy="50" r="10" />
+        <Circle cx="50" cy="35" r="10" />
+        <Circle cx="62" cy="42.5" r="10" />
+        <Circle cx="62" cy="57.5" r="10" />
+        <Circle cx="50" cy="65" r="10" />
+        <Circle cx="38" cy="57.5" r="10" />
+        <Circle cx="38" cy="42.5" r="10" />
+        {/* Second ring */}
+        <Circle cx="50" cy="20" r="10" />
+        <Circle cx="67" cy="27.5" r="10" />
+        <Circle cx="74" cy="50" r="10" />
+        <Circle cx="67" cy="72.5" r="10" />
+        <Circle cx="50" cy="80" r="10" />
+        <Circle cx="33" cy="72.5" r="10" />
+        <Circle cx="26" cy="50" r="10" />
+        <Circle cx="33" cy="27.5" r="10" />
+      </G>
+    </Svg>
+  );
+};
+
+// Cubeoctahedron
+export const Cubeoctahedron: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Outer hexagon */}
+        <Polygon points="50,15 75,30 75,70 50,85 25,70 25,30" />
+        {/* Inner star pattern */}
+        <Line x1="50" y1="15" x2="50" y2="85" />
+        <Line x1="25" y1="30" x2="75" y2="70" />
+        <Line x1="75" y1="30" x2="25" y2="70" />
+        {/* Inner hexagon */}
+        <Polygon points="50,35 65,42.5 65,57.5 50,65 35,57.5 35,42.5" />
+        {/* Connecting lines */}
+        <Line x1="50" y1="15" x2="35" y2="42.5" />
+        <Line x1="50" y1="15" x2="65" y2="42.5" />
+        <Line x1="75" y1="30" x2="65" y2="42.5" />
+        <Line x1="75" y1="70" x2="65" y2="57.5" />
+        <Line x1="50" y1="85" x2="65" y2="57.5" />
+        <Line x1="50" y1="85" x2="35" y2="57.5" />
+        <Line x1="25" y1="70" x2="35" y2="57.5" />
+        <Line x1="25" y1="30" x2="35" y2="42.5" />
+      </G>
+    </Svg>
+  );
+};
+
+// Vector Equilibrium
+export const VectorEquilibrium: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Outer circle */}
+        <Circle cx="50" cy="50" r="40" />
+        {/* Inner star pattern */}
+        <Polygon points="50,20 70,35 70,65 50,80 30,65 30,35" />
+        {/* Inner lines creating the equilibrium pattern */}
+        <Line x1="50" y1="20" x2="50" y2="80" />
+        <Line x1="30" y1="35" x2="70" y2="65" />
+        <Line x1="70" y1="35" x2="30" y2="65" />
+        {/* Center hexagon */}
+        <Polygon points="50,35 60,42.5 60,57.5 50,65 40,57.5 40,42.5" />
+        {/* Radiating lines */}
+        <Line x1="50" y1="50" x2="50" y2="20" />
+        <Line x1="50" y1="50" x2="70" y2="35" />
+        <Line x1="50" y1="50" x2="70" y2="65" />
+        <Line x1="50" y1="50" x2="50" y2="80" />
+        <Line x1="50" y1="50" x2="30" y2="65" />
+        <Line x1="50" y1="50" x2="30" y2="35" />
+      </G>
+    </Svg>
+  );
+};
+
+// 64-Tetrahedron Grid (simplified)
+export const TetrahedronGrid: React.FC<SacredGeometryProps> = ({ 
+  size = 40, 
+  color = 'rgba(255,255,255,0.6)', 
+  strokeWidth = 1 
+}) => {
+  if (Platform.OS === 'web') {
+    return <View style={{ width: size, height: size }} />;
+  }
+  
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        {/* Complex geometric grid - simplified representation */}
+        <Circle cx="50" cy="50" r="35" />
+        {/* Inner triangular grid */}
+        <Polygon points="50,25 70,60 30,60" />
+        <Polygon points="50,75 30,40 70,40" />
+        {/* Intersecting lines */}
+        <Line x1="20" y1="50" x2="80" y2="50" />
+        <Line x1="35" y1="25" x2="65" y2="75" />
+        <Line x1="65" y1="25" x2="35" y2="75" />
+        {/* Inner pattern */}
+        <Circle cx="50" cy="50" r="15" />
+        <Polygon points="50,40 58,55 42,55" />
+        <Polygon points="50,60 42,45 58,45" />
+      </G>
+    </Svg>
+  );
+};
