@@ -45,7 +45,7 @@ export default function DynamicMusicPlayer({ style }: DynamicMusicPlayerProps) {
         style={styles.gradient}
       >
         <Text style={styles.title}>Deep Despair Release</Text>
-        <Text style={styles.subtitle}>Dynamic Healing Music</Text>
+        <Text style={styles.subtitle}>Unique Composition • Generated Live</Text>
         
         <View style={styles.visualizer}>
           {currentLayers.map((layer, index) => (
@@ -65,7 +65,7 @@ export default function DynamicMusicPlayer({ style }: DynamicMusicPlayerProps) {
             <View style={styles.placeholderWaves}>
               <Waves size={40} color="#ffffff40" />
               <Text style={styles.placeholderText}>
-                Unique soundscapes will appear here
+                Your unique healing journey will visualize here
               </Text>
             </View>
           )}
@@ -121,17 +121,20 @@ export default function DynamicMusicPlayer({ style }: DynamicMusicPlayerProps) {
 
         <View style={styles.info}>
           <Text style={styles.infoText}>
-            🎵 Solfeggio frequencies for emotional healing
+            🎵 Unique healing frequencies each session
           </Text>
           <Text style={styles.infoText}>
-            🌊 Evolving soundscapes that adapt to your journey
+            🌊 Intelligent harmonic relationships
           </Text>
           <Text style={styles.infoText}>
-            ✨ Unique composition generated in real-time
+            ✨ Never the same composition twice
+          </Text>
+          <Text style={styles.infoText}>
+            🧘 Chakra-aligned frequency progression
           </Text>
           {isPlaying && (
             <Text style={styles.layerCount}>
-              Active layers: {currentLayers.length}
+              Active layers: {currentLayers.length} • Journey in progress...
             </Text>
           )}
         </View>

@@ -38,15 +38,42 @@ const HEALING_FREQUENCIES = {
   ALPHA: 10, // Relaxed awareness
   THETA: 6, // Deep meditation
   DELTA: 2, // Deep sleep/healing
+  // Deep despair specific frequencies
+  HEART_CHAKRA: 341.3, // Heart healing
+  THROAT_CHAKRA: 384, // Expression release
+  THIRD_EYE: 426.7, // Inner vision
+  CROWN_CHAKRA: 480, // Spiritual connection
+  // Binaural beat frequencies for deep states
+  DEEP_RELEASE: 40, // Gamma for breakthrough
+  EMOTIONAL_CLEARING: 8, // Alpha-theta bridge
+  SOUL_HEALING: 4, // Delta for deep healing
 };
 
-const DESPAIR_RELEASE_PROGRESSION = [
-  { freq: HEALING_FREQUENCIES.UT, duration: 30000, intensity: 0.8 }, // Release fear
-  { freq: HEALING_FREQUENCIES.RE, duration: 45000, intensity: 0.6 }, // Facilitate change
-  { freq: HEALING_FREQUENCIES.MI, duration: 60000, intensity: 0.4 }, // Transform
-  { freq: HEALING_FREQUENCIES.FA, duration: 45000, intensity: 0.3 }, // Connect
-  { freq: HEALING_FREQUENCIES.SOL, duration: 30000, intensity: 0.2 }, // Awaken
-];
+// Generate unique progression each time
+const generateUniqueDespairProgression = () => {
+  const baseFrequencies = [
+    HEALING_FREQUENCIES.UT,
+    HEALING_FREQUENCIES.RE, 
+    HEALING_FREQUENCIES.MI,
+    HEALING_FREQUENCIES.HEART_CHAKRA,
+    HEALING_FREQUENCIES.THROAT_CHAKRA,
+    HEALING_FREQUENCIES.THIRD_EYE
+  ];
+  
+  // Shuffle and select 4-6 frequencies for unique journey
+  const shuffled = [...baseFrequencies].sort(() => Math.random() - 0.5);
+  const selectedCount = 4 + Math.floor(Math.random() * 3); // 4-6 steps
+  const selected = shuffled.slice(0, selectedCount);
+  
+  return selected.map((freq, index) => ({
+    freq,
+    duration: 25000 + Math.random() * 35000, // 25-60 seconds per phase
+    intensity: Math.max(0.1, 0.9 - (index * 0.15) + (Math.random() * 0.2 - 0.1)), // Decreasing with variation
+    harmonicVariation: Math.random() * 0.3 + 0.1, // Unique harmonic ratios
+    modulationDepth: Math.random() * 2 + 0.5, // Varying modulation
+    layerCount: Math.floor(Math.random() * 3) + 2, // 2-4 layers per phase
+  }));
+};
 
 export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<DynamicMusicContextType>(() => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -139,29 +166,58 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     setCurrentLayers(prev => prev.filter(layer => layer.id !== layerId));
   }, []);
 
-  // Add a new healing layer
+  // Add a new healing layer with intelligent frequency selection
   const addHealingLayer = useCallback(() => {
-    const frequencies = Object.values(HEALING_FREQUENCIES);
-    const randomFreq = frequencies[Math.floor(Math.random() * frequencies.length)];
+    const currentFreqs = currentLayers.map(layer => layer.frequency);
+    const allFrequencies = Object.values(HEALING_FREQUENCIES);
+    
+    // Select frequency that harmonizes with current layers
+    let selectedFreq: number;
+    if (currentFreqs.length > 0) {
+      const baseFreq = currentFreqs[0];
+      const harmonicOptions = [
+        baseFreq * 0.5,   // Octave down
+        baseFreq * 0.75,  // Perfect fourth down
+        baseFreq * 1.25,  // Perfect fourth up
+        baseFreq * 1.5,   // Perfect fifth up
+        baseFreq * 2,     // Octave up
+        ...allFrequencies.filter(f => Math.abs(f - baseFreq) > 50) // Avoid too close frequencies
+      ];
+      selectedFreq = harmonicOptions[Math.floor(Math.random() * harmonicOptions.length)];
+    } else {
+      selectedFreq = allFrequencies[Math.floor(Math.random() * allFrequencies.length)];
+    }
+    
     const waveTypes: OscillatorType[] = ['sine', 'triangle', 'sawtooth'];
     const randomWave = waveTypes[Math.floor(Math.random() * waveTypes.length)];
     
+    // Create more sophisticated modulation
+    const modulationTypes = [
+      { frequency: 0.05 + Math.random() * 0.1, depth: 0.5 + Math.random() * 1 }, // Slow drift
+      { frequency: 0.2 + Math.random() * 0.3, depth: 1 + Math.random() * 2 },   // Medium pulse
+      { frequency: 0.8 + Math.random() * 1.2, depth: 0.3 + Math.random() * 0.7 }, // Fast shimmer
+    ];
+    const selectedModulation = modulationTypes[Math.floor(Math.random() * modulationTypes.length)];
+    
     const newLayer: MusicLayer = {
-      id: `layer_${Date.now()}_${Math.random()}`,
-      frequency: randomFreq,
-      volume: 0.1 + Math.random() * 0.3,
+      id: `healing_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      frequency: selectedFreq,
+      volume: 0.08 + Math.random() * 0.15, // Softer volumes for ambient layers
       waveType: randomWave,
-      modulation: Math.random() > 0.5 ? {
-        frequency: 0.1 + Math.random() * 0.5,
-        depth: 1 + Math.random() * 3
-      } : undefined
+      modulation: Math.random() > 0.2 ? selectedModulation : undefined // 80% chance of modulation
     };
     
     setCurrentLayers(prev => [...prev, newLayer]);
     createLayer(newLayer);
-  }, [createLayer]);
+    
+    // Auto-remove layer after some time to keep composition flowing
+    const removeTimeout = setTimeout(() => {
+      removeLayer(newLayer.id);
+    }, 45000 + Math.random() * 60000); // 45-105 seconds
+    
+  }, [createLayer, currentLayers, removeLayer]);
 
-  // Start the despair release journey
+  // Start the despair release journey with unique composition
   const startDespairRelease = useCallback(() => {
     if (Platform.OS !== 'web') {
       console.log('Dynamic music synthesis only available on web platform');
@@ -178,76 +234,143 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     setIsPlaying(true);
     currentStepRef.current = 0;
     
+    // Generate unique progression for this session
+    const uniqueProgression = generateUniqueDespairProgression();
+    console.log('Generated unique despair release journey:', uniqueProgression);
+    
     // Start the healing progression
     const runProgression = () => {
-      if (currentStepRef.current >= DESPAIR_RELEASE_PROGRESSION.length) {
-        // Journey complete, add gentle ambient layers
-        addHealingLayer();
+      if (currentStepRef.current >= uniqueProgression.length) {
+        // Journey complete, create ethereal ambient conclusion
+        const conclusionLayers = [
+          {
+            id: 'conclusion_1',
+            frequency: HEALING_FREQUENCIES.CROWN_CHAKRA,
+            volume: 0.15,
+            waveType: 'sine' as OscillatorType,
+            modulation: { frequency: 0.05, depth: 0.5 }
+          },
+          {
+            id: 'conclusion_2', 
+            frequency: HEALING_FREQUENCIES.SCHUMANN,
+            volume: 0.1,
+            waveType: 'triangle' as OscillatorType,
+            modulation: { frequency: 0.03, depth: 0.3 }
+          }
+        ];
+        
+        setCurrentLayers(conclusionLayers);
+        conclusionLayers.forEach(layer => createLayer(layer));
+        
+        // Gradually add more ethereal layers
         progressionTimeoutRef.current = setTimeout(() => {
           addHealingLayer();
+          setTimeout(() => addHealingLayer(), 15000);
         }, 10000);
         return;
       }
       
-      const step = DESPAIR_RELEASE_PROGRESSION[currentStepRef.current];
+      const step = uniqueProgression[currentStepRef.current];
       setIntensity(step.intensity);
       
-      // Create main healing tone
-      const mainLayer: MusicLayer = {
-        id: `main_${currentStepRef.current}`,
+      // Create unique layer composition for this step
+      const stepLayers: MusicLayer[] = [];
+      
+      // Main healing frequency
+      stepLayers.push({
+        id: `main_${currentStepRef.current}_${Date.now()}`,
         frequency: step.freq,
-        volume: 0.4,
+        volume: 0.3 + step.intensity * 0.2,
         waveType: 'sine',
         modulation: {
-          frequency: 0.2,
-          depth: 2
+          frequency: 0.1 + Math.random() * 0.3,
+          depth: step.modulationDepth
         }
-      };
+      });
       
-      // Create harmonic
-      const harmonicLayer: MusicLayer = {
-        id: `harmonic_${currentStepRef.current}`,
-        frequency: step.freq * 1.5, // Perfect fifth
-        volume: 0.2,
-        waveType: 'triangle',
+      // Generate unique harmonic relationships
+      const harmonicRatios = [1.5, 1.618, 2, 2.5, 3]; // Golden ratio, octaves, fifths
+      const selectedRatio = harmonicRatios[Math.floor(Math.random() * harmonicRatios.length)];
+      
+      stepLayers.push({
+        id: `harmonic_${currentStepRef.current}_${Date.now()}`,
+        frequency: step.freq * (selectedRatio + step.harmonicVariation),
+        volume: 0.15 + step.intensity * 0.1,
+        waveType: Math.random() > 0.5 ? 'triangle' : 'sawtooth',
         modulation: {
-          frequency: 0.15,
-          depth: 1.5
+          frequency: 0.08 + Math.random() * 0.2,
+          depth: step.modulationDepth * 0.7
         }
-      };
+      });
       
-      // Create sub-harmonic for depth
-      const subLayer: MusicLayer = {
-        id: `sub_${currentStepRef.current}`,
-        frequency: step.freq * 0.5,
-        volume: 0.15,
+      // Sub-harmonic for depth (unique ratio each time)
+      const subRatio = 0.5 + Math.random() * 0.3; // 0.5 to 0.8
+      stepLayers.push({
+        id: `sub_${currentStepRef.current}_${Date.now()}`,
+        frequency: step.freq * subRatio,
+        volume: 0.1 + step.intensity * 0.05,
         waveType: 'sawtooth',
         modulation: {
-          frequency: 0.1,
-          depth: 1
+          frequency: 0.05 + Math.random() * 0.1,
+          depth: step.modulationDepth * 0.5
+        }
+      });
+      
+      // Add additional layers based on step configuration
+      for (let i = 3; i < step.layerCount; i++) {
+        const additionalFreq = step.freq * (0.25 + Math.random() * 1.5);
+        stepLayers.push({
+          id: `extra_${i}_${currentStepRef.current}_${Date.now()}`,
+          frequency: additionalFreq,
+          volume: 0.05 + Math.random() * 0.1,
+          waveType: ['sine', 'triangle', 'sawtooth'][Math.floor(Math.random() * 3)] as OscillatorType,
+          modulation: {
+            frequency: Math.random() * 0.4,
+            depth: Math.random() * 2
+          }
+        });
+      }
+      
+      setCurrentLayers(stepLayers);
+      stepLayers.forEach(layer => createLayer(layer));
+      
+      // Add evolving layers during the step
+      const addEvolvingLayers = () => {
+        if (Math.random() > 0.4) {
+          // Create contextual healing layer based on current step
+          const contextualFreq = step.freq * (0.8 + Math.random() * 0.4);
+          const contextualLayer: MusicLayer = {
+            id: `evolving_${Date.now()}_${Math.random()}`,
+            frequency: contextualFreq,
+            volume: 0.08 + Math.random() * 0.12,
+            waveType: ['sine', 'triangle'][Math.floor(Math.random() * 2)] as OscillatorType,
+            modulation: {
+              frequency: 0.1 + Math.random() * 0.3,
+              depth: 0.5 + Math.random() * 1.5
+            }
+          };
+          
+          setCurrentLayers(prev => [...prev, contextualLayer]);
+          createLayer(contextualLayer);
         }
       };
       
-      setCurrentLayers([mainLayer, harmonicLayer, subLayer]);
-      createLayer(mainLayer);
-      createLayer(harmonicLayer);
-      createLayer(subLayer);
-      
-      // Add random healing layers during the step
-      const addRandomLayers = () => {
-        if (Math.random() > 0.3) {
-          addHealingLayer();
-        }
-      };
-      
-      const randomInterval = setInterval(addRandomLayers, 8000 + Math.random() * 12000);
+      const randomInterval = setInterval(addEvolvingLayers, 6000 + Math.random() * 14000);
       
       progressionTimeoutRef.current = setTimeout(() => {
         clearInterval(randomInterval);
-        // Clean up current step layers
-        [mainLayer, harmonicLayer, subLayer].forEach(layer => {
-          removeLayer(layer.id);
+        // Fade out current step layers
+        stepLayers.forEach(layer => {
+          const gainNode = gainNodesRef.current.get(layer.id);
+          if (gainNode && audioContextRef.current) {
+            gainNode.gain.linearRampToValueAtTime(0, audioContextRef.current.currentTime + 3);
+          }
         });
+        
+        // Clean up after fade
+        setTimeout(() => {
+          stepLayers.forEach(layer => removeLayer(layer.id));
+        }, 3000);
         
         currentStepRef.current++;
         runProgression();

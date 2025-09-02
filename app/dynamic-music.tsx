@@ -17,7 +17,7 @@ export default function DynamicMusicScreen() {
           <View style={styles.header}>
             <Text style={styles.title}>Dynamic Healing Music</Text>
             <Text style={styles.subtitle}>
-              Experience unique, AI-generated soundscapes for deep emotional release
+              Every session creates a completely unique healing composition
             </Text>
           </View>
 
@@ -35,18 +35,18 @@ export default function DynamicMusicScreen() {
             </View>
 
             <View style={styles.infoCard}>
-              <Text style={styles.infoCardTitle}>🌊 Dynamic Composition</Text>
+              <Text style={styles.infoCardTitle}>🌊 Never-Repeating Compositions</Text>
               <Text style={styles.infoCardText}>
-                Each session generates a unique musical journey that evolves in real-time, 
-                creating harmonics and layers that respond to your emotional state.
+                Advanced algorithms create unique frequency progressions, harmonic relationships, 
+                and layer combinations that are different every single time you play.
               </Text>
             </View>
 
             <View style={styles.infoCard}>
-              <Text style={styles.infoCardTitle}>✨ Despair Release Journey</Text>
+              <Text style={styles.infoCardTitle}>✨ Personalized Healing Journey</Text>
               <Text style={styles.infoCardText}>
-                Follows a carefully crafted progression: Fear Release → Change Facilitation → 
-                Transformation → Connection → Spiritual Awakening.
+                Each session randomly selects 4-6 healing phases from chakra frequencies, 
+                creating a unique emotional release pathway tailored to that moment.
               </Text>
             </View>
 
@@ -67,7 +67,8 @@ export default function DynamicMusicScreen() {
               <Text style={styles.benefitItem}>• Enhanced meditation and mindfulness</Text>
               <Text style={styles.benefitItem}>• Improved sleep quality</Text>
               <Text style={styles.benefitItem}>• Increased spiritual awareness</Text>
-              <Text style={styles.benefitItem}>• Unique experience every session</Text>
+              <Text style={styles.benefitItem}>• Truly unique - never the same twice</Text>
+              <Text style={styles.benefitItem}>• Intelligent harmonic generation</Text>
             </View>
           </View>
 
