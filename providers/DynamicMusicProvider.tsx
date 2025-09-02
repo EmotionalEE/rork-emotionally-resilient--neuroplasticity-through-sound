@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Platform } from "react-native";
 import createContextHook from "@nkzw/create-context-hook";
 
@@ -152,7 +152,7 @@ const generateUniqueProgression = (sessionId: string) => {
     return generateDefaultProgression();
   }
   
-  const { baseFrequencies, tempo, intensity, harmonicStyle } = config;
+  const { baseFrequencies, tempo, intensity } = config;
   
   // Shuffle and select frequencies for unique journey
   const shuffled = [...baseFrequencies].sort(() => Math.random() - 0.5);
@@ -236,11 +236,13 @@ const generateDefaultProgression = () => {
 };
 
 export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<DynamicMusicContextType>(() => {
+  // All useState hooks first
   const [isPlaying, setIsPlaying] = useState(false);
   const [intensity, setIntensity] = useState(0.5);
   const [currentLayers, setCurrentLayers] = useState<MusicLayer[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   
+  // All useRef hooks together
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorsRef = useRef<Map<string, OscillatorNode>>(new Map());
   const gainNodesRef = useRef<Map<string, GainNode>>(new Map());
@@ -662,7 +664,8 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     };
   }, [stopMusic]);
 
-  return useMemo(() => ({
+  // Return object directly instead of useMemo to avoid hook order issues
+  return {
     startSession,
     stopMusic,
     isPlaying,
@@ -672,5 +675,5 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     removeLayer,
     currentLayers,
     currentSessionId,
-  }), [startSession, stopMusic, isPlaying, intensity, setIntensity, addHealingLayer, removeLayer, currentLayers, currentSessionId]);
+  };
 });
