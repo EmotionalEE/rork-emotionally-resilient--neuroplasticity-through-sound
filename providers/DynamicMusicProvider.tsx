@@ -72,12 +72,82 @@ const HEALING_FREQUENCIES = {
 const SESSION_CONFIGS = {
   '396hz-release': {
     name: 'Deep Despair Release',
-    baseFrequencies: [HEALING_FREQUENCIES.UT, HEALING_FREQUENCIES.HEART_CHAKRA, HEALING_FREQUENCIES.THROAT_CHAKRA, HEALING_FREQUENCIES.THIRD_EYE],
-    tempo: 'slow', // 25-60s per phase
-    intensity: 'building', // Starts high, gradually decreases
-    harmonicStyle: 'minor', // Minor keys for emotional release
-    orchestration: 'strings_brass', // Deep, resonant instruments
-    waveTypes: ['sine', 'triangle'] as OscillatorType[],
+    baseFrequencies: [146.83, 164.81, 174.61, 196.00, 220.00, 261.63], // D Phrygian to C major progression
+    tempo: 'cinematic', // Variable timing based on composition phases
+    intensity: 'fear_to_peace', // Visceral fear → gradual peace transformation
+    harmonicStyle: 'orchestral_journey', // Complex orchestral harmonies
+    orchestration: 'full_cinematic', // Complete orchestral arrangement
+    waveTypes: ['sine', 'triangle', 'sawtooth'] as OscillatorType[],
+    composition: {
+      phases: [
+        {
+          name: 'Visceral Fear',
+          duration: 43000, // 0:00 - 0:43
+          key: 'D_Phrygian',
+          bpm: 112,
+          tuning: 432,
+          dynamics: 'intense',
+          instruments: ['contrabass', 'celli', 'trombones', 'violas', 'violins', 'low_toms'],
+          harmonies: ['Dm', 'Eb', 'F', 'Gm'],
+          rhythm: '3-3-2_pattern'
+        },
+        {
+          name: 'Tension Sustain',
+          duration: 37000, // 0:43 - 1:20
+          key: 'D_Phrygian',
+          bpm: 104,
+          tuning: 432,
+          dynamics: 'tense',
+          instruments: ['strings', 'brass', 'dark_pads'],
+          harmonies: ['Dm', 'Eb', 'Bb', 'F'],
+          rhythm: 'sustained_tension'
+        },
+        {
+          name: 'Pivot to Hope',
+          duration: 42000, // 1:20 - 2:02
+          key: 'A_minor',
+          bpm: 92,
+          tuning: 432,
+          dynamics: 'softening',
+          instruments: ['strings', 'woodwinds', 'soft_brass'],
+          harmonies: ['Am', 'F', 'C', 'G'],
+          rhythm: 'gentle_transition'
+        },
+        {
+          name: 'Opening to Light',
+          duration: 60000, // 2:02 - 3:02
+          key: 'C_major',
+          bpm: 92,
+          tuning: 432,
+          dynamics: 'opening',
+          instruments: ['strings_legato', 'choir', 'flute', 'clarinet', 'shaker'],
+          harmonies: ['Cmaj7', 'G', 'Am', 'Fadd9', 'Cmaj7'],
+          rhythm: 'flowing_8ths'
+        },
+        {
+          name: 'Warm Embrace',
+          duration: 71000, // 3:02 - 4:13
+          key: 'F_Lydian',
+          bpm: 68,
+          tuning: 432,
+          dynamics: 'warm',
+          instruments: ['warm_pads', 'choir_bloom', 'harp', 'piano', 'vibes'],
+          harmonies: ['Fmaj7#11', 'C', 'Dm', 'Bb', 'Gm'],
+          rhythm: 'ethereal_arps'
+        },
+        {
+          name: 'Divine Resolution',
+          duration: 47000, // 4:13 - 5:00
+          key: 'C_major',
+          bpm: 60,
+          tuning: 432,
+          dynamics: 'transcendent',
+          instruments: ['strings', 'choir', 'harp', 'piano', 'bells'],
+          harmonies: ['Cadd9', 'Fadd9', 'Gadd9', 'Cadd9'],
+          rhythm: 'no_drums_reverb_tail'
+        }
+      ]
+    }
   },
   '741hz-detox': {
     name: 'Grief & Anger Cleanse',
@@ -144,8 +214,72 @@ const SESSION_CONFIGS = {
   },
 };
 
+// Generate unique orchestral progression for Deep Despair Release
+const generateDeepDespairProgression = () => {
+  const config = SESSION_CONFIGS['396hz-release'];
+  const phases = config.composition?.phases || [];
+  
+  return phases.map((phase, index) => {
+    // Calculate base frequency from key and tuning
+    const keyFrequencies = {
+      'D_Phrygian': 146.83, // D3 at 432Hz tuning
+      'A_minor': 220.00,    // A3 at 432Hz tuning  
+      'C_major': 261.63,    // C4 at 432Hz tuning
+      'F_Lydian': 174.61    // F3 at 432Hz tuning
+    };
+    
+    const baseFreq = keyFrequencies[phase.key as keyof typeof keyFrequencies] || 261.63;
+    
+    // Intensity mapping for fear → peace arc
+    let stepIntensity: number;
+    switch (phase.name) {
+      case 'Visceral Fear':
+        stepIntensity = 0.95; // Maximum intensity
+        break;
+      case 'Tension Sustain':
+        stepIntensity = 0.85; // High but slightly reduced
+        break;
+      case 'Pivot to Hope':
+        stepIntensity = 0.65; // Noticeable softening
+        break;
+      case 'Opening to Light':
+        stepIntensity = 0.45; // Gentle and flowing
+        break;
+      case 'Warm Embrace':
+        stepIntensity = 0.35; // Soft and nurturing
+        break;
+      case 'Divine Resolution':
+        stepIntensity = 0.25; // Ethereal and transcendent
+        break;
+      default:
+        stepIntensity = 0.5;
+    }
+    
+    return {
+      freq: baseFreq,
+      duration: phase.duration,
+      intensity: stepIntensity,
+      harmonicVariation: 0.15 + (index * 0.05), // Increasing harmonic complexity
+      modulationDepth: phase.name === 'Visceral Fear' ? 3.0 : 1.5 - (index * 0.2),
+      layerCount: phase.instruments.length,
+      config,
+      phase,
+      bpm: phase.bpm,
+      key: phase.key,
+      dynamics: phase.dynamics,
+      instruments: phase.instruments,
+      harmonies: phase.harmonies
+    };
+  });
+};
+
 // Generate unique progression for any session
 const generateUniqueProgression = (sessionId: string) => {
+  // Special handling for Deep Despair Release
+  if (sessionId === '396hz-release') {
+    return generateDeepDespairProgression();
+  }
+  
   const config = SESSION_CONFIGS[sessionId as keyof typeof SESSION_CONFIGS];
   if (!config) {
     console.warn(`No configuration found for session ${sessionId}, using default`);
@@ -165,6 +299,7 @@ const generateUniqueProgression = (sessionId: string) => {
     slow: { min: 25000, max: 60000 },
     medium: { min: 20000, max: 45000 },
     fast: { min: 15000, max: 30000 },
+    cinematic: { min: 30000, max: 80000 }, // Variable for cinematic timing
   };
   const tempoRange = tempoMap[tempo as keyof typeof tempoMap] || tempoMap.medium;
   
@@ -173,6 +308,9 @@ const generateUniqueProgression = (sessionId: string) => {
     
     // Intensity patterns based on session type
     switch (intensity) {
+      case 'fear_to_peace':
+        stepIntensity = Math.max(0.2, 0.95 - (index * 0.15));
+        break;
       case 'building':
         stepIntensity = Math.max(0.1, 0.9 - (index * 0.15) + (Math.random() * 0.2 - 0.1));
         break;
@@ -506,6 +644,25 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
       
       // Add orchestration-specific layers
       const orchestrationLayers = {
+        full_cinematic: [
+          // Deep foundation - contrabass and celli
+          { ratio: 0.25, volume: 0.15, wave: 'sawtooth', instrument: 'contrabass' },
+          { ratio: 0.5, volume: 0.12, wave: 'triangle', instrument: 'celli' },
+          // Brass section - trombones and horns
+          { ratio: 0.75, volume: 0.14, wave: 'sawtooth', instrument: 'trombones' },
+          { ratio: 1.25, volume: 0.10, wave: 'triangle', instrument: 'horns' },
+          // String sections
+          { ratio: 1.5, volume: 0.11, wave: 'triangle', instrument: 'violas' },
+          { ratio: 2.0, volume: 0.09, wave: 'sine', instrument: 'violins' },
+          // Woodwinds
+          { ratio: 1.33, volume: 0.08, wave: 'triangle', instrument: 'clarinet' },
+          { ratio: 2.67, volume: 0.06, wave: 'sine', instrument: 'flute' },
+          // Percussion and rhythm
+          { ratio: 0.125, volume: 0.13, wave: 'sawtooth', instrument: 'low_toms' },
+          // Harmonic layers
+          { ratio: 3.0, volume: 0.05, wave: 'sine', instrument: 'harp' },
+          { ratio: 4.0, volume: 0.04, wave: 'triangle', instrument: 'bells' },
+        ],
         strings_brass: [
           { ratio: 1.5, volume: 0.1, wave: 'triangle' }, // Strings
           { ratio: 2, volume: 0.08, wave: 'sawtooth' }, // Brass

@@ -130,22 +130,46 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
         </View>
 
         <View style={styles.info}>
-          <Text style={styles.infoText}>
-            🎵 {currentSession?.frequency}Hz healing frequency
-          </Text>
-          <Text style={styles.infoText}>
-            🌊 Orchestral synthesis • {currentSession?.duration || 15} min journey
-          </Text>
-          <Text style={styles.infoText}>
-            ✨ Never the same composition twice
-          </Text>
-          <Text style={styles.infoText}>
-            🧘 Emotion-specific harmonic progression
-          </Text>
-          {isPlaying && (
-            <Text style={styles.layerCount}>
-              Active layers: {currentLayers.length} • {sessionTitle} in progress...
-            </Text>
+          {displaySessionId === '396hz-release' ? (
+            <>
+              <Text style={styles.infoText}>
+                🎼 Cinematic orchestral journey • 5:00 • 432 Hz tuning
+              </Text>
+              <Text style={styles.infoText}>
+                🎭 D Phrygian → A minor → C major → F Lydian progression
+              </Text>
+              <Text style={styles.infoText}>
+                🎻 Full orchestra: strings, brass, woodwinds, percussion
+              </Text>
+              <Text style={styles.infoText}>
+                🌊 Fear → Peace transformation arc • Unique every time
+              </Text>
+              {isPlaying && (
+                <Text style={styles.layerCount}>
+                  Active layers: {currentLayers.length} • Deep Despair Release in progress...
+                </Text>
+              )}
+            </>
+          ) : (
+            <>
+              <Text style={styles.infoText}>
+                🎵 {currentSession?.frequency}Hz healing frequency
+              </Text>
+              <Text style={styles.infoText}>
+                🌊 Orchestral synthesis • {currentSession?.duration || 15} min journey
+              </Text>
+              <Text style={styles.infoText}>
+                ✨ Never the same composition twice
+              </Text>
+              <Text style={styles.infoText}>
+                🧘 Emotion-specific harmonic progression
+              </Text>
+              {isPlaying && (
+                <Text style={styles.layerCount}>
+                  Active layers: {currentLayers.length} • {sessionTitle} in progress...
+                </Text>
+              )}
+            </>
           )}
         </View>
       </LinearGradient>
