@@ -257,7 +257,7 @@ const SacredGeometry = ({
                       backgroundColor: secondaryColor,
                       transform: [
                         { rotate: `${i * (360 / Math.floor(geometry.elements / 2))}deg` },
-                        { translateY: -120 },
+                        { translateY: -90 },
                       ],
                     },
                   ]}
@@ -964,49 +964,78 @@ export default function SessionScreen() {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.sessionTitle}>{session.title}</Text>
-          <Text style={styles.frequency}>{session.frequency}Hz</Text>
+          {/* Title and Frequency */}
+          <View style={styles.titleSection}>
+            <Text style={styles.sessionTitle}>{session.title}</Text>
+            <Text style={styles.frequency}>{session.frequency}Hz</Text>
+          </View>
 
-          <View style={styles.visualizer}>
-            {/* Sacred Geometry Background */}
-            <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} geometry={session.geometry} />
-            
-            <Animated.View
-              style={[
-                styles.pulseCircle,
-                {
-                  opacity: pulseOpacity,
-                },
-              ]}
-            />
-            <Animated.View
-              style={[
-                styles.waveCircle,
-                {
-                  opacity: waveOpacity,
-                },
-              ]}
-            />
-            <View style={styles.centerCircle}>
-              <Brain size={48} color="#fff" />
+          {/* Main Visualizer Section */}
+          <View style={styles.mainSection}>
+            <View style={styles.visualizer}>
+              {/* Sacred Geometry Background */}
+              <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} geometry={session.geometry} />
+              
+              <Animated.View
+                style={[
+                  styles.pulseCircle,
+                  {
+                    opacity: pulseOpacity,
+                  },
+                ]}
+              />
+              <Animated.View
+                style={[
+                  styles.waveCircle,
+                  {
+                    opacity: waveOpacity,
+                  },
+                ]}
+              />
+              <View style={styles.centerCircle}>
+                <Brain size={32} color="#fff" />
+              </View>
+            </View>
+
+            {/* Side Controls */}
+            <View style={styles.sideControls}>
+              {/* Breathing Guide */}
+              <View style={styles.breathingGuide}>
+                <Animated.View
+                  style={[
+                    styles.breathIndicator,
+                    {
+                      transform: [{ scale: breathIndicatorScale }],
+                      opacity: breathIndicatorOpacity,
+                    },
+                  ]}
+                />
+                <Text style={styles.breathText}>
+                  {breathingPhase === 'in' ? "In" : "Out"}
+                </Text>
+              </View>
+
+              {/* Play Button */}
+              <TouchableOpacity
+                onPress={handlePlayPause}
+                style={styles.playButton}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
+                  style={styles.playButtonGradient}
+                >
+                  {isPlaying ? (
+                    <Pause size={28} color="#fff" />
+                  ) : (
+                    <Play size={28} color="#fff" style={{ marginLeft: 2 }} />
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
             </View>
           </View>
 
-          <View style={styles.breathingGuide}>
-            <Animated.View
-              style={[
-                styles.breathIndicator,
-                {
-                  transform: [{ scale: breathIndicatorScale }],
-                  opacity: breathIndicatorOpacity,
-                },
-              ]}
-            />
-            <Text style={styles.breathText}>
-              {breathingPhase === 'in' ? "Breathe In" : "Breathe Out"}
-            </Text>
-          </View>
-
+          {/* Progress Section */}
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: `${progress}%` }]} />
@@ -1019,43 +1048,25 @@ export default function SessionScreen() {
             </View>
           </View>
 
-          <View style={styles.controls}>
-            <TouchableOpacity
-              onPress={handlePlayPause}
-              style={styles.playButton}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
-                style={styles.playButtonGradient}
-              >
-                {isPlaying ? (
-                  <Pause size={40} color="#fff" />
-                ) : (
-                  <Play size={40} color="#fff" style={{ marginLeft: 4 }} />
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-
+          {/* Info Cards */}
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
               <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-                <Heart size={20} color="#fff" />
+                <Heart size={16} color="#fff" />
               </Animated.View>
-              <Text style={styles.infoText}>Reduces Stress</Text>
+              <Text style={styles.infoText}>Stress Relief</Text>
             </View>
             <View style={styles.infoCard}>
               <Animated.View style={{ transform: [{ rotate: activityRotation }] }}>
-                <Activity size={20} color="#fff" />
+                <Activity size={16} color="#fff" />
               </Animated.View>
-              <Text style={styles.infoText}>Balances Energy</Text>
+              <Text style={styles.infoText}>Energy Balance</Text>
             </View>
             <View style={styles.infoCard}>
               <Animated.View style={{ transform: [{ scale: volumeScale }] }}>
-                <Volume2 size={20} color="#fff" />
+                <Volume2 size={16} color="#fff" />
               </Animated.View>
-              <Text style={styles.infoText}>Binaural Beats</Text>
+              <Text style={styles.infoText}>Binaural</Text>
             </View>
           </View>
           
@@ -1092,59 +1103,73 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
+    justifyContent: "space-between",
+  },
+  titleSection: {
     alignItems: "center",
-    justifyContent: "center",
+    paddingTop: 10,
   },
   sessionTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold" as const,
     color: "#fff",
-    marginBottom: 8,
+    marginBottom: 4,
     textAlign: "center",
   },
   frequency: {
-    fontSize: 18,
+    fontSize: 16,
     color: "rgba(255,255,255,0.8)",
-    marginBottom: 40,
+  },
+  mainSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flex: 1,
+    paddingVertical: 20,
   },
   visualizer: {
-    width: 300,
-    height: 300,
+    width: 220,
+    height: 220,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 40,
+  },
+  sideControls: {
+    alignItems: "center",
+    justifyContent: "space-around",
+    height: 220,
+    paddingLeft: 20,
   },
   geometryContainer: {
     position: "absolute",
-    width: 300,
-    height: 300,
+    width: 220,
+    height: 220,
     alignItems: "center",
     justifyContent: "center",
   },
   mandalaOuter: {
     position: "absolute",
-    width: 280,
-    height: 280,
+    width: 200,
+    height: 200,
     alignItems: "center",
     justifyContent: "center",
   },
   mandalaLine: {
     position: "absolute",
-    width: 3,
-    height: 140,
+    width: 2,
+    height: 100,
     backgroundColor: "rgba(255,255,255,0.7)",
     top: 0,
-    borderRadius: 1.5,
+    borderRadius: 1,
     shadowColor: "#fff",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
-    shadowRadius: 4,
+    shadowRadius: 3,
   },
   outerRing: {
     position: "absolute",
-    width: 240,
-    height: 240,
+    width: 180,
+    height: 180,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1255,23 +1280,23 @@ const styles = StyleSheet.create({
   },
   pulseCircle: {
     position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     backgroundColor: "#fff",
   },
   waveCircle: {
     position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     borderWidth: 2,
     borderColor: "#fff",
   },
   centerCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
@@ -1280,25 +1305,24 @@ const styles = StyleSheet.create({
   },
   breathingGuide: {
     alignItems: "center",
-    marginBottom: 30,
   },
   breathIndicator: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: "rgba(255,255,255,0.1)",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.3)",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   breathText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "rgba(255,255,255,0.9)",
     fontWeight: "600" as const,
   },
   progressContainer: {
     width: "100%",
-    marginBottom: 40,
+    marginBottom: 20,
   },
   progressBar: {
     height: 6,
@@ -1320,17 +1344,14 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     fontSize: 14,
   },
-  controls: {
-    marginBottom: 40,
-  },
   playButton: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
   },
   playButtonGradient: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -1338,25 +1359,28 @@ const styles = StyleSheet.create({
   },
   infoCards: {
     flexDirection: "row",
-    gap: 15,
+    justifyContent: "space-between",
+    marginBottom: 15,
   },
   infoCard: {
     backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
+    flex: 1,
+    marginHorizontal: 4,
   },
   infoText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "600" as const,
   },
   dynamicMusicSection: {
-    marginTop: 30,
     width: '100%',
+    paddingBottom: 10,
   },
   dynamicMusicPlayer: {
     marginHorizontal: 0,
