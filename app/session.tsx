@@ -24,6 +24,8 @@ import {
 import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
+import { useDynamicMusic } from "@/providers/DynamicMusicProvider";
+import DynamicMusicPlayer from "@/components/DynamicMusicPlayer";
 import * as Haptics from "expo-haptics";
 
 // Sacred Geometry Component
@@ -661,6 +663,7 @@ export default function SessionScreen() {
   const { sessionId } = useLocalSearchParams();
   const { playSound, stopSound, isPlaying } = useAudio();
   const { addSession } = useUserProgress();
+  const { stopMusic: stopDynamicMusic, isPlaying: isDynamicPlaying } = useDynamicMusic();
   
   const session = useMemo(() => sessions.find((s) => s.id === sessionId), [sessionId]);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -737,6 +740,7 @@ export default function SessionScreen() {
           onPress: async () => {
             try {
               await stopSound();
+              stopDynamicMusic();
             } catch (error) {
               console.log("Error stopping sound during close:", error);
             }
@@ -746,17 +750,18 @@ export default function SessionScreen() {
         },
       ]
     );
-  }, [stopSound, router]);
+  }, [stopSound, stopDynamicMusic, router]);
 
   const handleQuickExit = useCallback(async () => {
     try {
       await stopSound();
+      stopDynamicMusic();
     } catch (error) {
       console.log("Error stopping sound during quick exit:", error);
     }
     // Always navigate to home to avoid GO_BACK errors
     router.replace("/home");
-  }, [stopSound, router]);
+  }, [stopSound, stopDynamicMusic, router]);
 
   useEffect(() => {
     if (!session) return;
@@ -862,6 +867,7 @@ export default function SessionScreen() {
 
     return () => {
       stopSound();
+      stopDynamicMusic();
       clearInterval(breathTimer);
       backHandler.remove();
     };
@@ -878,6 +884,7 @@ export default function SessionScreen() {
     
     try {
       await stopSound();
+      stopDynamicMusic();
     } catch (error) {
       console.log("Error stopping sound during completion:", error);
     }
@@ -895,7 +902,7 @@ export default function SessionScreen() {
         },
       ]
     );
-  }, [session, timeElapsed, addSession, stopSound, router]);
+  }, [session, timeElapsed, addSession, stopSound, stopDynamicMusic, router]);
 
   useEffect(() => {
     if (!isPaused && session) {
@@ -1050,6 +1057,11 @@ export default function SessionScreen() {
               </Animated.View>
               <Text style={styles.infoText}>Binaural Beats</Text>
             </View>
+          </View>
+          
+          {/* Dynamic Music Player */}
+          <View style={styles.dynamicMusicSection}>
+            <DynamicMusicPlayer sessionId={session.id} style={styles.dynamicMusicPlayer} />
           </View>
         </View>
       </SafeAreaView>
@@ -1341,6 +1353,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 12,
     fontWeight: "600" as const,
+  },
+  dynamicMusicSection: {
+    marginTop: 30,
+    width: '100%',
+  },
+  dynamicMusicPlayer: {
+    marginHorizontal: 0,
   },
   errorText: {
     color: "#fff",

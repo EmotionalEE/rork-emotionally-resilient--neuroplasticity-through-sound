@@ -3,21 +3,29 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import { LinearGradient } from 'expo-linear-gradient';
 import { Play, Pause, Volume2, Waves } from 'lucide-react-native';
 import { useDynamicMusic } from '@/providers/DynamicMusicProvider';
+import { sessions } from '@/constants/sessions';
 
 interface DynamicMusicPlayerProps {
+  sessionId?: string;
   style?: any;
 }
 
-export default function DynamicMusicPlayer({ style }: DynamicMusicPlayerProps) {
+export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPlayerProps) {
   const {
-    startDespairRelease,
+    startSession,
     stopMusic,
     isPlaying,
     intensity,
     setIntensity,
     addHealingLayer,
-    currentLayers
+    currentLayers,
+    currentSessionId
   } = useDynamicMusic();
+  
+  // Find current session info
+  const currentSession = sessions.find(s => s.id === (currentSessionId || sessionId));
+  const displaySessionId = currentSessionId || sessionId || '396hz-release';
+  const sessionTitle = currentSession?.title || 'Dynamic Healing Music';
 
   if (Platform.OS !== 'web') {
     return (
@@ -44,8 +52,10 @@ export default function DynamicMusicPlayer({ style }: DynamicMusicPlayerProps) {
         colors={isPlaying ? ['#2d1b69', '#11998e', '#38ef7d'] : ['#1a1a2e', '#16213e', '#0f3460']}
         style={styles.gradient}
       >
-        <Text style={styles.title}>Deep Despair Release</Text>
-        <Text style={styles.subtitle}>Unique Composition • Generated Live</Text>
+        <Text style={styles.title}>{sessionTitle}</Text>
+        <Text style={styles.subtitle}>
+          {currentSessionId ? 'Playing Now' : 'Ready to Play'} • Unique Composition
+        </Text>
         
         <View style={styles.visualizer}>
           {currentLayers.map((layer, index) => (
@@ -74,7 +84,7 @@ export default function DynamicMusicPlayer({ style }: DynamicMusicPlayerProps) {
         <View style={styles.controls}>
           <TouchableOpacity
             style={[styles.playButton, isPlaying && styles.playButtonActive]}
-            onPress={isPlaying ? stopMusic : startDespairRelease}
+            onPress={isPlaying ? stopMusic : () => startSession(displaySessionId)}
           >
             {isPlaying ? (
               <Pause size={24} color="#ffffff" />
@@ -121,20 +131,20 @@ export default function DynamicMusicPlayer({ style }: DynamicMusicPlayerProps) {
 
         <View style={styles.info}>
           <Text style={styles.infoText}>
-            🎵 Unique healing frequencies each session
+            🎵 {currentSession?.frequency}Hz healing frequency
           </Text>
           <Text style={styles.infoText}>
-            🌊 Intelligent harmonic relationships
+            🌊 Orchestral synthesis • {currentSession?.duration || 15} min journey
           </Text>
           <Text style={styles.infoText}>
             ✨ Never the same composition twice
           </Text>
           <Text style={styles.infoText}>
-            🧘 Chakra-aligned frequency progression
+            🧘 Emotion-specific harmonic progression
           </Text>
           {isPlaying && (
             <Text style={styles.layerCount}>
-              Active layers: {currentLayers.length} • Journey in progress...
+              Active layers: {currentLayers.length} • {sessionTitle} in progress...
             </Text>
           )}
         </View>
