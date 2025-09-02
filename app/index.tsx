@@ -16,7 +16,8 @@ export default function IndexScreen() {
         isLoading,
         hasSeenWelcome,
         isAuthenticated,
-        hasCompletedOnboarding
+        hasCompletedOnboarding,
+        user: user ? `${user.name} (${user.email})` : 'null'
       });
       
       if (isLoading) {
@@ -40,7 +41,7 @@ export default function IndexScreen() {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [hasSeenWelcome, hasCompletedOnboarding, isAuthenticated, isLoading, router]);
+  }, [hasSeenWelcome, hasCompletedOnboarding, isAuthenticated, isLoading, router, user]);
 
   return (
     <View style={styles.container}>

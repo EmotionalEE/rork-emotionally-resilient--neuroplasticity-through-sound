@@ -531,7 +531,10 @@ export default function ProfileScreen() {
             
             <TouchableOpacity 
               style={styles.settingCard}
-              onPress={() => router.push('/payment-methods')}
+              onPress={() => {
+                console.log('Payment methods button pressed');
+                router.push('/payment-methods');
+              }}
               activeOpacity={0.8}
             >
               <View style={styles.settingContent}>

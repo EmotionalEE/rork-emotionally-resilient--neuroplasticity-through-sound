@@ -132,7 +132,13 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
       console.log("Creating new user:", newUser);
       const updatedUsers = [...users, newUser];
       await saveMockUsers(updatedUsers);
+      
+      // Save user and verify it was saved
       await saveUser(newUser);
+      
+      // Verify the user was actually saved
+      const savedUser = await AsyncStorage.getItem(AUTH_KEY);
+      console.log("Verification - User saved to storage:", savedUser ? JSON.parse(savedUser) : 'null');
       
       console.log("Registration successful, user saved:", newUser);
       return { success: true };

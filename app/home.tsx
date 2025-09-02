@@ -117,7 +117,11 @@ export default function HomeScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     await logout();
-    router.replace("/welcome");
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/welcome");
+    }
   }, [logout, router]);
 
   // Sacred Geometry Icon Component
@@ -690,7 +694,7 @@ export default function HomeScreen() {
                               extrapolate: 'clamp',
                             });
                           } catch (error) {
-                            console.log('Home fadeAnim translateY interpolation error:', error);
+                            console.warn('Home fadeAnim translateY interpolation error:', error);
                             return 0;
                           }
                         })(),
@@ -740,7 +744,7 @@ export default function HomeScreen() {
                             extrapolate: 'clamp',
                           });
                         } catch (error) {
-                          console.log('Home fadeAnim translateX interpolation error:', error);
+                          console.warn('Home fadeAnim translateX interpolation error:', error);
                           return 0;
                         }
                       })(),
