@@ -975,7 +975,6 @@ export default function SessionScreen() {
             <View style={styles.visualizer}>
               {/* Sacred Geometry Background */}
               <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} geometry={session.geometry} />
-              
               <Animated.View
                 style={[
                   styles.pulseCircle,
