@@ -1068,7 +1068,7 @@ export default function SessionScreen() {
               <Text style={styles.infoText}>Binaural</Text>
             </View>
           </View>
-          
+
           {/* Dynamic Music Player */}
           <View style={styles.dynamicMusicSection}>
             <DynamicMusicPlayer sessionId={session.id} style={styles.dynamicMusicPlayer} />
