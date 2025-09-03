@@ -31,6 +31,7 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
     try {
       console.log("Loading user from AsyncStorage...");
       const stored = await AsyncStorage.getItem(AUTH_KEY);
+      console.log("Raw stored data:", stored);
       if (stored) {
         const userData = JSON.parse(stored);
         console.log("User loaded from storage:", userData);
@@ -46,17 +47,25 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
   }, []);
 
   useEffect(() => {
+    console.log("AuthProvider initializing...");
     loadUser();
   }, [loadUser]);
 
   const saveUser = useCallback(async (userData: User) => {
     try {
       console.log("Saving user to AsyncStorage:", userData);
-      await AsyncStorage.setItem(AUTH_KEY, JSON.stringify(userData));
+      const serializedData = JSON.stringify(userData);
+      await AsyncStorage.setItem(AUTH_KEY, serializedData);
+      
+      // Verify the save worked
+      const verification = await AsyncStorage.getItem(AUTH_KEY);
+      console.log("Verification after save:", verification);
+      
       setUser(userData);
       console.log("User saved successfully and state updated");
     } catch (error) {
       console.error("Error saving user:", error);
+      throw error;
     }
   }, []);
 
