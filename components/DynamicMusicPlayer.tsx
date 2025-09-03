@@ -19,7 +19,9 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
     setIntensity,
     addHealingLayer,
     currentLayers,
-    currentSessionId
+    currentSessionId,
+    currentPhase,
+    isLoading
   } = useDynamicMusic();
   
   // Find current session info
@@ -36,10 +38,10 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
         >
           <Text style={styles.title}>Dynamic Healing Music</Text>
           <Text style={styles.subtitle}>
-            Dynamic music synthesis is only available on web platform
+            🎼 Orchestral Music Available • Dynamic Effects Web Only
           </Text>
           <Text style={styles.description}>
-            Please use the web version to experience the unique dynamic music for deep despair release
+            You&apos;ll hear the beautiful orchestral compositions on mobile. For full dynamic effects and real-time synthesis, use the web version.
           </Text>
         </LinearGradient>
       </View>
@@ -54,7 +56,7 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
       >
         <Text style={styles.title}>{sessionTitle}</Text>
         <Text style={styles.subtitle}>
-          {currentSessionId ? 'Playing Now' : 'Ready to Play'} • Unique Composition
+          {isLoading ? 'Loading Orchestral Music...' : currentSessionId ? `Playing Now${currentPhase ? ` • ${currentPhase}` : ''}` : 'Ready to Play'} • Unique Composition
         </Text>
         
         <View style={styles.visualizer}>
@@ -83,10 +85,13 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
 
         <View style={styles.controls}>
           <TouchableOpacity
-            style={[styles.playButton, isPlaying && styles.playButtonActive]}
+            style={[styles.playButton, isPlaying && styles.playButtonActive, isLoading && styles.playButtonLoading]}
             onPress={isPlaying ? stopMusic : () => startSession(displaySessionId)}
+            disabled={isLoading}
           >
-            {isPlaying ? (
+            {isLoading ? (
+              <Text style={styles.loadingText}>⏳</Text>
+            ) : isPlaying ? (
               <Pause size={24} color="#ffffff" />
             ) : (
               <Play size={24} color="#ffffff" />
@@ -146,7 +151,7 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
               </Text>
               {isPlaying && (
                 <Text style={styles.layerCount}>
-                  Active layers: {currentLayers.length} • Deep Despair Release in progress...
+                  🎼 Orchestral Music + {currentLayers.length} Dynamic Effects • {currentPhase || 'Deep Despair Release'} in progress...
                 </Text>
               )}
             </>
@@ -166,7 +171,7 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
               </Text>
               {isPlaying && (
                 <Text style={styles.layerCount}>
-                  Active layers: {currentLayers.length} • {sessionTitle} in progress...
+                  🎼 Orchestral Music + {currentLayers.length} Dynamic Effects • {currentPhase || sessionTitle} in progress...
                 </Text>
               )}
             </>
@@ -250,6 +255,14 @@ const styles = StyleSheet.create({
   playButtonActive: {
     backgroundColor: '#ffffff30',
     borderColor: '#ffffff80',
+  },
+  playButtonLoading: {
+    backgroundColor: '#ffffff15',
+    borderColor: '#ffffff30',
+  },
+  loadingText: {
+    fontSize: 20,
+    color: '#ffffff80',
   },
   intensityControl: {
     alignItems: 'center',

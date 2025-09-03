@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Platform } from "react-native";
+import { Audio } from 'expo-av';
 import createContextHook from "@nkzw/create-context-hook";
+import { sessions } from '@/constants/sessions';
 
 interface MusicLayer {
   id: string;
@@ -23,6 +25,8 @@ interface DynamicMusicContextType {
   removeLayer: (layerId: string) => void;
   currentLayers: MusicLayer[];
   currentSessionId: string | null;
+  currentPhase: string | null;
+  isLoading: boolean;
 }
 
 // Comprehensive healing frequencies for all emotional states
@@ -379,6 +383,8 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   const [intensity, setIntensity] = useState(0.5);
   const [currentLayers, setCurrentLayers] = useState<MusicLayer[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [currentPhase, setCurrentPhase] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   // All useRef hooks together
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -386,6 +392,8 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   const gainNodesRef = useRef<Map<string, GainNode>>(new Map());
   const progressionTimeoutRef = useRef<any>(null);
   const currentStepRef = useRef(0);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const audioFiltersRef = useRef<Map<string, BiquadFilterNode>>(new Map());
 
   // Initialize Web Audio Context (works on both web and mobile)
   const initAudioContext = useCallback(() => {
@@ -528,29 +536,124 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   }, [createLayer, currentLayers, removeLayer, currentSessionId]);
 
   // Start any session with unique orchestral composition
-  const startSession = useCallback((sessionId: string) => {
-    if (Platform.OS !== 'web') {
-      console.log('Dynamic music synthesis only available on web platform');
-      return;
-    }
-    
-    initAudioContext();
-    
-    if (!audioContextRef.current) {
-      console.log('Could not initialize audio context');
-      return;
-    }
-    
-    setIsPlaying(true);
+  const startSession = useCallback(async (sessionId: string) => {
+    setIsLoading(true);
     setCurrentSessionId(sessionId);
-    currentStepRef.current = 0;
     
-    // Generate unique progression for this specific session
-    const uniqueProgression = generateUniqueProgression(sessionId);
+    try {
+      // Find the session configuration
+      const session = sessions.find(s => s.id === sessionId);
+      if (!session) {
+        console.warn(`Session ${sessionId} not found`);
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log(`Starting ${session.title} with orchestral audio: ${session.audioUrl}`);
+      
+      // Stop any existing audio
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+      
+      // Load and play the orchestral audio file
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: session.audioUrl },
+        { 
+          shouldPlay: true, 
+          isLooping: true,
+          volume: intensity * 0.8 // Start with lower volume for orchestral music
+        }
+      );
+      
+      soundRef.current = sound;
+      setIsPlaying(true);
+      setIsLoading(false);
+      
+      // Initialize Web Audio for dynamic effects (web only)
+      if (Platform.OS === 'web') {
+        initAudioContext();
+        
+        if (audioContextRef.current) {
+          // Generate unique progression for dynamic effects layering
+          const uniqueProgression = generateUniqueProgression(sessionId);
+          const sessionConfig = SESSION_CONFIGS[sessionId as keyof typeof SESSION_CONFIGS];
+          console.log(`Generated unique ${sessionConfig?.name || sessionId} effects journey:`, uniqueProgression);
+          
+          // Start the dynamic effects progression
+          runEffectsProgression(uniqueProgression, sessionId);
+        }
+      } else {
+        // On mobile, just play the orchestral music with phase updates
+        runMobileProgression(sessionId);
+      }
+      
+    } catch (error) {
+      console.error('Error starting session:', error);
+      setIsLoading(false);
+    }
+  }, [intensity]);
+  
+  // Mobile progression (just phase updates without Web Audio effects)
+  const runMobileProgression = useCallback((sessionId: string) => {
     const sessionConfig = SESSION_CONFIGS[sessionId as keyof typeof SESSION_CONFIGS];
-    console.log(`Generated unique ${sessionConfig?.name || sessionId} journey:`, uniqueProgression);
+    const phases = (sessionConfig as any)?.composition?.phases || [];
     
-    // Start the healing progression
+    if (phases.length === 0) return;
+    
+    let currentPhaseIndex = 0;
+    
+    const updatePhase = () => {
+      if (currentPhaseIndex >= phases.length) {
+        setCurrentPhase('Ethereal Conclusion');
+        return;
+      }
+      
+      const phase = phases[currentPhaseIndex];
+      setCurrentPhase(phase.name);
+      console.log(`Phase: ${phase.name} (${phase.key} at ${phase.bpm} BPM)`);
+      
+      // Update intensity based on phase
+      let phaseIntensity: number;
+      switch (phase.name) {
+        case 'Visceral Fear':
+          phaseIntensity = 0.95;
+          break;
+        case 'Tension Sustain':
+          phaseIntensity = 0.85;
+          break;
+        case 'Pivot to Hope':
+          phaseIntensity = 0.65;
+          break;
+        case 'Opening to Light':
+          phaseIntensity = 0.45;
+          break;
+        case 'Warm Embrace':
+          phaseIntensity = 0.35;
+          break;
+        case 'Divine Resolution':
+          phaseIntensity = 0.25;
+          break;
+        default:
+          phaseIntensity = 0.5;
+      }
+      
+      setIntensity(phaseIntensity);
+      
+      // Schedule next phase
+      progressionTimeoutRef.current = setTimeout(() => {
+        currentPhaseIndex++;
+        updatePhase();
+      }, phase.duration);
+    };
+    
+    updatePhase();
+  }, []);
+  
+  // Web progression with dynamic effects
+  const runEffectsProgression = useCallback((uniqueProgression: any[], sessionId: string) => {
+    
     const runProgression = () => {
       if (currentStepRef.current >= uniqueProgression.length) {
         // Journey complete, create ethereal ambient conclusion
@@ -584,6 +687,12 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
       
       const step = uniqueProgression[currentStepRef.current];
       setIntensity(step.intensity);
+      
+      // Update current phase for display
+      if (step.phase) {
+        setCurrentPhase(step.phase.name);
+        console.log(`Phase: ${step.phase.name} (${step.phase.key} at ${step.phase.bpm} BPM)`);
+      }
       
       // Create unique orchestral layer composition for this step
       const stepLayers: MusicLayer[] = [];
@@ -765,18 +874,31 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     };
     
     runProgression();
-  }, [initAudioContext, createLayer, addHealingLayer, removeLayer]);
+  }, [createLayer, addHealingLayer, removeLayer]);
 
   // Stop all music
-  const stopMusic = useCallback(() => {
+  const stopMusic = useCallback(async () => {
     setIsPlaying(false);
     setCurrentSessionId(null);
+    setCurrentPhase(null);
+    setIsLoading(false);
     
     if (progressionTimeoutRef.current) {
       clearTimeout(progressionTimeoutRef.current);
     }
     
-    // Stop all oscillators
+    // Stop orchestral audio
+    if (soundRef.current) {
+      try {
+        await soundRef.current.stopAsync();
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      } catch (error) {
+        console.log('Error stopping orchestral audio:', error);
+      }
+    }
+    
+    // Stop all oscillators (effects layers)
     oscillatorsRef.current.forEach((oscillator, id) => {
       try {
         const gainNode = gainNodesRef.current.get(id);
@@ -794,22 +916,31 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     const cleanupTimeout = setTimeout(() => {
       oscillatorsRef.current.clear();
       gainNodesRef.current.clear();
+      audioFiltersRef.current.clear();
       setCurrentLayers([]);
     }, 1000);
   }, []);
 
-  // Update intensity of all current layers
+  // Update intensity of all current layers and main audio
   useEffect(() => {
+    // Update orchestral audio volume
+    if (soundRef.current && isPlaying) {
+      soundRef.current.setVolumeAsync(intensity * 0.8).catch(error => {
+        console.log('Error updating volume:', error);
+      });
+    }
+    
+    // Update effects layers volume
     gainNodesRef.current.forEach((gainNode, id) => {
       const layer = currentLayers.find(l => l.id === id);
       if (layer && audioContextRef.current) {
         gainNode.gain.linearRampToValueAtTime(
-          layer.volume * intensity,
+          layer.volume * intensity * 0.3, // Lower volume for effects layers
           audioContextRef.current.currentTime + 0.5
         );
       }
     });
-  }, [intensity, currentLayers]);
+  }, [intensity, currentLayers, isPlaying]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -832,5 +963,7 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     removeLayer,
     currentLayers,
     currentSessionId,
+    currentPhase,
+    isLoading,
   };
 });
