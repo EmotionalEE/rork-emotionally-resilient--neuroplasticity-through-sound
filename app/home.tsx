@@ -25,7 +25,7 @@ import {
   User,
   LucideIcon,
   Crown,
-
+  Music,
 } from "lucide-react-native";
 import {
   EggOfLife,
@@ -642,6 +642,13 @@ export default function HomeScreen() {
                 <Text style={styles.title}>How are you feeling?</Text>
               </View>
               <View style={styles.headerButtons}>
+                <TouchableOpacity
+                  style={styles.musicButton}
+                  onPress={() => router.push('/music-library')}
+                  activeOpacity={0.7}
+                >
+                  <Music size={20} color="rgba(255, 255, 255, 0.7)" />
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.profileButton}
                   onPress={() => router.push('/profile')}

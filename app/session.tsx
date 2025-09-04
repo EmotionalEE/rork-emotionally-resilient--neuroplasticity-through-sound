@@ -25,6 +25,7 @@ import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useDynamicMusic } from "@/providers/DynamicMusicProvider";
+import { useCustomMusic } from "@/providers/CustomMusicProvider";
 import DynamicMusicPlayer from "@/components/DynamicMusicPlayer";
 import * as Haptics from "expo-haptics";
 
@@ -664,8 +665,10 @@ export default function SessionScreen() {
   const { playSound, stopSound, isPlaying } = useAudio();
   const { addSession } = useUserProgress();
   const { stopMusic: stopDynamicMusic, isPlaying: isDynamicPlaying } = useDynamicMusic();
+  const { getSessionMusic } = useCustomMusic();
   
   const session = useMemo(() => sessions.find((s) => s.id === sessionId), [sessionId]);
+  const customMusic = useMemo(() => getSessionMusic(sessionId as string), [sessionId, getSessionMusic]);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -930,7 +933,9 @@ export default function SessionScreen() {
       setIsPaused(true);
     } else {
       if (session) {
-        await playSound(session.audioUrl);
+        // Use custom music if available, otherwise use default
+        const audioUrl = customMusic?.url || session.audioUrl;
+        await playSound(audioUrl);
         setIsPaused(false);
       }
     }

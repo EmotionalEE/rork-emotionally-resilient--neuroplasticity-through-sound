@@ -8,6 +8,7 @@ import { UserProgressProvider } from "@/providers/UserProgressProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { PaymentProvider } from "@/providers/PaymentProvider";
 import { DynamicMusicProvider } from "@/providers/DynamicMusicProvider";
+import { CustomMusicProvider } from "@/providers/CustomMusicProvider";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,6 +28,7 @@ function RootLayoutNav() {
       <Stack.Screen name="subscription" options={{ presentation: "modal" }} />
       <Stack.Screen name="payment-methods" options={{ presentation: "modal" }} />
       <Stack.Screen name="dynamic-music" options={{ presentation: "modal" }} />
+      <Stack.Screen name="music-library" options={{ presentation: "modal" }} />
     </Stack>
   );
 }
@@ -44,7 +46,9 @@ export default function RootLayout() {
             <UserProgressProvider>
               <AudioProvider>
                 <DynamicMusicProvider>
-                  <RootLayoutNav />
+                  <CustomMusicProvider>
+                    <RootLayoutNav />
+                  </CustomMusicProvider>
                 </DynamicMusicProvider>
               </AudioProvider>
             </UserProgressProvider>
