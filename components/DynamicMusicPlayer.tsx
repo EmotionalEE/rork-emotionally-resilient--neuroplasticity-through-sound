@@ -41,7 +41,7 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
             🎼 Orchestral Music Available • Dynamic Effects Web Only
           </Text>
           <Text style={styles.description}>
-            You&apos;ll hear the beautiful orchestral compositions on mobile. For full dynamic effects and real-time synthesis, use the web version.
+            You will hear the beautiful orchestral compositions on mobile. For full dynamic effects and real-time synthesis, use the web version.
           </Text>
         </LinearGradient>
       </View>
