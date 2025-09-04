@@ -526,7 +526,6 @@ const SacredGeometry = ({
                 },
               ]}
             />
-            
             {/* Inner triangles - upward pointing */}
             <Animated.View
               style={[
@@ -553,7 +552,6 @@ const SacredGeometry = ({
                 />
               ))}
             </Animated.View>
-            
             {/* Outer triangles - downward pointing */}
             <Animated.View
               style={[
@@ -580,7 +578,6 @@ const SacredGeometry = ({
                 />
               ))}
             </Animated.View>
-            
             {/* Outer lotus petals */}
             <Animated.View
               style={[
@@ -607,7 +604,6 @@ const SacredGeometry = ({
                 />
               ))}
             </Animated.View>
-            
             {/* Outer square boundary */}
             <Animated.View
               style={[
