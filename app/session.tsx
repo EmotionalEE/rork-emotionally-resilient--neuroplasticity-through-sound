@@ -526,6 +526,7 @@ const SacredGeometry = ({
                 },
               ]}
             />
+            
             {/* Inner triangles - upward pointing */}
             <Animated.View
               style={[
@@ -552,6 +553,7 @@ const SacredGeometry = ({
                 />
               ))}
             </Animated.View>
+            
             {/* Outer triangles - downward pointing */}
             <Animated.View
               style={[
@@ -578,12 +580,13 @@ const SacredGeometry = ({
                 />
               ))}
             </Animated.View>
+            
             {/* Outer lotus petals */}
             <Animated.View
               style={[
                 styles.sriYantraLotus,
                 {
-                  transform: [{ rotate: rotation }, { scale: flowerOpacity }],
+                  transform: [{ rotate: `${rotation}deg` }, { scale: flowerOpacity }],
                   opacity: flowerOpacity,
                 },
               ]}
@@ -604,13 +607,14 @@ const SacredGeometry = ({
                 />
               ))}
             </Animated.View>
+            
             {/* Outer square boundary */}
             <Animated.View
               style={[
                 styles.sriYantraSquare,
                 {
                   borderColor: accentColor,
-                  transform: [{ rotate: counterRotation }, { scale: breathScale }],
+                  transform: [{ rotate: `${counterRotation}deg` }, { scale: breathScale }],
                   opacity: breathOpacity,
                 },
               ]}
@@ -971,6 +975,7 @@ export default function SessionScreen() {
             <View style={styles.visualizer}>
               {/* Sacred Geometry Background */}
               <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} geometry={session.geometry} />
+              
               <Animated.View
                 style={[
                   styles.pulseCircle,
@@ -1064,7 +1069,7 @@ export default function SessionScreen() {
               <Text style={styles.infoText}>Binaural</Text>
             </View>
           </View>
-
+          
           {/* Dynamic Music Player */}
           <View style={styles.dynamicMusicSection}>
             <DynamicMusicPlayer sessionId={session.id} style={styles.dynamicMusicPlayer} />

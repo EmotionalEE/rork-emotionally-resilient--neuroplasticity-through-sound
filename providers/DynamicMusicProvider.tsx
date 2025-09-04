@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Platform } from "react-native";
-import { Audio } from 'expo-av';
 import createContextHook from "@nkzw/create-context-hook";
-import { sessions } from '@/constants/sessions';
 
 interface MusicLayer {
   id: string;
@@ -25,8 +23,6 @@ interface DynamicMusicContextType {
   removeLayer: (layerId: string) => void;
   currentLayers: MusicLayer[];
   currentSessionId: string | null;
-  currentPhase: string | null;
-  isLoading: boolean;
 }
 
 // Comprehensive healing frequencies for all emotional states
@@ -76,82 +72,12 @@ const HEALING_FREQUENCIES = {
 const SESSION_CONFIGS = {
   '396hz-release': {
     name: 'Deep Despair Release',
-    baseFrequencies: [146.83, 164.81, 174.61, 196.00, 220.00, 261.63], // D Phrygian to C major progression
-    tempo: 'cinematic', // Variable timing based on composition phases
-    intensity: 'fear_to_peace', // Visceral fear → gradual peace transformation
-    harmonicStyle: 'orchestral_journey', // Complex orchestral harmonies
-    orchestration: 'full_cinematic', // Complete orchestral arrangement
-    waveTypes: ['sine', 'triangle', 'sawtooth'] as OscillatorType[],
-    composition: {
-      phases: [
-        {
-          name: 'Visceral Fear',
-          duration: 43000, // 0:00 - 0:43
-          key: 'D_Phrygian',
-          bpm: 112,
-          tuning: 432,
-          dynamics: 'intense',
-          instruments: ['contrabass', 'celli', 'trombones', 'violas', 'violins', 'low_toms'],
-          harmonies: ['Dm', 'Eb', 'F', 'Gm'],
-          rhythm: '3-3-2_pattern'
-        },
-        {
-          name: 'Tension Sustain',
-          duration: 37000, // 0:43 - 1:20
-          key: 'D_Phrygian',
-          bpm: 104,
-          tuning: 432,
-          dynamics: 'tense',
-          instruments: ['strings', 'brass', 'dark_pads'],
-          harmonies: ['Dm', 'Eb', 'Bb', 'F'],
-          rhythm: 'sustained_tension'
-        },
-        {
-          name: 'Pivot to Hope',
-          duration: 42000, // 1:20 - 2:02
-          key: 'A_minor',
-          bpm: 92,
-          tuning: 432,
-          dynamics: 'softening',
-          instruments: ['strings', 'woodwinds', 'soft_brass'],
-          harmonies: ['Am', 'F', 'C', 'G'],
-          rhythm: 'gentle_transition'
-        },
-        {
-          name: 'Opening to Light',
-          duration: 60000, // 2:02 - 3:02
-          key: 'C_major',
-          bpm: 92,
-          tuning: 432,
-          dynamics: 'opening',
-          instruments: ['strings_legato', 'choir', 'flute', 'clarinet', 'shaker'],
-          harmonies: ['Cmaj7', 'G', 'Am', 'Fadd9', 'Cmaj7'],
-          rhythm: 'flowing_8ths'
-        },
-        {
-          name: 'Warm Embrace',
-          duration: 71000, // 3:02 - 4:13
-          key: 'F_Lydian',
-          bpm: 68,
-          tuning: 432,
-          dynamics: 'warm',
-          instruments: ['warm_pads', 'choir_bloom', 'harp', 'piano', 'vibes'],
-          harmonies: ['Fmaj7#11', 'C', 'Dm', 'Bb', 'Gm'],
-          rhythm: 'ethereal_arps'
-        },
-        {
-          name: 'Divine Resolution',
-          duration: 47000, // 4:13 - 5:00
-          key: 'C_major',
-          bpm: 60,
-          tuning: 432,
-          dynamics: 'transcendent',
-          instruments: ['strings', 'choir', 'harp', 'piano', 'bells'],
-          harmonies: ['Cadd9', 'Fadd9', 'Gadd9', 'Cadd9'],
-          rhythm: 'no_drums_reverb_tail'
-        }
-      ]
-    }
+    baseFrequencies: [HEALING_FREQUENCIES.UT, HEALING_FREQUENCIES.HEART_CHAKRA, HEALING_FREQUENCIES.THROAT_CHAKRA, HEALING_FREQUENCIES.THIRD_EYE],
+    tempo: 'slow', // 25-60s per phase
+    intensity: 'building', // Starts high, gradually decreases
+    harmonicStyle: 'minor', // Minor keys for emotional release
+    orchestration: 'strings_brass', // Deep, resonant instruments
+    waveTypes: ['sine', 'triangle'] as OscillatorType[],
   },
   '741hz-detox': {
     name: 'Grief & Anger Cleanse',
@@ -218,72 +144,8 @@ const SESSION_CONFIGS = {
   },
 };
 
-// Generate unique orchestral progression for Deep Despair Release
-const generateDeepDespairProgression = () => {
-  const config = SESSION_CONFIGS['396hz-release'];
-  const phases = config.composition?.phases || [];
-  
-  return phases.map((phase, index) => {
-    // Calculate base frequency from key and tuning
-    const keyFrequencies = {
-      'D_Phrygian': 146.83, // D3 at 432Hz tuning
-      'A_minor': 220.00,    // A3 at 432Hz tuning  
-      'C_major': 261.63,    // C4 at 432Hz tuning
-      'F_Lydian': 174.61    // F3 at 432Hz tuning
-    };
-    
-    const baseFreq = keyFrequencies[phase.key as keyof typeof keyFrequencies] || 261.63;
-    
-    // Intensity mapping for fear → peace arc
-    let stepIntensity: number;
-    switch (phase.name) {
-      case 'Visceral Fear':
-        stepIntensity = 0.95; // Maximum intensity
-        break;
-      case 'Tension Sustain':
-        stepIntensity = 0.85; // High but slightly reduced
-        break;
-      case 'Pivot to Hope':
-        stepIntensity = 0.65; // Noticeable softening
-        break;
-      case 'Opening to Light':
-        stepIntensity = 0.45; // Gentle and flowing
-        break;
-      case 'Warm Embrace':
-        stepIntensity = 0.35; // Soft and nurturing
-        break;
-      case 'Divine Resolution':
-        stepIntensity = 0.25; // Ethereal and transcendent
-        break;
-      default:
-        stepIntensity = 0.5;
-    }
-    
-    return {
-      freq: baseFreq,
-      duration: phase.duration,
-      intensity: stepIntensity,
-      harmonicVariation: 0.15 + (index * 0.05), // Increasing harmonic complexity
-      modulationDepth: phase.name === 'Visceral Fear' ? 3.0 : 1.5 - (index * 0.2),
-      layerCount: phase.instruments.length,
-      config,
-      phase,
-      bpm: phase.bpm,
-      key: phase.key,
-      dynamics: phase.dynamics,
-      instruments: phase.instruments,
-      harmonies: phase.harmonies
-    };
-  });
-};
-
 // Generate unique progression for any session
 const generateUniqueProgression = (sessionId: string) => {
-  // Special handling for Deep Despair Release
-  if (sessionId === '396hz-release') {
-    return generateDeepDespairProgression();
-  }
-  
   const config = SESSION_CONFIGS[sessionId as keyof typeof SESSION_CONFIGS];
   if (!config) {
     console.warn(`No configuration found for session ${sessionId}, using default`);
@@ -303,7 +165,6 @@ const generateUniqueProgression = (sessionId: string) => {
     slow: { min: 25000, max: 60000 },
     medium: { min: 20000, max: 45000 },
     fast: { min: 15000, max: 30000 },
-    cinematic: { min: 30000, max: 80000 }, // Variable for cinematic timing
   };
   const tempoRange = tempoMap[tempo as keyof typeof tempoMap] || tempoMap.medium;
   
@@ -312,9 +173,6 @@ const generateUniqueProgression = (sessionId: string) => {
     
     // Intensity patterns based on session type
     switch (intensity) {
-      case 'fear_to_peace':
-        stepIntensity = Math.max(0.2, 0.95 - (index * 0.15));
-        break;
       case 'building':
         stepIntensity = Math.max(0.1, 0.9 - (index * 0.15) + (Math.random() * 0.2 - 0.1));
         break;
@@ -383,8 +241,6 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   const [intensity, setIntensity] = useState(0.5);
   const [currentLayers, setCurrentLayers] = useState<MusicLayer[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [currentPhase, setCurrentPhase] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   
   // All useRef hooks together
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -392,8 +248,6 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   const gainNodesRef = useRef<Map<string, GainNode>>(new Map());
   const progressionTimeoutRef = useRef<any>(null);
   const currentStepRef = useRef(0);
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const audioFiltersRef = useRef<Map<string, BiquadFilterNode>>(new Map());
 
   // Initialize Web Audio Context (works on both web and mobile)
   const initAudioContext = useCallback(() => {
@@ -536,124 +390,29 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   }, [createLayer, currentLayers, removeLayer, currentSessionId]);
 
   // Start any session with unique orchestral composition
-  const startSession = useCallback(async (sessionId: string) => {
-    setIsLoading(true);
-    setCurrentSessionId(sessionId);
-    
-    try {
-      // Find the session configuration
-      const session = sessions.find(s => s.id === sessionId);
-      if (!session) {
-        console.warn(`Session ${sessionId} not found`);
-        setIsLoading(false);
-        return;
-      }
-      
-      console.log(`Starting ${session.title} with orchestral audio: ${session.audioUrl}`);
-      
-      // Stop any existing audio
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
-      
-      // Load and play the orchestral audio file
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: session.audioUrl },
-        { 
-          shouldPlay: true, 
-          isLooping: true,
-          volume: intensity * 0.8 // Start with lower volume for orchestral music
-        }
-      );
-      
-      soundRef.current = sound;
-      setIsPlaying(true);
-      setIsLoading(false);
-      
-      // Initialize Web Audio for dynamic effects (web only)
-      if (Platform.OS === 'web') {
-        initAudioContext();
-        
-        if (audioContextRef.current) {
-          // Generate unique progression for dynamic effects layering
-          const uniqueProgression = generateUniqueProgression(sessionId);
-          const sessionConfig = SESSION_CONFIGS[sessionId as keyof typeof SESSION_CONFIGS];
-          console.log(`Generated unique ${sessionConfig?.name || sessionId} effects journey:`, uniqueProgression);
-          
-          // Start the dynamic effects progression
-          runEffectsProgression(uniqueProgression, sessionId);
-        }
-      } else {
-        // On mobile, just play the orchestral music with phase updates
-        runMobileProgression(sessionId);
-      }
-      
-    } catch (error) {
-      console.error('Error starting session:', error);
-      setIsLoading(false);
+  const startSession = useCallback((sessionId: string) => {
+    if (Platform.OS !== 'web') {
+      console.log('Dynamic music synthesis only available on web platform');
+      return;
     }
-  }, [intensity]);
-  
-  // Mobile progression (just phase updates without Web Audio effects)
-  const runMobileProgression = useCallback((sessionId: string) => {
+    
+    initAudioContext();
+    
+    if (!audioContextRef.current) {
+      console.log('Could not initialize audio context');
+      return;
+    }
+    
+    setIsPlaying(true);
+    setCurrentSessionId(sessionId);
+    currentStepRef.current = 0;
+    
+    // Generate unique progression for this specific session
+    const uniqueProgression = generateUniqueProgression(sessionId);
     const sessionConfig = SESSION_CONFIGS[sessionId as keyof typeof SESSION_CONFIGS];
-    const phases = (sessionConfig as any)?.composition?.phases || [];
+    console.log(`Generated unique ${sessionConfig?.name || sessionId} journey:`, uniqueProgression);
     
-    if (phases.length === 0) return;
-    
-    let currentPhaseIndex = 0;
-    
-    const updatePhase = () => {
-      if (currentPhaseIndex >= phases.length) {
-        setCurrentPhase('Ethereal Conclusion');
-        return;
-      }
-      
-      const phase = phases[currentPhaseIndex];
-      setCurrentPhase(phase.name);
-      console.log(`Phase: ${phase.name} (${phase.key} at ${phase.bpm} BPM)`);
-      
-      // Update intensity based on phase
-      let phaseIntensity: number;
-      switch (phase.name) {
-        case 'Visceral Fear':
-          phaseIntensity = 0.95;
-          break;
-        case 'Tension Sustain':
-          phaseIntensity = 0.85;
-          break;
-        case 'Pivot to Hope':
-          phaseIntensity = 0.65;
-          break;
-        case 'Opening to Light':
-          phaseIntensity = 0.45;
-          break;
-        case 'Warm Embrace':
-          phaseIntensity = 0.35;
-          break;
-        case 'Divine Resolution':
-          phaseIntensity = 0.25;
-          break;
-        default:
-          phaseIntensity = 0.5;
-      }
-      
-      setIntensity(phaseIntensity);
-      
-      // Schedule next phase
-      progressionTimeoutRef.current = setTimeout(() => {
-        currentPhaseIndex++;
-        updatePhase();
-      }, phase.duration);
-    };
-    
-    updatePhase();
-  }, []);
-  
-  // Web progression with dynamic effects
-  const runEffectsProgression = useCallback((uniqueProgression: any[], sessionId: string) => {
-    
+    // Start the healing progression
     const runProgression = () => {
       if (currentStepRef.current >= uniqueProgression.length) {
         // Journey complete, create ethereal ambient conclusion
@@ -687,12 +446,6 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
       
       const step = uniqueProgression[currentStepRef.current];
       setIntensity(step.intensity);
-      
-      // Update current phase for display
-      if (step.phase) {
-        setCurrentPhase(step.phase.name);
-        console.log(`Phase: ${step.phase.name} (${step.phase.key} at ${step.phase.bpm} BPM)`);
-      }
       
       // Create unique orchestral layer composition for this step
       const stepLayers: MusicLayer[] = [];
@@ -753,25 +506,6 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
       
       // Add orchestration-specific layers
       const orchestrationLayers = {
-        full_cinematic: [
-          // Deep foundation - contrabass and celli
-          { ratio: 0.25, volume: 0.15, wave: 'sawtooth', instrument: 'contrabass' },
-          { ratio: 0.5, volume: 0.12, wave: 'triangle', instrument: 'celli' },
-          // Brass section - trombones and horns
-          { ratio: 0.75, volume: 0.14, wave: 'sawtooth', instrument: 'trombones' },
-          { ratio: 1.25, volume: 0.10, wave: 'triangle', instrument: 'horns' },
-          // String sections
-          { ratio: 1.5, volume: 0.11, wave: 'triangle', instrument: 'violas' },
-          { ratio: 2.0, volume: 0.09, wave: 'sine', instrument: 'violins' },
-          // Woodwinds
-          { ratio: 1.33, volume: 0.08, wave: 'triangle', instrument: 'clarinet' },
-          { ratio: 2.67, volume: 0.06, wave: 'sine', instrument: 'flute' },
-          // Percussion and rhythm
-          { ratio: 0.125, volume: 0.13, wave: 'sawtooth', instrument: 'low_toms' },
-          // Harmonic layers
-          { ratio: 3.0, volume: 0.05, wave: 'sine', instrument: 'harp' },
-          { ratio: 4.0, volume: 0.04, wave: 'triangle', instrument: 'bells' },
-        ],
         strings_brass: [
           { ratio: 1.5, volume: 0.1, wave: 'triangle' }, // Strings
           { ratio: 2, volume: 0.08, wave: 'sawtooth' }, // Brass
@@ -874,31 +608,18 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     };
     
     runProgression();
-  }, [createLayer, addHealingLayer, removeLayer]);
+  }, [initAudioContext, createLayer, addHealingLayer, removeLayer]);
 
   // Stop all music
-  const stopMusic = useCallback(async () => {
+  const stopMusic = useCallback(() => {
     setIsPlaying(false);
     setCurrentSessionId(null);
-    setCurrentPhase(null);
-    setIsLoading(false);
     
     if (progressionTimeoutRef.current) {
       clearTimeout(progressionTimeoutRef.current);
     }
     
-    // Stop orchestral audio
-    if (soundRef.current) {
-      try {
-        await soundRef.current.stopAsync();
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
-      } catch (error) {
-        console.log('Error stopping orchestral audio:', error);
-      }
-    }
-    
-    // Stop all oscillators (effects layers)
+    // Stop all oscillators
     oscillatorsRef.current.forEach((oscillator, id) => {
       try {
         const gainNode = gainNodesRef.current.get(id);
@@ -916,31 +637,22 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     const cleanupTimeout = setTimeout(() => {
       oscillatorsRef.current.clear();
       gainNodesRef.current.clear();
-      audioFiltersRef.current.clear();
       setCurrentLayers([]);
     }, 1000);
   }, []);
 
-  // Update intensity of all current layers and main audio
+  // Update intensity of all current layers
   useEffect(() => {
-    // Update orchestral audio volume
-    if (soundRef.current && isPlaying) {
-      soundRef.current.setVolumeAsync(intensity * 0.8).catch(error => {
-        console.log('Error updating volume:', error);
-      });
-    }
-    
-    // Update effects layers volume
     gainNodesRef.current.forEach((gainNode, id) => {
       const layer = currentLayers.find(l => l.id === id);
       if (layer && audioContextRef.current) {
         gainNode.gain.linearRampToValueAtTime(
-          layer.volume * intensity * 0.3, // Lower volume for effects layers
+          layer.volume * intensity,
           audioContextRef.current.currentTime + 0.5
         );
       }
     });
-  }, [intensity, currentLayers, isPlaying]);
+  }, [intensity, currentLayers]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -963,7 +675,5 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     removeLayer,
     currentLayers,
     currentSessionId,
-    currentPhase,
-    isLoading,
   };
 });

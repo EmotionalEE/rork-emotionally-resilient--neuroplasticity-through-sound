@@ -19,9 +19,7 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
     setIntensity,
     addHealingLayer,
     currentLayers,
-    currentSessionId,
-    currentPhase,
-    isLoading
+    currentSessionId
   } = useDynamicMusic();
   
   // Find current session info
@@ -38,10 +36,10 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
         >
           <Text style={styles.title}>Dynamic Healing Music</Text>
           <Text style={styles.subtitle}>
-            🎼 Orchestral Music Available • Dynamic Effects Web Only
+            Dynamic music synthesis is only available on web platform
           </Text>
           <Text style={styles.description}>
-            You will hear the beautiful orchestral compositions on mobile. For full dynamic effects and real-time synthesis, use the web version.
+            Please use the web version to experience the unique dynamic music for deep despair release
           </Text>
         </LinearGradient>
       </View>
@@ -56,7 +54,7 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
       >
         <Text style={styles.title}>{sessionTitle}</Text>
         <Text style={styles.subtitle}>
-          {isLoading ? 'Loading Orchestral Music...' : currentSessionId ? `Playing Now${currentPhase ? ` • ${currentPhase}` : ''}` : 'Ready to Play'} • Unique Composition
+          {currentSessionId ? 'Playing Now' : 'Ready to Play'} • Unique Composition
         </Text>
         
         <View style={styles.visualizer}>
@@ -85,13 +83,10 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
 
         <View style={styles.controls}>
           <TouchableOpacity
-            style={[styles.playButton, isPlaying && styles.playButtonActive, isLoading && styles.playButtonLoading]}
+            style={[styles.playButton, isPlaying && styles.playButtonActive]}
             onPress={isPlaying ? stopMusic : () => startSession(displaySessionId)}
-            disabled={isLoading}
           >
-            {isLoading ? (
-              <Text style={styles.loadingText}>⏳</Text>
-            ) : isPlaying ? (
+            {isPlaying ? (
               <Pause size={24} color="#ffffff" />
             ) : (
               <Play size={24} color="#ffffff" />
@@ -135,46 +130,22 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
         </View>
 
         <View style={styles.info}>
-          {displaySessionId === '396hz-release' ? (
-            <>
-              <Text style={styles.infoText}>
-                🎼 Cinematic orchestral journey • 5:00 • 432 Hz tuning
-              </Text>
-              <Text style={styles.infoText}>
-                🎭 D Phrygian → A minor → C major → F Lydian progression
-              </Text>
-              <Text style={styles.infoText}>
-                🎻 Full orchestra: strings, brass, woodwinds, percussion
-              </Text>
-              <Text style={styles.infoText}>
-                🌊 Fear → Peace transformation arc • Unique every time
-              </Text>
-              {isPlaying && (
-                <Text style={styles.layerCount}>
-                  🎼 Orchestral Music + {currentLayers.length} Dynamic Effects • {currentPhase || 'Deep Despair Release'} in progress...
-                </Text>
-              )}
-            </>
-          ) : (
-            <>
-              <Text style={styles.infoText}>
-                🎵 {currentSession?.frequency}Hz healing frequency
-              </Text>
-              <Text style={styles.infoText}>
-                🌊 Orchestral synthesis • {currentSession?.duration || 15} min journey
-              </Text>
-              <Text style={styles.infoText}>
-                ✨ Never the same composition twice
-              </Text>
-              <Text style={styles.infoText}>
-                🧘 Emotion-specific harmonic progression
-              </Text>
-              {isPlaying && (
-                <Text style={styles.layerCount}>
-                  🎼 Orchestral Music + {currentLayers.length} Dynamic Effects • {currentPhase || sessionTitle} in progress...
-                </Text>
-              )}
-            </>
+          <Text style={styles.infoText}>
+            🎵 {currentSession?.frequency}Hz healing frequency
+          </Text>
+          <Text style={styles.infoText}>
+            🌊 Orchestral synthesis • {currentSession?.duration || 15} min journey
+          </Text>
+          <Text style={styles.infoText}>
+            ✨ Never the same composition twice
+          </Text>
+          <Text style={styles.infoText}>
+            🧘 Emotion-specific harmonic progression
+          </Text>
+          {isPlaying && (
+            <Text style={styles.layerCount}>
+              Active layers: {currentLayers.length} • {sessionTitle} in progress...
+            </Text>
           )}
         </View>
       </LinearGradient>
@@ -255,14 +226,6 @@ const styles = StyleSheet.create({
   playButtonActive: {
     backgroundColor: '#ffffff30',
     borderColor: '#ffffff80',
-  },
-  playButtonLoading: {
-    backgroundColor: '#ffffff15',
-    borderColor: '#ffffff30',
-  },
-  loadingText: {
-    fontSize: 20,
-    color: '#ffffff80',
   },
   intensityControl: {
     alignItems: 'center',
