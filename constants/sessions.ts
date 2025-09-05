@@ -52,7 +52,7 @@ export const sessions: Session[] = [
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
-    audioUrl: "YOUR_MUSIC_URL_HERE", // Replace with your music URL or local asset
+    audioUrl: "https://drive.google.com/uc?export=download&id=1D4mcUG3uuOUGZ62rSzZiSsVYrJ28Xfqd",
     geometry: {
       type: 'spiral',
       elements: 12,
