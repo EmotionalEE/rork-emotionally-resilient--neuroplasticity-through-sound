@@ -50,71 +50,23 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
       console.log("Loading sound from:", url);
       
-      // Test URL accessibility first
-      try {
-        console.log("Testing URL accessibility:", url);
-        const response = await fetch(url, { 
-          method: 'HEAD',
-          headers: {
-            'Accept': 'audio/*,*/*'
-          }
-        });
-        console.log("Response status:", response.status, response.statusText);
-        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-        
-        if (!response.ok) {
-          throw new Error(`URL not accessible: ${response.status} ${response.statusText}`);
-        }
-        console.log("URL fetch test passed");
-      } catch (fetchError) {
-        console.error("URL fetch test failed:", fetchError);
-        
-        // Try a simple GET request as fallback
-        try {
-          console.log("Trying GET request as fallback...");
-          const getResponse = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Accept': 'audio/*,*/*'
-            }
-          });
-          if (getResponse.ok) {
-            console.log("GET request succeeded, proceeding with audio loading");
-          } else {
-            throw new Error(`GET request also failed: ${getResponse.status}`);
-          }
-        } catch (getFallbackError) {
-          console.error("GET fallback also failed:", getFallbackError);
-          throw new Error(`Cannot access audio URL: ${fetchError}`);
-        }
-      }
-      
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: url },
         { shouldPlay: true, isLooping: true }
       );
 
-      console.log("Sound created successfully, setting up playback...");
       setSound(newSound);
       setIsPlaying(true);
 
       // Set up playback status update
       newSound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
-          console.log("Playback status:", {
-            isPlaying: status.isPlaying,
-            positionMillis: status.positionMillis,
-            durationMillis: status.durationMillis
-          });
           setIsPlaying(status.isPlaying);
-        } else {
-          console.log("Sound not loaded:", status);
         }
       });
     } catch (error) {
-      console.error("Failed to play audio:", error);
+      console.error("Error playing sound:", error);
       setIsPlaying(false);
-      throw error; // Re-throw to let the UI handle the error
     }
   }, [sound]);
 

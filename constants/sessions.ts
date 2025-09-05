@@ -52,7 +52,7 @@ export const sessions: Session[] = [
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
-    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+    audioUrl: "https://drive.google.com/uc?export=download&id=1D4mcUG3uuOUGZ62rSzZiSsVYrJ28Xfqd",
     geometry: {
       type: 'spiral',
       elements: 12,
@@ -70,7 +70,7 @@ export const sessions: Session[] = [
     frequency: "741",
     gradient: ["#d299c2", "#fef9d7"],
     targetEmotions: ["angry", "sad", "stressed"],
-    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
     geometry: {
       type: 'triangle',
       elements: 9,
@@ -88,7 +88,7 @@ export const sessions: Session[] = [
     frequency: "6",
     gradient: ["#f093fb", "#f5576c"],
     targetEmotions: ["sad", "anxious", "calm"],
-    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     geometry: {
       type: 'lotus',
       elements: 8,
@@ -106,7 +106,7 @@ export const sessions: Session[] = [
     frequency: "2",
     gradient: ["#a8edea", "#fed6e3"],
     targetEmotions: ["anxious", "stressed", "calm"],
-    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
     geometry: {
       type: 'sri_yantra',
       elements: 9,
@@ -124,7 +124,7 @@ export const sessions: Session[] = [
     frequency: "10",
     gradient: ["#667eea", "#764ba2"],
     targetEmotions: ["anxious", "stressed", "calm"],
-    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     geometry: {
       type: 'hexagon',
       elements: 6,
@@ -142,7 +142,7 @@ export const sessions: Session[] = [
     frequency: "528",
     gradient: ["#ff9a9e", "#fecfef"],
     targetEmotions: ["sad", "angry", "happy", "calm"],
-    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
     geometry: {
       type: 'flower',
       elements: 12,
@@ -160,7 +160,7 @@ export const sessions: Session[] = [
     frequency: "20",
     gradient: ["#4facfe", "#00f2fe"],
     targetEmotions: ["focused", "energized"],
-    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
     geometry: {
       type: 'star',
       elements: 8,
@@ -178,7 +178,7 @@ export const sessions: Session[] = [
     frequency: "40",
     gradient: ["#ffecd2", "#fcb69f"],
     targetEmotions: ["focused", "energized", "happy"],
-    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
     geometry: {
       type: 'merkaba',
       elements: 6,
