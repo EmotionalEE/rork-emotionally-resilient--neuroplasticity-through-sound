@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Audio } from "expo-av";
+import { Platform } from "react-native";
 import createContextHook from "@nkzw/create-context-hook";
 
 interface AudioContextType {
@@ -14,13 +15,17 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    // Configure audio mode
-    Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: true,
-      shouldDuckAndroid: true,
-    });
+    // Configure audio mode - only on native platforms
+    if (Platform.OS !== 'web') {
+      Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        shouldDuckAndroid: true,
+      }).catch((error) => {
+        console.log("Audio mode configuration error (non-critical):", error);
+      });
+    }
 
     return () => {
       if (sound) {
@@ -50,9 +55,18 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
       console.log("Loading sound from:", url);
       
+      // Create sound with better error handling
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: url },
-        { shouldPlay: true, isLooping: true }
+        { 
+          shouldPlay: true, 
+          isLooping: true,
+          // Add web-specific options
+          ...(Platform.OS === 'web' && {
+            progressUpdateIntervalMillis: 1000,
+            positionMillis: 0
+          })
+        }
       );
 
       setSound(newSound);
@@ -62,11 +76,26 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       newSound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
           setIsPlaying(status.isPlaying);
+        } else {
+          // Handle loading errors
+          setIsPlaying(false);
+          if ('error' in status && status.error) {
+            console.error("Sound loading error:", status.error);
+          }
         }
       });
     } catch (error) {
       console.error("Error playing sound:", error);
       setIsPlaying(false);
+      
+      // Provide more specific error information
+      if (error instanceof Error) {
+        if (error.message.includes('NotSupportedError')) {
+          console.error("Audio format not supported on this platform");
+        } else if (error.message.includes('NetworkError')) {
+          console.error("Network error loading audio");
+        }
+      }
     }
   }, [sound]);
 
