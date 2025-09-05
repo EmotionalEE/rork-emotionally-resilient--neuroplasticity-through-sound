@@ -52,7 +52,7 @@ export const sessions: Session[] = [
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+    audioUrl: "https://soundcloud.com/james-jimenez-896404653/to-app?si=dc3879d039b9418683323e214acebe5d&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing",
     geometry: {
       type: 'spiral',
       elements: 12,
