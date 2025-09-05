@@ -923,8 +923,19 @@ export default function SessionScreen() {
       setIsPaused(true);
     } else {
       if (session) {
-        await playSound(session.audioUrl);
-        setIsPaused(false);
+        try {
+          console.log("Attempting to play audio:", session.audioUrl);
+          await playSound(session.audioUrl);
+          setIsPaused(false);
+          console.log("Audio playback started successfully");
+        } catch (error) {
+          console.error("Failed to play audio:", error);
+          Alert.alert(
+            "Audio Error",
+            "Unable to play the audio. Please check your internet connection and try again.",
+            [{ text: "OK" }]
+          );
+        }
       }
     }
   }, [isPlaying, session, playSound, stopSound]);

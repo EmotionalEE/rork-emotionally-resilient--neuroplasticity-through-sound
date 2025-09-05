@@ -50,23 +50,44 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
       console.log("Loading sound from:", url);
       
+      // Test if URL is accessible
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        console.log("URL accessibility check:", response.status, response.statusText);
+        if (!response.ok) {
+          throw new Error(`URL not accessible: ${response.status} ${response.statusText}`);
+        }
+      } catch (fetchError) {
+        console.error("URL fetch test failed:", fetchError);
+        throw new Error(`Cannot access audio URL: ${fetchError}`);
+      }
+      
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: url },
         { shouldPlay: true, isLooping: true }
       );
 
+      console.log("Sound created successfully, setting up playback...");
       setSound(newSound);
       setIsPlaying(true);
 
       // Set up playback status update
       newSound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
+          console.log("Playback status:", {
+            isPlaying: status.isPlaying,
+            positionMillis: status.positionMillis,
+            durationMillis: status.durationMillis
+          });
           setIsPlaying(status.isPlaying);
+        } else {
+          console.log("Sound not loaded:", status);
         }
       });
     } catch (error) {
       console.error("Error playing sound:", error);
       setIsPlaying(false);
+      throw error; // Re-throw to let the UI handle the error
     }
   }, [sound]);
 
