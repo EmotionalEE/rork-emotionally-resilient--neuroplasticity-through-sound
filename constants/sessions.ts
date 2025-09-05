@@ -52,7 +52,7 @@ export const sessions: Session[] = [
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
-    audioUrl: "https://github.com/EmotionalEE/app-/raw/7e52fbd3b485e6b5dc088df4102977e002c8feef/to%20app.mp3",
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
     geometry: {
       type: 'spiral',
       elements: 12,
