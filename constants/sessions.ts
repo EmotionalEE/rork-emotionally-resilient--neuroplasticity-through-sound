@@ -52,7 +52,7 @@ export const sessions: Session[] = [
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
     geometry: {
       type: 'spiral',
       elements: 12,
