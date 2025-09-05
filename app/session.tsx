@@ -24,9 +24,6 @@ import {
 import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
-import { useDynamicMusic } from "@/providers/DynamicMusicProvider";
-import { useCustomMusic } from "@/providers/CustomMusicProvider";
-import DynamicMusicPlayer from "@/components/DynamicMusicPlayer";
 import * as Haptics from "expo-haptics";
 
 // Sacred Geometry Component
@@ -258,7 +255,7 @@ const SacredGeometry = ({
                       backgroundColor: secondaryColor,
                       transform: [
                         { rotate: `${i * (360 / Math.floor(geometry.elements / 2))}deg` },
-                        { translateY: -90 },
+                        { translateY: -120 },
                       ],
                     },
                   ]}
@@ -664,11 +661,8 @@ export default function SessionScreen() {
   const { sessionId } = useLocalSearchParams();
   const { playSound, stopSound, isPlaying } = useAudio();
   const { addSession } = useUserProgress();
-  const { stopMusic: stopDynamicMusic, isPlaying: isDynamicPlaying } = useDynamicMusic();
-  const { getSessionMusic } = useCustomMusic();
   
   const session = useMemo(() => sessions.find((s) => s.id === sessionId), [sessionId]);
-  const customMusic = useMemo(() => getSessionMusic(sessionId as string), [sessionId, getSessionMusic]);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -743,7 +737,6 @@ export default function SessionScreen() {
           onPress: async () => {
             try {
               await stopSound();
-              stopDynamicMusic();
             } catch (error) {
               console.log("Error stopping sound during close:", error);
             }
@@ -753,18 +746,17 @@ export default function SessionScreen() {
         },
       ]
     );
-  }, [stopSound, stopDynamicMusic, router]);
+  }, [stopSound, router]);
 
   const handleQuickExit = useCallback(async () => {
     try {
       await stopSound();
-      stopDynamicMusic();
     } catch (error) {
       console.log("Error stopping sound during quick exit:", error);
     }
     // Always navigate to home to avoid GO_BACK errors
     router.replace("/home");
-  }, [stopSound, stopDynamicMusic, router]);
+  }, [stopSound, router]);
 
   useEffect(() => {
     if (!session) return;
@@ -870,7 +862,6 @@ export default function SessionScreen() {
 
     return () => {
       stopSound();
-      stopDynamicMusic();
       clearInterval(breathTimer);
       backHandler.remove();
     };
@@ -887,7 +878,6 @@ export default function SessionScreen() {
     
     try {
       await stopSound();
-      stopDynamicMusic();
     } catch (error) {
       console.log("Error stopping sound during completion:", error);
     }
@@ -905,7 +895,7 @@ export default function SessionScreen() {
         },
       ]
     );
-  }, [session, timeElapsed, addSession, stopSound, stopDynamicMusic, router]);
+  }, [session, timeElapsed, addSession, stopSound, router]);
 
   useEffect(() => {
     if (!isPaused && session) {
@@ -933,9 +923,7 @@ export default function SessionScreen() {
       setIsPaused(true);
     } else {
       if (session) {
-        // Use custom music if available, otherwise use default
-        const audioUrl = customMusic?.url || session.audioUrl;
-        await playSound(audioUrl);
+        await playSound(session.audioUrl);
         setIsPaused(false);
       }
     }
@@ -969,78 +957,49 @@ export default function SessionScreen() {
         </View>
 
         <View style={styles.content}>
-          {/* Title and Frequency */}
-          <View style={styles.titleSection}>
-            <Text style={styles.sessionTitle}>{session.title}</Text>
-            <Text style={styles.frequency}>{session.frequency}Hz</Text>
-          </View>
+          <Text style={styles.sessionTitle}>{session.title}</Text>
+          <Text style={styles.frequency}>{session.frequency}Hz</Text>
 
-          {/* Main Visualizer Section */}
-          <View style={styles.mainSection}>
-            <View style={styles.visualizer}>
-              {/* Sacred Geometry Background */}
-              <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} geometry={session.geometry} />
-              
-              <Animated.View
-                style={[
-                  styles.pulseCircle,
-                  {
-                    opacity: pulseOpacity,
-                  },
-                ]}
-              />
-              <Animated.View
-                style={[
-                  styles.waveCircle,
-                  {
-                    opacity: waveOpacity,
-                  },
-                ]}
-              />
-              <View style={styles.centerCircle}>
-                <Brain size={32} color="#fff" />
-              </View>
-            </View>
-
-            {/* Side Controls */}
-            <View style={styles.sideControls}>
-              {/* Breathing Guide */}
-              <View style={styles.breathingGuide}>
-                <Animated.View
-                  style={[
-                    styles.breathIndicator,
-                    {
-                      transform: [{ scale: breathIndicatorScale }],
-                      opacity: breathIndicatorOpacity,
-                    },
-                  ]}
-                />
-                <Text style={styles.breathText}>
-                  {breathingPhase === 'in' ? "In" : "Out"}
-                </Text>
-              </View>
-
-              {/* Play Button */}
-              <TouchableOpacity
-                onPress={handlePlayPause}
-                style={styles.playButton}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
-                  style={styles.playButtonGradient}
-                >
-                  {isPlaying ? (
-                    <Pause size={28} color="#fff" />
-                  ) : (
-                    <Play size={28} color="#fff" style={{ marginLeft: 2 }} />
-                  )}
-                </LinearGradient>
-              </TouchableOpacity>
+          <View style={styles.visualizer}>
+            {/* Sacred Geometry Background */}
+            <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} geometry={session.geometry} />
+            
+            <Animated.View
+              style={[
+                styles.pulseCircle,
+                {
+                  opacity: pulseOpacity,
+                },
+              ]}
+            />
+            <Animated.View
+              style={[
+                styles.waveCircle,
+                {
+                  opacity: waveOpacity,
+                },
+              ]}
+            />
+            <View style={styles.centerCircle}>
+              <Brain size={48} color="#fff" />
             </View>
           </View>
 
-          {/* Progress Section */}
+          <View style={styles.breathingGuide}>
+            <Animated.View
+              style={[
+                styles.breathIndicator,
+                {
+                  transform: [{ scale: breathIndicatorScale }],
+                  opacity: breathIndicatorOpacity,
+                },
+              ]}
+            />
+            <Text style={styles.breathText}>
+              {breathingPhase === 'in' ? "Breathe In" : "Breathe Out"}
+            </Text>
+          </View>
+
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: `${progress}%` }]} />
@@ -1053,31 +1012,44 @@ export default function SessionScreen() {
             </View>
           </View>
 
-          {/* Info Cards */}
+          <View style={styles.controls}>
+            <TouchableOpacity
+              onPress={handlePlayPause}
+              style={styles.playButton}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
+                style={styles.playButtonGradient}
+              >
+                {isPlaying ? (
+                  <Pause size={40} color="#fff" />
+                ) : (
+                  <Play size={40} color="#fff" style={{ marginLeft: 4 }} />
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
               <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-                <Heart size={16} color="#fff" />
+                <Heart size={20} color="#fff" />
               </Animated.View>
-              <Text style={styles.infoText}>Stress Relief</Text>
+              <Text style={styles.infoText}>Reduces Stress</Text>
             </View>
             <View style={styles.infoCard}>
               <Animated.View style={{ transform: [{ rotate: activityRotation }] }}>
-                <Activity size={16} color="#fff" />
+                <Activity size={20} color="#fff" />
               </Animated.View>
-              <Text style={styles.infoText}>Energy Balance</Text>
+              <Text style={styles.infoText}>Balances Energy</Text>
             </View>
             <View style={styles.infoCard}>
               <Animated.View style={{ transform: [{ scale: volumeScale }] }}>
-                <Volume2 size={16} color="#fff" />
+                <Volume2 size={20} color="#fff" />
               </Animated.View>
-              <Text style={styles.infoText}>Binaural</Text>
+              <Text style={styles.infoText}>Binaural Beats</Text>
             </View>
-          </View>
-          
-          {/* Dynamic Music Player */}
-          <View style={styles.dynamicMusicSection}>
-            <DynamicMusicPlayer sessionId={session.id} style={styles.dynamicMusicPlayer} />
           </View>
         </View>
       </SafeAreaView>
@@ -1108,73 +1080,59 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    justifyContent: "space-between",
-  },
-  titleSection: {
-    alignItems: "center",
-    paddingTop: 10,
-  },
-  sessionTitle: {
-    fontSize: 24,
-    fontWeight: "bold" as const,
-    color: "#fff",
-    marginBottom: 4,
-    textAlign: "center",
-  },
-  frequency: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.8)",
-  },
-  mainSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    flex: 1,
-    paddingVertical: 20,
-  },
-  visualizer: {
-    width: 220,
-    height: 220,
+    paddingHorizontal: 30,
     alignItems: "center",
     justifyContent: "center",
   },
-  sideControls: {
+  sessionTitle: {
+    fontSize: 28,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  frequency: {
+    fontSize: 18,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 40,
+  },
+  visualizer: {
+    width: 300,
+    height: 300,
     alignItems: "center",
-    justifyContent: "space-around",
-    height: 220,
-    paddingLeft: 20,
+    justifyContent: "center",
+    marginBottom: 40,
   },
   geometryContainer: {
     position: "absolute",
-    width: 220,
-    height: 220,
+    width: 300,
+    height: 300,
     alignItems: "center",
     justifyContent: "center",
   },
   mandalaOuter: {
     position: "absolute",
-    width: 200,
-    height: 200,
+    width: 280,
+    height: 280,
     alignItems: "center",
     justifyContent: "center",
   },
   mandalaLine: {
     position: "absolute",
-    width: 2,
-    height: 100,
+    width: 3,
+    height: 140,
     backgroundColor: "rgba(255,255,255,0.7)",
     top: 0,
-    borderRadius: 1,
+    borderRadius: 1.5,
     shadowColor: "#fff",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
-    shadowRadius: 3,
+    shadowRadius: 4,
   },
   outerRing: {
     position: "absolute",
-    width: 180,
-    height: 180,
+    width: 240,
+    height: 240,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1285,23 +1243,23 @@ const styles = StyleSheet.create({
   },
   pulseCircle: {
     position: "absolute",
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     backgroundColor: "#fff",
   },
   waveCircle: {
     position: "absolute",
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     borderWidth: 2,
     borderColor: "#fff",
   },
   centerCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
@@ -1310,24 +1268,25 @@ const styles = StyleSheet.create({
   },
   breathingGuide: {
     alignItems: "center",
+    marginBottom: 30,
   },
   breathIndicator: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: "rgba(255,255,255,0.1)",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.3)",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   breathText: {
-    fontSize: 12,
+    fontSize: 16,
     color: "rgba(255,255,255,0.9)",
     fontWeight: "600" as const,
   },
   progressContainer: {
     width: "100%",
-    marginBottom: 20,
+    marginBottom: 40,
   },
   progressBar: {
     height: 6,
@@ -1349,14 +1308,17 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     fontSize: 14,
   },
+  controls: {
+    marginBottom: 40,
+  },
   playButton: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
   },
   playButtonGradient: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -1364,31 +1326,21 @@ const styles = StyleSheet.create({
   },
   infoCards: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
+    gap: 15,
   },
   infoCard: {
     backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    flex: 1,
-    marginHorizontal: 4,
+    gap: 8,
   },
   infoText: {
     color: "#fff",
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "600" as const,
-  },
-  dynamicMusicSection: {
-    width: '100%',
-    paddingBottom: 10,
-  },
-  dynamicMusicPlayer: {
-    marginHorizontal: 0,
   },
   errorText: {
     color: "#fff",
