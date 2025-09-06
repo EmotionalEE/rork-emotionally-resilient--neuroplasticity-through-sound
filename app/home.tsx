@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Platform,
   Animated,
-  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -47,196 +46,6 @@ import { useAuth } from "@/providers/AuthProvider";
 import { usePayment } from "@/providers/PaymentProvider";
 import { EmotionalState } from "@/types/session";
 import * as Haptics from "expo-haptics";
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
-// Background Sacred Geometry Component
-const BackgroundSacredGeometry = () => {
-  const rotationAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const floatAnim = useRef(new Animated.Value(0)).current;
-  const secondaryRotationAnim = useRef(new Animated.Value(0)).current;
-  const tertiaryPulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    // Main rotation animation - very slow
-    const rotationAnimation = Animated.loop(
-      Animated.timing(rotationAnim, {
-        toValue: 1,
-        duration: 60000, // 60 seconds for full rotation
-        useNativeDriver: true,
-      })
-    );
-
-    // Secondary counter-rotation - even slower
-    const secondaryRotationAnimation = Animated.loop(
-      Animated.timing(secondaryRotationAnim, {
-        toValue: 1,
-        duration: 90000, // 90 seconds
-        useNativeDriver: true,
-      })
-    );
-
-    // Gentle pulsing animation
-    const pulseAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 4000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0.9,
-          duration: 4000,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    // Tertiary pulse for layered effect
-    const tertiaryPulseAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(tertiaryPulseAnim, {
-          toValue: 1.2,
-          duration: 6000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(tertiaryPulseAnim, {
-          toValue: 0.8,
-          duration: 6000,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    // Floating animation
-    const floatAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatAnim, {
-          toValue: 1,
-          duration: 8000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(floatAnim, {
-          toValue: 0,
-          duration: 8000,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    rotationAnimation.start();
-    secondaryRotationAnimation.start();
-    pulseAnimation.start();
-    tertiaryPulseAnimation.start();
-    floatAnimation.start();
-
-    return () => {
-      rotationAnimation.stop();
-      secondaryRotationAnimation.stop();
-      pulseAnimation.stop();
-      tertiaryPulseAnimation.stop();
-      floatAnimation.stop();
-    };
-  }, [rotationAnim, secondaryRotationAnim, pulseAnim, tertiaryPulseAnim, floatAnim]);
-
-  const rotationInterpolation = rotationAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const secondaryRotationInterpolation = secondaryRotationAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['360deg', '0deg'],
-  });
-
-  const floatInterpolation = floatAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-20, 20],
-  });
-
-  return (
-    <View style={styles.backgroundGeometry}>
-      {/* Main large geometry - Flower of Life */}
-      <Animated.View
-        style={[
-          styles.mainBackgroundGeometry,
-          {
-            transform: [
-              { rotate: rotationInterpolation },
-              { scale: pulseAnim },
-              { translateY: floatInterpolation },
-            ],
-          },
-        ]}
-      >
-        <FlowerOfLife 
-          size={screenWidth * 0.8} 
-          color="rgba(255,255,255,0.03)" 
-          strokeWidth={1} 
-        />
-      </Animated.View>
-
-      {/* Secondary geometry - Seed of Life */}
-      <Animated.View
-        style={[
-          styles.secondaryBackgroundGeometry,
-          {
-            transform: [
-              { rotate: secondaryRotationInterpolation },
-              { scale: tertiaryPulseAnim },
-            ],
-          },
-        ]}
-      >
-        <SeedOfLife 
-          size={screenWidth * 0.6} 
-          color="rgba(255,255,255,0.02)" 
-          strokeWidth={0.8} 
-        />
-      </Animated.View>
-
-      {/* Tertiary geometry - Metatron's Cube */}
-      <Animated.View
-        style={[
-          styles.tertiaryBackgroundGeometry,
-          {
-            transform: [
-              { rotate: rotationInterpolation },
-              { scale: pulseAnim },
-              { translateY: floatInterpolation },
-            ],
-          },
-        ]}
-      >
-        <MetatronsCube 
-          size={screenWidth * 0.4} 
-          color="rgba(255,255,255,0.025)" 
-          strokeWidth={0.6} 
-        />
-      </Animated.View>
-
-      {/* Quaternary geometry - Vector Equilibrium */}
-      <Animated.View
-        style={[
-          styles.quaternaryBackgroundGeometry,
-          {
-            transform: [
-              { rotate: secondaryRotationInterpolation },
-              { scale: tertiaryPulseAnim },
-            ],
-          },
-        ]}
-      >
-        <VectorEquilibrium 
-          size={screenWidth * 0.3} 
-          color="rgba(255,255,255,0.015)" 
-          strokeWidth={0.5} 
-        />
-      </Animated.View>
-    </View>
-  );
-};
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -310,7 +119,7 @@ export default function HomeScreen() {
   }, [logout, router]);
 
   // Sacred Geometry Icon Component
-  const SacredGeometryIcon = ({ emotion, isSelected, isCurrentFeeling = false }: { emotion: EmotionalState; isSelected: boolean; isCurrentFeeling?: boolean }) => {
+  const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
     const rotationAnim = useRef(new Animated.Value(0)).current;
     const pulseAnim = useRef(new Animated.Value(1)).current;
     const mandalaAnim = useRef(new Animated.Value(0)).current;
@@ -749,34 +558,18 @@ export default function HomeScreen() {
       }
     };
 
-    // Get complementary geometry color based on emotion
+    // Get color based on emotion
     const getGeometryColor = (emotionId: string): string => {
-      if (isCurrentFeeling) {
-        // Very light, muted colors for current feeling
-        switch (emotionId) {
-          case 'anxious': return 'rgba(200,220,255,0.4)'; // Very light blue
-          case 'stressed': return 'rgba(255,240,200,0.4)'; // Very light yellow
-          case 'sad': return 'rgba(220,200,255,0.4)'; // Very light purple
-          case 'angry': return 'rgba(255,200,220,0.4)'; // Very light pink
-          case 'calm': return 'rgba(200,240,255,0.4)'; // Very light cyan
-          case 'focused': return 'rgba(200,255,220,0.4)'; // Very light green
-          case 'happy': return 'rgba(255,240,200,0.4)'; // Very light orange
-          case 'energized': return 'rgba(220,255,240,0.4)'; // Very light mint
-          default: return 'rgba(230,230,255,0.4)';
-        }
-      } else {
-        // Original vibrant colors for "want to feel"
-        switch (emotionId) {
-          case 'anxious': return 'rgba(120,200,255,0.6)'; // Cool blue to complement warm anxiety colors
-          case 'stressed': return 'rgba(180,120,255,0.6)'; // Purple to complement yellow stress colors
-          case 'sad': return 'rgba(255,180,120,0.6)'; // Warm orange to complement cool sad colors
-          case 'angry': return 'rgba(120,255,180,0.7)'; // Cool green to complement warm angry colors
-          case 'calm': return 'rgba(255,220,120,0.6)'; // Warm gold to complement cool calm colors
-          case 'focused': return 'rgba(255,120,180,0.6)'; // Pink to complement green focused colors
-          case 'happy': return 'rgba(120,180,255,0.7)'; // Cool blue to complement warm happy colors
-          case 'energized': return 'rgba(255,150,120,0.7)'; // Warm coral to complement cool energized colors
-          default: return 'rgba(200,200,255,0.6)';
-        }
+      switch (emotionId) {
+        case 'anxious': return 'rgba(255,100,100,0.7)';
+        case 'stressed': return 'rgba(255,200,0,0.7)';
+        case 'sad': return 'rgba(150,150,255,0.7)';
+        case 'angry': return 'rgba(255,80,120,0.8)';
+        case 'calm': return 'rgba(100,200,255,0.7)';
+        case 'focused': return 'rgba(100,255,150,0.7)';
+        case 'happy': return 'rgba(255,200,100,0.8)';
+        case 'energized': return 'rgba(100,255,255,0.8)';
+        default: return 'rgba(255,255,255,0.6)';
       }
     };
 
@@ -800,26 +593,11 @@ export default function HomeScreen() {
     );
   };
 
-  const getEmotionIcon = useCallback((emotion: EmotionalState, isSelected: boolean, isCurrentFeeling: boolean = false) => {
-    return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} isCurrentFeeling={isCurrentFeeling} />;
+  const getEmotionIcon = useCallback((emotion: EmotionalState, isSelected: boolean) => {
+    return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} />;
   }, []);
 
 
-
-  // Get light gradient colors for current feeling
-  const getCurrentFeelingGradient = (emotion: EmotionalState): readonly [string, string, ...string[]] => {
-    switch (emotion.id) {
-      case 'anxious': return ['rgba(255,240,240,0.3)', 'rgba(240,230,255,0.3)'] as const; // Very light pink to light purple
-      case 'stressed': return ['rgba(255,250,230,0.3)', 'rgba(250,245,200,0.3)'] as const; // Very light cream to light yellow
-      case 'sad': return ['rgba(240,240,255,0.3)', 'rgba(230,235,250,0.3)'] as const; // Very light blue to light lavender
-      case 'angry': return ['rgba(255,245,245,0.3)', 'rgba(250,235,240,0.3)'] as const; // Very light pink to light rose
-      case 'calm': return ['rgba(240,250,255,0.3)', 'rgba(230,245,250,0.3)'] as const; // Very light cyan to light blue
-      case 'focused': return ['rgba(245,255,245,0.3)', 'rgba(235,250,240,0.3)'] as const; // Very light green to light mint
-      case 'happy': return ['rgba(255,250,240,0.3)', 'rgba(250,245,230,0.3)'] as const; // Very light peach to light cream
-      case 'energized': return ['rgba(245,255,250,0.3)', 'rgba(235,250,245,0.3)'] as const; // Very light mint to light aqua
-      default: return ['rgba(250,250,255,0.3)', 'rgba(245,245,250,0.3)'] as const;
-    }
-  };
 
   // Show loading state while navigation is not ready
   if (!isNavigationReady) {
@@ -836,9 +614,6 @@ export default function HomeScreen() {
 
   return (
     <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
-      {/* Background Sacred Geometry */}
-      <BackgroundSacredGeometry />
-      
       <SafeAreaView style={styles.safeArea}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           <Animated.View
@@ -920,14 +695,14 @@ export default function HomeScreen() {
                     activeOpacity={0.8}
                   >
                     <LinearGradient
-                      colors={getCurrentFeelingGradient(emotion)}
+                      colors={["#2a2a3e", "#1f1f2e"] as const}
                       style={[
                         styles.emotionCard,
                         styles.currentEmotionCard,
                       ]}
                     >
-                      {getEmotionIcon(emotion, isSelected, true)}
-                      <Text style={[styles.emotionLabel, styles.currentEmotionLabel]}>{emotion.label}</Text>
+                      {getEmotionIcon(emotion, isSelected)}
+                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 </Animated.View>
@@ -984,7 +759,7 @@ export default function HomeScreen() {
                     activeOpacity={0.8}
                   >
                     <LinearGradient
-                      colors={emotion.gradient as unknown as readonly [string, string, ...string[]]}
+                      colors={isSelected ? (emotion.gradient as unknown as readonly [string, string, ...string[]]) : ["#2a2a3e", "#1f1f2e"] as const}
                       style={[
                         styles.emotionCard,
                         isSelected && styles.emotionCardSelected,
@@ -1383,45 +1158,7 @@ const styles = StyleSheet.create({
   },
   currentEmotionCard: {
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    borderColor: "rgba(255,255,255,0.2)",
   },
-  currentEmotionLabel: {
-    color: "rgba(255,255,255,0.6)",
-  },
-  // Background Sacred Geometry Styles
-  backgroundGeometry: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 0,
-  },
-  mainBackgroundGeometry: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-    top: screenHeight * 0.1,
-  },
-  secondaryBackgroundGeometry: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-    top: screenHeight * 0.2,
-  },
-  tertiaryBackgroundGeometry: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-    top: screenHeight * 0.3,
-  },
-  quaternaryBackgroundGeometry: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-    top: screenHeight * 0.4,
-  },
+
 });
