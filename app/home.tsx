@@ -558,18 +558,18 @@ export default function HomeScreen() {
       }
     };
 
-    // Get color based on emotion
+    // Get complementary geometry color based on emotion
     const getGeometryColor = (emotionId: string): string => {
       switch (emotionId) {
-        case 'anxious': return 'rgba(255,100,100,0.7)';
-        case 'stressed': return 'rgba(255,200,0,0.7)';
-        case 'sad': return 'rgba(150,150,255,0.7)';
-        case 'angry': return 'rgba(255,80,120,0.8)';
-        case 'calm': return 'rgba(100,200,255,0.7)';
-        case 'focused': return 'rgba(100,255,150,0.7)';
-        case 'happy': return 'rgba(255,200,100,0.8)';
-        case 'energized': return 'rgba(100,255,255,0.8)';
-        default: return 'rgba(255,255,255,0.6)';
+        case 'anxious': return 'rgba(120,200,255,0.6)'; // Cool blue to complement warm anxiety colors
+        case 'stressed': return 'rgba(180,120,255,0.6)'; // Purple to complement yellow stress colors
+        case 'sad': return 'rgba(255,180,120,0.6)'; // Warm orange to complement cool sad colors
+        case 'angry': return 'rgba(120,255,180,0.7)'; // Cool green to complement warm angry colors
+        case 'calm': return 'rgba(255,220,120,0.6)'; // Warm gold to complement cool calm colors
+        case 'focused': return 'rgba(255,120,180,0.6)'; // Pink to complement green focused colors
+        case 'happy': return 'rgba(120,180,255,0.7)'; // Cool blue to complement warm happy colors
+        case 'energized': return 'rgba(255,150,120,0.7)'; // Warm coral to complement cool energized colors
+        default: return 'rgba(200,200,255,0.6)';
       }
     };
 
