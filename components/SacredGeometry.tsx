@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Animated, View } from 'react-native';
 import Svg, { Circle, Path, Line, Polygon, G } from 'react-native-svg';
 
 interface SacredGeometryProps {
@@ -344,5 +345,99 @@ export const TetrahedronGrid: React.FC<SacredGeometryProps> = ({
         <Polygon points="50,60 42,45 58,45" />
       </G>
     </Svg>
+  );
+};
+
+// Circle of Life - Pulsating breathing circle for sadness transformation
+export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }> = ({ 
+  size = 200, 
+  color = 'rgba(255,255,255,0.8)', 
+  strokeWidth = 2,
+  isActive = false
+}) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(0.6)).current;
+
+  useEffect(() => {
+    if (isActive) {
+      // Breathing animation - 4 seconds inhale, 4 seconds exhale
+      const breathingAnimation = Animated.loop(
+        Animated.sequence([
+          // Inhale - expand
+          Animated.parallel([
+            Animated.timing(scaleAnim, {
+              toValue: 1.3,
+              duration: 4000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacityAnim, {
+              toValue: 0.9,
+              duration: 4000,
+              useNativeDriver: true,
+            }),
+          ]),
+          // Exhale - contract
+          Animated.parallel([
+            Animated.timing(scaleAnim, {
+              toValue: 0.8,
+              duration: 4000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(opacityAnim, {
+              toValue: 0.4,
+              duration: 4000,
+              useNativeDriver: true,
+            }),
+          ]),
+        ])
+      );
+      
+      breathingAnimation.start();
+      
+      return () => {
+        breathingAnimation.stop();
+      };
+    } else {
+      // Reset to default state
+      scaleAnim.setValue(1);
+      opacityAnim.setValue(0.6);
+    }
+  }, [isActive, scaleAnim, opacityAnim]);
+
+  return (
+    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Animated.View
+        style={{
+          transform: [{ scale: scaleAnim }],
+          opacity: opacityAnim,
+        }}
+      >
+        <Svg width={size} height={size} viewBox="0 0 200 200">
+          <G stroke={color} strokeWidth={strokeWidth} fill="none">
+            {/* Outer circle - the cycle of life */}
+            <Circle cx="100" cy="100" r="80" strokeOpacity="0.8" />
+            
+            {/* Inner circles representing the eternal cycle */}
+            <Circle cx="100" cy="100" r="60" strokeOpacity="0.6" />
+            <Circle cx="100" cy="100" r="40" strokeOpacity="0.4" />
+            
+            {/* Center breathing circle */}
+            <Circle cx="100" cy="100" r="20" strokeOpacity="1" strokeWidth={strokeWidth * 1.5} />
+            
+            {/* Connecting lines showing the flow of life energy */}
+            <Line x1="100" y1="20" x2="100" y2="40" strokeOpacity="0.5" />
+            <Line x1="100" y1="160" x2="100" y2="180" strokeOpacity="0.5" />
+            <Line x1="20" y1="100" x2="40" y2="100" strokeOpacity="0.5" />
+            <Line x1="160" y1="100" x2="180" y2="100" strokeOpacity="0.5" />
+            
+            {/* Diagonal flow lines */}
+            <Line x1="41.4" y1="41.4" x2="58.6" y2="58.6" strokeOpacity="0.3" />
+            <Line x1="158.6" y1="41.4" x2="141.4" y2="58.6" strokeOpacity="0.3" />
+            <Line x1="158.6" y1="158.6" x2="141.4" y2="141.4" strokeOpacity="0.3" />
+            <Line x1="41.4" y1="158.6" x2="58.6" y2="141.4" strokeOpacity="0.3" />
+          </G>
+        </Svg>
+      </Animated.View>
+    </View>
   );
 };
