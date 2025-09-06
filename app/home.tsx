@@ -628,7 +628,7 @@ export default function HomeScreen() {
             <View style={styles.headerTop}>
               <View style={styles.headerText}>
                 <Text style={styles.greeting}>Welcome back{user?.name ? `, ${user.name}` : ''}</Text>
-                <Text style={styles.title}>How do you want to feel?</Text>
+                <Text style={styles.title}>How are you feeling?</Text>
               </View>
               <View style={styles.headerButtons}>
                 <TouchableOpacity
@@ -658,7 +658,70 @@ export default function HomeScreen() {
             </View>
           </Animated.View>
 
+          {/* How do you feel section */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.emotionsContainer}
+          >
+            {emotionalStates.map((emotion, index) => {
+              const isSelected = false;
 
+              return (
+                <Animated.View
+                  key={`current-${emotion.id}`}
+                  style={{
+                    opacity: fadeAnim,
+                    transform: [
+                      {
+                        translateY: (() => {
+                          try {
+                            return fadeAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [20, 0],
+                              extrapolate: 'clamp',
+                            });
+                          } catch (error) {
+                            console.warn('Home fadeAnim translateY interpolation error:', error);
+                            return 0;
+                          }
+                        })(),
+                      },
+                    ],
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => console.log(`Current feeling: ${emotion.label}`)}
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={["#2a2a3e", "#1f1f2e"] as const}
+                      style={[
+                        styles.emotionCard,
+                        styles.currentEmotionCard,
+                      ]}
+                    >
+                      {getEmotionIcon(emotion, isSelected)}
+                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })}
+          </ScrollView>
+
+          {/* How do you want to feel section */}
+          <Animated.View
+            style={[
+              styles.wantToFeelHeader,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            <Text style={styles.sectionTitle}>How do you want to feel?</Text>
+          </Animated.View>
 
           <ScrollView
             horizontal
@@ -670,7 +733,7 @@ export default function HomeScreen() {
 
               return (
                 <Animated.View
-                  key={emotion.id}
+                  key={`want-${emotion.id}`}
                   style={{
                     opacity: fadeAnim,
                     transform: [
@@ -1075,6 +1138,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600" as const,
     color: "#fff",
+  },
+  wantToFeelHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 5,
+  },
+  currentEmotionCard: {
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
   },
 
 });
