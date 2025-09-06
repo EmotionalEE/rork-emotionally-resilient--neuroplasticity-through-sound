@@ -628,7 +628,7 @@ export default function HomeScreen() {
             <View style={styles.headerTop}>
               <View style={styles.headerText}>
                 <Text style={styles.greeting}>Welcome back{user?.name ? `, ${user.name}` : ''}</Text>
-                <Text style={styles.title}>How are you feeling?</Text>
+                <Text style={styles.title}>How are you feeling today?</Text>
               </View>
               <View style={styles.headerButtons}>
                 <TouchableOpacity
@@ -876,8 +876,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   headerTop: {
     flexDirection: 'row',
@@ -918,47 +918,59 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(251, 191, 36, 0.3)',
   },
   greeting: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.7)",
-    marginBottom: 8,
+    fontSize: 18,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 4,
+    fontWeight: "500" as const,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold" as const,
+    fontSize: 24,
+    fontWeight: "700" as const,
     color: "#fff",
+    letterSpacing: 0.5,
   },
   emotionsContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 16,
   },
   emotionCard: {
-    width: 100,
-    height: 100,
-    borderRadius: 20,
-    marginRight: 12,
+    width: 95,
+    height: 95,
+    borderRadius: 18,
+    marginRight: 14,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   emotionCardSelected: {
     borderColor: "rgba(255,255,255,0.5)",
   },
   emotionLabel: {
     color: "#fff",
-    fontSize: 14,
-    marginTop: 8,
-    fontWeight: "600" as const,
+    fontSize: 13,
+    marginTop: 6,
+    fontWeight: "500" as const,
+    textAlign: "center" as const,
   },
   sessionsSection: {
     paddingHorizontal: 20,
     marginTop: 10,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold" as const,
+    fontSize: 22,
+    fontWeight: "600" as const,
     color: "#fff",
-    marginBottom: 20,
+    marginBottom: 16,
+    letterSpacing: 0.3,
   },
   sessionCard: {
     borderRadius: 20,
@@ -1141,8 +1153,8 @@ const styles = StyleSheet.create({
   },
   wantToFeelHeader: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 5,
+    paddingTop: 20,
+    paddingBottom: 8,
   },
   currentEmotionCard: {
     borderWidth: 1,
