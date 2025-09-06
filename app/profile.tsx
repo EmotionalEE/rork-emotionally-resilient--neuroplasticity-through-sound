@@ -11,11 +11,12 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { ArrowLeft, User, Calendar, Clock, Flame, TrendingUp, Award, Target, Crown, CreditCard, Settings } from "lucide-react-native";
+import { ArrowLeft, User, Calendar, Clock, Flame, TrendingUp, Award, Target, Crown, CreditCard, Settings, Share } from "lucide-react-native";
 import { useAuth } from "@/providers/AuthProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { usePayment } from "@/providers/PaymentProvider";
 import { emotionalStates } from "@/constants/sessions";
+import SocialShare from "@/components/SocialShare";
 
 const { width } = Dimensions.get("window");
 
@@ -33,6 +34,18 @@ export default function ProfileScreen() {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const [progressAnimations, setProgressAnimations] = useState<{[key: string]: Animated.Value}>({});
+  const [shareModalVisible, setShareModalVisible] = useState<boolean>(false);
+  const [shareData, setShareData] = useState<{
+    type: 'progress' | 'achievement' | 'streak' | 'session';
+    title: string;
+    description: string;
+    stats?: {
+      sessions?: number;
+      streak?: number;
+      minutes?: number;
+      improvement?: number;
+    };
+  } | null>(null);
   
   // Initialize progress animations
   useEffect(() => {
@@ -144,6 +157,44 @@ export default function ProfileScreen() {
     ]).start();
   };
 
+  const handleShare = (type: 'progress' | 'achievement' | 'streak' | 'session', customData?: any) => {
+    let title = '';
+    let description = '';
+    let stats = {};
+
+    switch (type) {
+      case 'progress':
+        title = 'My Meditation Journey';
+        description = 'Tracking my mindfulness progress and celebrating every step forward!';
+        stats = {
+          sessions: progress.totalSessions,
+          minutes: progress.totalMinutes,
+          improvement: Math.round(progress.emotionProgress.reduce((acc, curr) => acc + curr.improvementPercentage, 0) / progress.emotionProgress.length) || 0,
+        };
+        break;
+      case 'achievement':
+        title = customData?.title || 'New Milestone Reached!';
+        description = customData?.description || 'Just hit a new personal record in my meditation practice!';
+        stats = customData?.stats || {};
+        break;
+      case 'streak':
+        title = `${progress.streak} Day Meditation Streak!`;
+        description = 'Consistency is the key to inner peace. Every day counts!';
+        stats = {
+          streak: progress.streak,
+          sessions: progress.totalSessions,
+        };
+        break;
+      case 'session':
+        title = 'Mindful Moment Complete';
+        description = 'Just finished another peaceful meditation session. Feeling centered and grateful!';
+        break;
+    }
+
+    setShareData({ type, title, description, stats });
+    setShareModalVisible(true);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient colors={["#1a1a2e", "#16213e"]} style={styles.gradient}>
@@ -243,6 +294,7 @@ export default function ProfileScreen() {
             <TouchableOpacity 
               style={styles.statCard} 
               onPress={() => handleStatPress('sessions')}
+              onLongPress={() => handleShare('progress')}
               activeOpacity={0.8}
             >
               <Animated.View
@@ -313,6 +365,7 @@ export default function ProfileScreen() {
             <TouchableOpacity 
               style={styles.statCard} 
               onPress={() => handleStatPress('streak')}
+              onLongPress={() => handleShare('streak')}
               activeOpacity={0.8}
             >
               <Animated.View
@@ -547,6 +600,46 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </Animated.View>
 
+          {/* Social Sharing */}
+          <Animated.View 
+            style={[
+              styles.section,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
+            <View style={styles.sectionHeader}>
+              <Share size={20} color="#ffffff" />
+              <Text style={styles.sectionTitle}>Share Your Journey</Text>
+            </View>
+            
+            <View style={styles.shareButtonsContainer}>
+              <TouchableOpacity 
+                style={styles.shareButton}
+                onPress={() => handleShare('progress')}
+                activeOpacity={0.8}
+              >
+                <LinearGradient colors={['#667eea', '#764ba2']} style={styles.shareButtonGradient}>
+                  <Target size={20} color="#ffffff" />
+                  <Text style={styles.shareButtonText}>Share Progress</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.shareButton}
+                onPress={() => handleShare('streak')}
+                activeOpacity={0.8}
+              >
+                <LinearGradient colors={['#fa709a', '#fee140']} style={styles.shareButtonGradient}>
+                  <Flame size={20} color="#ffffff" />
+                  <Text style={styles.shareButtonText}>Share Streak</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+
           {/* Recent Activity */}
           <Animated.View 
             style={[
@@ -608,6 +701,19 @@ export default function ProfileScreen() {
             </Animated.View>
           </Animated.View>
         </ScrollView>
+        
+        {/* Social Share Modal */}
+        {shareData && (
+          <SocialShare
+            visible={shareModalVisible}
+            onClose={() => {
+              setShareModalVisible(false);
+              setShareData(null);
+            }}
+            shareType={shareData.type}
+            data={shareData}
+          />
+        )}
       </LinearGradient>
     </SafeAreaView>
   );
@@ -899,5 +1005,27 @@ const styles = StyleSheet.create({
   settingSubtitle: {
     fontSize: 14,
     color: "rgba(255,255,255,0.6)",
+  },
+  shareButtonsContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  shareButton: {
+    flex: 1,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  shareButtonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  shareButtonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600" as const,
   },
 });

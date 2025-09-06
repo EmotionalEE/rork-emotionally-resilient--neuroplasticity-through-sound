@@ -24,6 +24,7 @@ import {
 import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
+import SocialShare from "@/components/SocialShare";
 import * as Haptics from "expo-haptics";
 
 // Sacred Geometry Component
@@ -669,6 +670,18 @@ export default function SessionScreen() {
   const waveAnim = useRef(new Animated.Value(0)).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
+  const [shareModalVisible, setShareModalVisible] = useState<boolean>(false);
+  const [shareData, setShareData] = useState<{
+    type: 'progress' | 'achievement' | 'streak' | 'session';
+    title: string;
+    description: string;
+    stats?: {
+      sessions?: number;
+      streak?: number;
+      minutes?: number;
+      improvement?: number;
+    };
+  } | null>(null);
   
   // Icon animation values
   const heartAnim = useRef(new Animated.Value(1)).current;
@@ -867,6 +880,24 @@ export default function SessionScreen() {
     };
   }, [session, pulseAnim, waveAnim, breathAnim, stopSound, handleClose]);
 
+  const handleShare = useCallback((type: 'session') => {
+    if (!session) return;
+    
+    const sessionMinutes = Math.floor(timeElapsed / 60);
+    const title = `Completed: ${session.title}`;
+    const description = `Just finished a ${sessionMinutes}-minute ${session.title.toLowerCase()} session. Feeling more centered and peaceful!`;
+    
+    setShareData({ 
+      type, 
+      title, 
+      description,
+      stats: {
+        minutes: sessionMinutes,
+      }
+    });
+    setShareModalVisible(true);
+  }, [session, timeElapsed]);
+
   const handleComplete = useCallback(async () => {
     if (Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -887,6 +918,10 @@ export default function SessionScreen() {
       "Great job! You've completed this session.",
       [
         {
+          text: "Share Progress",
+          onPress: () => handleShare('session'),
+        },
+        {
           text: "Continue",
           onPress: () => {
             // Always navigate to home to avoid GO_BACK errors
@@ -895,7 +930,7 @@ export default function SessionScreen() {
         },
       ]
     );
-  }, [session, timeElapsed, addSession, stopSound, router]);
+  }, [session, timeElapsed, addSession, stopSound, router, handleShare]);
 
   useEffect(() => {
     if (!isPaused && session) {
@@ -1053,6 +1088,21 @@ export default function SessionScreen() {
           </View>
         </View>
       </SafeAreaView>
+      
+      {/* Social Share Modal */}
+      {shareData && (
+        <SocialShare
+          visible={shareModalVisible}
+          onClose={() => {
+            setShareModalVisible(false);
+            setShareData(null);
+            // Navigate to home after sharing
+            router.replace("/home");
+          }}
+          shareType={shareData.type}
+          data={shareData}
+        />
+      )}
     </LinearGradient>
   );
 }
