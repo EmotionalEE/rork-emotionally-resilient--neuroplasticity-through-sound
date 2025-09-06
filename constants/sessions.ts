@@ -83,7 +83,7 @@ export const sessions: Session[] = [
   {
     id: "theta-healing",
     title: "Sadness Transformation",
-    description: "Deep meditation and emotional healing with 6Hz theta waves",
+    description: "Deep emotional training and emotional healing with 6Hz theta waves",
     duration: 20,
     frequency: "6",
     gradient: ["#f093fb", "#f5576c"],

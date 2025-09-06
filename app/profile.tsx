@@ -164,7 +164,7 @@ export default function ProfileScreen() {
 
     switch (type) {
       case 'progress':
-        title = 'My Meditation Journey';
+        title = 'My Emotional Training Journey';
         description = 'Tracking my mindfulness progress and celebrating every step forward!';
         stats = {
           sessions: progress.totalSessions,
@@ -174,11 +174,11 @@ export default function ProfileScreen() {
         break;
       case 'achievement':
         title = customData?.title || 'New Milestone Reached!';
-        description = customData?.description || 'Just hit a new personal record in my meditation practice!';
+        description = customData?.description || 'Just hit a new personal record in my emotional training practice!';
         stats = customData?.stats || {};
         break;
       case 'streak':
-        title = `${progress.streak} Day Meditation Streak!`;
+        title = `${progress.streak} Day Emotional Training Streak!`;
         description = 'Consistency is the key to inner peace. Every day counts!';
         stats = {
           streak: progress.streak,
@@ -187,7 +187,7 @@ export default function ProfileScreen() {
         break;
       case 'session':
         title = 'Mindful Moment Complete';
-        description = 'Just finished another peaceful meditation session. Feeling centered and grateful!';
+        description = 'Just finished another peaceful emotional training session. Feeling centered and grateful!';
         break;
     }
 

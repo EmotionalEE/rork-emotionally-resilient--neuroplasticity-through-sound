@@ -62,7 +62,7 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     currency: "USD",
     interval: "monthly",
     features: [
-      "Access to all meditation sessions",
+      "Access to all emotional training sessions",
       "Basic progress tracking",
       "Standard audio quality",
       "Email support"

@@ -61,19 +61,19 @@ export default function SocialShare({ visible, onClose, shareType, data }: Socia
     
     switch (shareType) {
       case 'progress':
-        return `🧘 ${title}\n\n${description}\n\n📊 My meditation progress:\n${stats?.sessions ? `• ${stats.sessions} sessions completed` : ''}\n${stats?.minutes ? `• ${Math.floor(stats.minutes / 60)}h ${stats.minutes % 60}m total time` : ''}\n${stats?.improvement ? `• ${stats.improvement}% improvement` : ''}\n\n#Meditation #Mindfulness #PersonalGrowth`;
+        return `🧘 ${title}\n\n${description}\n\n📊 My emotional training progress:\n${stats?.sessions ? `• ${stats.sessions} sessions completed` : ''}\n${stats?.minutes ? `• ${Math.floor(stats.minutes / 60)}h ${stats.minutes % 60}m total time` : ''}\n${stats?.improvement ? `• ${stats.improvement}% improvement` : ''}\n\n#EmotionalTraining #Mindfulness #PersonalGrowth`;
       
       case 'achievement':
-        return `🏆 ${title}\n\n${description}\n\nJust reached a new milestone in my meditation journey! 🌟\n\n#Achievement #Meditation #Mindfulness #PersonalGrowth`;
+        return `🏆 ${title}\n\n${description}\n\nJust reached a new milestone in my emotional training journey! 🌟\n\n#Achievement #EmotionalTraining #Mindfulness #PersonalGrowth`;
       
       case 'streak':
-        return `🔥 ${title}\n\n${description}\n\n${stats?.streak ? `Maintained my meditation streak for ${stats.streak} days!` : ''} Consistency is key to inner peace. 🧘‍♀️\n\n#MeditationStreak #Mindfulness #DailyPractice #PersonalGrowth`;
+        return `🔥 ${title}\n\n${description}\n\n${stats?.streak ? `Maintained my emotional training streak for ${stats.streak} days!` : ''} Consistency is key to inner peace. 🧘‍♀️\n\n#EmotionalTrainingStreak #Mindfulness #DailyPractice #PersonalGrowth`;
       
       case 'session':
-        return `✨ ${title}\n\n${description}\n\nJust completed another mindful session. Every moment of peace counts! 🙏\n\n#Meditation #Mindfulness #InnerPeace #SelfCare`;
+        return `✨ ${title}\n\n${description}\n\nJust completed another mindful session. Every moment of peace counts! 🙏\n\n#EmotionalTraining #Mindfulness #InnerPeace #SelfCare`;
       
       default:
-        return `${title}\n\n${description}\n\n#Meditation #Mindfulness`;
+        return `${title}\n\n${description}\n\n#EmotionalTraining #Mindfulness`;
     }
   };
 

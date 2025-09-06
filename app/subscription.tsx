@@ -334,7 +334,7 @@ export default function SubscriptionScreen() {
             </View>
             <Text style={styles.heroTitle}>Unlock Your Inner Peace</Text>
             <Text style={styles.heroSubtitle}>
-              Access premium meditation sessions, advanced visualizations, and personalized guidance
+              Access premium emotional training sessions, advanced visualizations, and personalized guidance
             </Text>
           </Animated.View>
 
