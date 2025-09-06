@@ -104,7 +104,7 @@ export const sessions: Session[] = [
     description: "Dissolve anxiety with sacred geometry and 2Hz delta waves",
     duration: 30,
     frequency: "2",
-    gradient: ["#667eea", "#764ba2"],
+    gradient: ["#a8e6cf", "#88d8a3"],
     targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
     geometry: {
@@ -113,7 +113,7 @@ export const sessions: Session[] = [
       layers: 4,
       rotationSpeed: 12000,
       pulseIntensity: 1.5,
-      colors: ['rgba(255,255,255,0.9)', 'rgba(102,126,234,0.8)', 'rgba(118,75,162,0.7)']
+      colors: ['rgba(255,255,255,0.9)', 'rgba(168,230,207,0.8)', 'rgba(136,216,163,0.7)']
     },
   },
   {
