@@ -41,7 +41,6 @@ import {
   TetrahedronGrid,
 } from "@/components/SacredGeometry";
 import { CalmLandscape } from "@/components/CalmLandscape";
-import { CalmingSacredGeometry } from "@/components/CalmingSacredGeometry";
 import { emotionalStates } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -619,12 +618,7 @@ export default function HomeScreen() {
       {/* Calm landscape background */}
       <CalmLandscape opacity={0.4} />
       
-      {/* Single calming sacred geometry */}
-      <CalmingSacredGeometry 
-        size={100} 
-        color="rgba(100, 200, 255, 0.3)" 
-        opacity={0.7} 
-      />
+
       
       <SafeAreaView style={styles.safeArea}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
