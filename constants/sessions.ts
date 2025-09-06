@@ -101,19 +101,19 @@ export const sessions: Session[] = [
   {
     id: "delta-sleep",
     title: "Anxiety Dissolution",
-    description: "Prepare for restful sleep with 2Hz delta waves",
+    description: "Dissolve anxiety with sacred geometry and 2Hz delta waves",
     duration: 30,
     frequency: "2",
-    gradient: ["#a8edea", "#fed6e3"],
+    gradient: ["#667eea", "#764ba2"],
     targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
     geometry: {
       type: 'sri_yantra',
       elements: 9,
       layers: 4,
-      rotationSpeed: 15000,
-      pulseIntensity: 1.3,
-      colors: ['rgba(168,237,234,0.9)', 'rgba(254,214,227,0.7)', 'rgba(255,255,255,0.8)']
+      rotationSpeed: 12000,
+      pulseIntensity: 1.5,
+      colors: ['rgba(255,255,255,0.9)', 'rgba(102,126,234,0.8)', 'rgba(118,75,162,0.7)']
     },
   },
   {
