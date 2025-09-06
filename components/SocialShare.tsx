@@ -80,13 +80,41 @@ export default function SocialShare({ visible, onClose, shareType, data }: Socia
   const shareToNative = async (text: string) => {
     try {
       setIsSharing(true);
-      await Share.share({
-        message: text,
-        title: data.title,
-      });
+      
+      if (Platform.OS === 'web') {
+        // For web, check if Web Share API is available and allowed
+        if (navigator.share && navigator.canShare && navigator.canShare({ text })) {
+          await navigator.share({
+            title: data.title,
+            text: text,
+          });
+        } else {
+          // Fallback: copy to clipboard and show instructions
+          await copyToClipboard(text);
+          Alert.alert(
+            'Content Copied!', 
+            'The content has been copied to your clipboard. You can now paste it in your preferred social media app.'
+          );
+        }
+      } else {
+        // Native mobile sharing
+        await Share.share({
+          message: text,
+          title: data.title,
+        });
+      }
     } catch (error) {
       console.error('Error sharing:', error);
-      Alert.alert('Error', 'Failed to share content');
+      // Fallback to clipboard on any error
+      try {
+        await copyToClipboard(text);
+        Alert.alert(
+          'Copied to Clipboard', 
+          'Content copied to clipboard. You can paste it in your preferred app.'
+        );
+      } catch {
+        Alert.alert('Error', 'Unable to share or copy content');
+      }
     } finally {
       setIsSharing(false);
     }
