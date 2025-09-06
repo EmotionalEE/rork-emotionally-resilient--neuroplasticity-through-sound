@@ -53,7 +53,7 @@ export default function HomeScreen() {
   const { progress } = useUserProgress();
   const { user, logout } = useAuth();
   const { isPremium, trialDaysLeft, subscription } = usePayment();
-  const [selectedEmotion, setSelectedEmotion] = useState<EmotionalState | null>(null);
+
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
@@ -99,8 +99,11 @@ export default function HomeScreen() {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    setSelectedEmotion(emotion);
-  }, []);
+    router.push({
+      pathname: "/recommended-sessions",
+      params: { emotionId: emotion.id },
+    });
+  }, [router]);
 
   const handleSessionPress = useCallback((session: Session) => {
     if (Platform.OS !== "web") {
@@ -603,12 +606,7 @@ export default function HomeScreen() {
     return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} />;
   }, []);
 
-  const filteredSessions = useMemo(() => 
-    selectedEmotion
-      ? sessions.filter((s) => s.targetEmotions.includes(selectedEmotion.id))
-      : sessions,
-    [selectedEmotion]
-  );
+
 
   // Show loading state while navigation is not ready
   if (!isNavigationReady) {
@@ -639,7 +637,7 @@ export default function HomeScreen() {
             <View style={styles.headerTop}>
               <View style={styles.headerText}>
                 <Text style={styles.greeting}>Welcome back{user?.name ? `, ${user.name}` : ''}</Text>
-                <Text style={styles.title}>How are you feeling?</Text>
+                <Text style={styles.title}>How do you want to feel?</Text>
               </View>
               <View style={styles.headerButtons}>
                 <TouchableOpacity
@@ -677,7 +675,7 @@ export default function HomeScreen() {
             contentContainerStyle={styles.emotionsContainer}
           >
             {emotionalStates.map((emotion, index) => {
-              const isSelected = selectedEmotion?.id === emotion.id;
+              const isSelected = false;
 
               return (
                 <Animated.View
@@ -723,13 +721,9 @@ export default function HomeScreen() {
           </ScrollView>
 
           <View style={styles.sessionsSection}>
-            <Text style={styles.sectionTitle}>
-              {selectedEmotion
-                ? `Sessions for ${selectedEmotion.label}`
-                : "Recommended Sessions"}
-            </Text>
+            <Text style={styles.sectionTitle}>Popular Sessions</Text>
 
-            {filteredSessions.map((session, index) => (
+            {sessions.slice(0, 3).map((session, index) => (
               <Animated.View
                 key={session.id}
                 style={{
