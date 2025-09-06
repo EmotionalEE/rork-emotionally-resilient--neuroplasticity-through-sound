@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   Animated,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -46,6 +47,196 @@ import { useAuth } from "@/providers/AuthProvider";
 import { usePayment } from "@/providers/PaymentProvider";
 import { EmotionalState } from "@/types/session";
 import * as Haptics from "expo-haptics";
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+// Background Sacred Geometry Component
+const BackgroundSacredGeometry = () => {
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const secondaryRotationAnim = useRef(new Animated.Value(0)).current;
+  const tertiaryPulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Main rotation animation - very slow
+    const rotationAnimation = Animated.loop(
+      Animated.timing(rotationAnim, {
+        toValue: 1,
+        duration: 60000, // 60 seconds for full rotation
+        useNativeDriver: true,
+      })
+    );
+
+    // Secondary counter-rotation - even slower
+    const secondaryRotationAnimation = Animated.loop(
+      Animated.timing(secondaryRotationAnim, {
+        toValue: 1,
+        duration: 90000, // 90 seconds
+        useNativeDriver: true,
+      })
+    );
+
+    // Gentle pulsing animation
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.1,
+          duration: 4000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.9,
+          duration: 4000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    // Tertiary pulse for layered effect
+    const tertiaryPulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(tertiaryPulseAnim, {
+          toValue: 1.2,
+          duration: 6000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(tertiaryPulseAnim, {
+          toValue: 0.8,
+          duration: 6000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    // Floating animation
+    const floatAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: 1,
+          duration: 8000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 8000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    rotationAnimation.start();
+    secondaryRotationAnimation.start();
+    pulseAnimation.start();
+    tertiaryPulseAnimation.start();
+    floatAnimation.start();
+
+    return () => {
+      rotationAnimation.stop();
+      secondaryRotationAnimation.stop();
+      pulseAnimation.stop();
+      tertiaryPulseAnimation.stop();
+      floatAnimation.stop();
+    };
+  }, [rotationAnim, secondaryRotationAnim, pulseAnim, tertiaryPulseAnim, floatAnim]);
+
+  const rotationInterpolation = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const secondaryRotationInterpolation = secondaryRotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['360deg', '0deg'],
+  });
+
+  const floatInterpolation = floatAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-20, 20],
+  });
+
+  return (
+    <View style={styles.backgroundGeometry}>
+      {/* Main large geometry - Flower of Life */}
+      <Animated.View
+        style={[
+          styles.mainBackgroundGeometry,
+          {
+            transform: [
+              { rotate: rotationInterpolation },
+              { scale: pulseAnim },
+              { translateY: floatInterpolation },
+            ],
+          },
+        ]}
+      >
+        <FlowerOfLife 
+          size={screenWidth * 0.8} 
+          color="rgba(255,255,255,0.03)" 
+          strokeWidth={1} 
+        />
+      </Animated.View>
+
+      {/* Secondary geometry - Seed of Life */}
+      <Animated.View
+        style={[
+          styles.secondaryBackgroundGeometry,
+          {
+            transform: [
+              { rotate: secondaryRotationInterpolation },
+              { scale: tertiaryPulseAnim },
+            ],
+          },
+        ]}
+      >
+        <SeedOfLife 
+          size={screenWidth * 0.6} 
+          color="rgba(255,255,255,0.02)" 
+          strokeWidth={0.8} 
+        />
+      </Animated.View>
+
+      {/* Tertiary geometry - Metatron's Cube */}
+      <Animated.View
+        style={[
+          styles.tertiaryBackgroundGeometry,
+          {
+            transform: [
+              { rotate: rotationInterpolation },
+              { scale: pulseAnim },
+              { translateY: floatInterpolation },
+            ],
+          },
+        ]}
+      >
+        <MetatronsCube 
+          size={screenWidth * 0.4} 
+          color="rgba(255,255,255,0.025)" 
+          strokeWidth={0.6} 
+        />
+      </Animated.View>
+
+      {/* Quaternary geometry - Vector Equilibrium */}
+      <Animated.View
+        style={[
+          styles.quaternaryBackgroundGeometry,
+          {
+            transform: [
+              { rotate: secondaryRotationInterpolation },
+              { scale: tertiaryPulseAnim },
+            ],
+          },
+        ]}
+      >
+        <VectorEquilibrium 
+          size={screenWidth * 0.3} 
+          color="rgba(255,255,255,0.015)" 
+          strokeWidth={0.5} 
+        />
+      </Animated.View>
+    </View>
+  );
+};
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -614,6 +805,9 @@ export default function HomeScreen() {
 
   return (
     <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
+      {/* Background Sacred Geometry */}
+      <BackgroundSacredGeometry />
+      
       <SafeAreaView style={styles.safeArea}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           <Animated.View
@@ -1160,5 +1354,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
   },
-
+  // Background Sacred Geometry Styles
+  backgroundGeometry: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 0,
+  },
+  mainBackgroundGeometry: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+    top: screenHeight * 0.1,
+  },
+  secondaryBackgroundGeometry: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+    top: screenHeight * 0.2,
+  },
+  tertiaryBackgroundGeometry: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+    top: screenHeight * 0.3,
+  },
+  quaternaryBackgroundGeometry: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+    top: screenHeight * 0.4,
+  },
 });
