@@ -310,7 +310,7 @@ export default function HomeScreen() {
   }, [logout, router]);
 
   // Sacred Geometry Icon Component
-  const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
+  const SacredGeometryIcon = ({ emotion, isSelected, isCurrentFeeling = false }: { emotion: EmotionalState; isSelected: boolean; isCurrentFeeling?: boolean }) => {
     const rotationAnim = useRef(new Animated.Value(0)).current;
     const pulseAnim = useRef(new Animated.Value(1)).current;
     const mandalaAnim = useRef(new Animated.Value(0)).current;
@@ -751,16 +751,32 @@ export default function HomeScreen() {
 
     // Get complementary geometry color based on emotion
     const getGeometryColor = (emotionId: string): string => {
-      switch (emotionId) {
-        case 'anxious': return 'rgba(120,200,255,0.6)'; // Cool blue to complement warm anxiety colors
-        case 'stressed': return 'rgba(180,120,255,0.6)'; // Purple to complement yellow stress colors
-        case 'sad': return 'rgba(255,180,120,0.6)'; // Warm orange to complement cool sad colors
-        case 'angry': return 'rgba(120,255,180,0.7)'; // Cool green to complement warm angry colors
-        case 'calm': return 'rgba(255,220,120,0.6)'; // Warm gold to complement cool calm colors
-        case 'focused': return 'rgba(255,120,180,0.6)'; // Pink to complement green focused colors
-        case 'happy': return 'rgba(120,180,255,0.7)'; // Cool blue to complement warm happy colors
-        case 'energized': return 'rgba(255,150,120,0.7)'; // Warm coral to complement cool energized colors
-        default: return 'rgba(200,200,255,0.6)';
+      if (isCurrentFeeling) {
+        // Very light, muted colors for current feeling
+        switch (emotionId) {
+          case 'anxious': return 'rgba(200,220,255,0.4)'; // Very light blue
+          case 'stressed': return 'rgba(255,240,200,0.4)'; // Very light yellow
+          case 'sad': return 'rgba(220,200,255,0.4)'; // Very light purple
+          case 'angry': return 'rgba(255,200,220,0.4)'; // Very light pink
+          case 'calm': return 'rgba(200,240,255,0.4)'; // Very light cyan
+          case 'focused': return 'rgba(200,255,220,0.4)'; // Very light green
+          case 'happy': return 'rgba(255,240,200,0.4)'; // Very light orange
+          case 'energized': return 'rgba(220,255,240,0.4)'; // Very light mint
+          default: return 'rgba(230,230,255,0.4)';
+        }
+      } else {
+        // Original vibrant colors for "want to feel"
+        switch (emotionId) {
+          case 'anxious': return 'rgba(120,200,255,0.6)'; // Cool blue to complement warm anxiety colors
+          case 'stressed': return 'rgba(180,120,255,0.6)'; // Purple to complement yellow stress colors
+          case 'sad': return 'rgba(255,180,120,0.6)'; // Warm orange to complement cool sad colors
+          case 'angry': return 'rgba(120,255,180,0.7)'; // Cool green to complement warm angry colors
+          case 'calm': return 'rgba(255,220,120,0.6)'; // Warm gold to complement cool calm colors
+          case 'focused': return 'rgba(255,120,180,0.6)'; // Pink to complement green focused colors
+          case 'happy': return 'rgba(120,180,255,0.7)'; // Cool blue to complement warm happy colors
+          case 'energized': return 'rgba(255,150,120,0.7)'; // Warm coral to complement cool energized colors
+          default: return 'rgba(200,200,255,0.6)';
+        }
       }
     };
 
@@ -784,11 +800,26 @@ export default function HomeScreen() {
     );
   };
 
-  const getEmotionIcon = useCallback((emotion: EmotionalState, isSelected: boolean) => {
-    return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} />;
+  const getEmotionIcon = useCallback((emotion: EmotionalState, isSelected: boolean, isCurrentFeeling: boolean = false) => {
+    return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} isCurrentFeeling={isCurrentFeeling} />;
   }, []);
 
 
+
+  // Get light gradient colors for current feeling
+  const getCurrentFeelingGradient = (emotion: EmotionalState): readonly [string, string, ...string[]] => {
+    switch (emotion.id) {
+      case 'anxious': return ['rgba(255,240,240,0.3)', 'rgba(240,230,255,0.3)'] as const; // Very light pink to light purple
+      case 'stressed': return ['rgba(255,250,230,0.3)', 'rgba(250,245,200,0.3)'] as const; // Very light cream to light yellow
+      case 'sad': return ['rgba(240,240,255,0.3)', 'rgba(230,235,250,0.3)'] as const; // Very light blue to light lavender
+      case 'angry': return ['rgba(255,245,245,0.3)', 'rgba(250,235,240,0.3)'] as const; // Very light pink to light rose
+      case 'calm': return ['rgba(240,250,255,0.3)', 'rgba(230,245,250,0.3)'] as const; // Very light cyan to light blue
+      case 'focused': return ['rgba(245,255,245,0.3)', 'rgba(235,250,240,0.3)'] as const; // Very light green to light mint
+      case 'happy': return ['rgba(255,250,240,0.3)', 'rgba(250,245,230,0.3)'] as const; // Very light peach to light cream
+      case 'energized': return ['rgba(245,255,250,0.3)', 'rgba(235,250,245,0.3)'] as const; // Very light mint to light aqua
+      default: return ['rgba(250,250,255,0.3)', 'rgba(245,245,250,0.3)'] as const;
+    }
+  };
 
   // Show loading state while navigation is not ready
   if (!isNavigationReady) {
@@ -889,14 +920,14 @@ export default function HomeScreen() {
                     activeOpacity={0.8}
                   >
                     <LinearGradient
-                      colors={emotion.gradient as unknown as readonly [string, string, ...string[]]}
+                      colors={getCurrentFeelingGradient(emotion)}
                       style={[
                         styles.emotionCard,
                         styles.currentEmotionCard,
                       ]}
                     >
-                      {getEmotionIcon(emotion, isSelected)}
-                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
+                      {getEmotionIcon(emotion, isSelected, true)}
+                      <Text style={[styles.emotionLabel, styles.currentEmotionLabel]}>{emotion.label}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 </Animated.View>
@@ -1352,7 +1383,11 @@ const styles = StyleSheet.create({
   },
   currentEmotionCard: {
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(255,255,255,0.05)",
+  },
+  currentEmotionLabel: {
+    color: "rgba(255,255,255,0.6)",
   },
   // Background Sacred Geometry Styles
   backgroundGeometry: {
