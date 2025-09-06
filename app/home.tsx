@@ -695,7 +695,7 @@ export default function HomeScreen() {
                     activeOpacity={0.8}
                   >
                     <LinearGradient
-                      colors={["#2a2a3e", "#1f1f2e"] as const}
+                      colors={emotion.gradient as unknown as readonly [string, string, ...string[]]}
                       style={[
                         styles.emotionCard,
                         styles.currentEmotionCard,
@@ -759,7 +759,7 @@ export default function HomeScreen() {
                     activeOpacity={0.8}
                   >
                     <LinearGradient
-                      colors={isSelected ? (emotion.gradient as unknown as readonly [string, string, ...string[]]) : ["#2a2a3e", "#1f1f2e"] as const}
+                      colors={emotion.gradient as unknown as readonly [string, string, ...string[]]}
                       style={[
                         styles.emotionCard,
                         isSelected && styles.emotionCardSelected,
