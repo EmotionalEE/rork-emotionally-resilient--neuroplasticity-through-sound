@@ -42,6 +42,7 @@ import {
 } from "@/components/SacredGeometry";
 import { CalmLandscape } from "@/components/CalmLandscape";
 import { CalmingSacredGeometry } from "@/components/CalmingSacredGeometry";
+import { MovingFlowerOfLife } from "@/components/MovingFlowerOfLife";
 import { emotionalStates } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -624,6 +625,26 @@ export default function HomeScreen() {
         size={100} 
         color="rgba(100, 200, 255, 0.3)" 
         opacity={0.7} 
+      />
+      
+      {/* Moving flower of life throughout the page */}
+      <MovingFlowerOfLife 
+        size={60} 
+        color="rgba(100, 200, 255, 0.25)" 
+        opacity={0.5} 
+        speed={0.8} 
+      />
+      <MovingFlowerOfLife 
+        size={40} 
+        color="rgba(150, 150, 255, 0.2)" 
+        opacity={0.4} 
+        speed={1.2} 
+      />
+      <MovingFlowerOfLife 
+        size={80} 
+        color="rgba(200, 150, 255, 0.15)" 
+        opacity={0.3} 
+        speed={0.6} 
       />
       
       <SafeAreaView style={styles.safeArea}>
