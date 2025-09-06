@@ -25,7 +25,6 @@ import {
   User,
   LucideIcon,
   Crown,
-
 } from "lucide-react-native";
 import {
   EggOfLife,
@@ -41,11 +40,11 @@ import {
   VectorEquilibrium,
   TetrahedronGrid,
 } from "@/components/SacredGeometry";
-import { emotionalStates, sessions } from "@/constants/sessions";
+import { emotionalStates } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { usePayment } from "@/providers/PaymentProvider";
-import { EmotionalState, Session } from "@/types/session";
+import { EmotionalState } from "@/types/session";
 import * as Haptics from "expo-haptics";
 
 export default function HomeScreen() {
@@ -105,15 +104,7 @@ export default function HomeScreen() {
     });
   }, [router]);
 
-  const handleSessionPress = useCallback((session: Session) => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    router.push({
-      pathname: "/session",
-      params: { sessionId: session.id },
-    });
-  }, [router]);
+
 
   const handleLogout = useCallback(async () => {
     if (Platform.OS !== "web") {
@@ -720,70 +711,7 @@ export default function HomeScreen() {
             })}
           </ScrollView>
 
-          <View style={styles.sessionsSection}>
-            <Text style={styles.sectionTitle}>Popular Sessions</Text>
 
-            {sessions.slice(0, 3).map((session, index) => (
-              <Animated.View
-                key={session.id}
-                style={{
-                  opacity: fadeAnim,
-                  transform: [
-                    {
-                      translateX: (() => {
-                        try {
-                          return fadeAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [-30, 0],
-                            extrapolate: 'clamp',
-                          });
-                        } catch (error) {
-                          console.warn('Home fadeAnim translateX interpolation error:', error);
-                          return 0;
-                        }
-                      })(),
-                    },
-                  ],
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => handleSessionPress(session)}
-                  activeOpacity={0.9}
-                >
-                  <LinearGradient
-                    colors={session.gradient as unknown as readonly [string, string, ...string[]]}
-                    style={styles.sessionCard}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <View style={styles.sessionContent}>
-                      <View style={styles.sessionInfo}>
-                        <Text style={styles.sessionTitle}>{session.title}</Text>
-                        <Text style={styles.sessionDescription}>
-                          {session.description}
-                        </Text>
-                        <View style={styles.sessionMeta}>
-                          <View style={styles.sessionTag}>
-                            <Text style={styles.sessionTagText}>
-                              {session.duration} min
-                            </Text>
-                          </View>
-                          <View style={styles.sessionTag}>
-                            <Text style={styles.sessionTagText}>
-                              {session.frequency}Hz
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                      <View style={styles.sessionIcon}>
-                        <Waves size={32} color="rgba(255,255,255,0.8)" />
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </Animated.View>
-            ))}
-          </View>
 
           {/* Premium Upgrade Prompt */}
           {!isPremium && (
