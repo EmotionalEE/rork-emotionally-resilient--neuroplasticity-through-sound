@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Platform,
   Animated,
+  Dimensions,
+  ImageBackground,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,6 +27,12 @@ import {
   User,
   LucideIcon,
   Crown,
+  Home,
+  Search,
+  Library,
+  MoreHorizontal,
+  Play,
+  Headphones,
 } from "lucide-react-native";
 import {
   EggOfLife,
@@ -40,13 +48,60 @@ import {
   VectorEquilibrium,
   TetrahedronGrid,
 } from "@/components/SacredGeometry";
-import { CalmLandscape } from "@/components/CalmLandscape";
 import { emotionalStates } from "@/constants/sessions";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { usePayment } from "@/providers/PaymentProvider";
 import { EmotionalState } from "@/types/session";
 import * as Haptics from "expo-haptics";
+
+const { width: screenWidth } = Dimensions.get('window');
+
+// Featured sessions data
+const featuredSession = {
+  id: 'roots-rhythm',
+  title: 'Roots in Rhythm',
+  subtitle: 'Focus · Music',
+  frequency: '14 Hz',
+  image: 'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=800',
+  isNew: true,
+};
+
+const trendingSessions = [
+  {
+    id: 'endless-serenity',
+    title: 'Endless Serenity',
+    subtitle: 'Sleep · Music',
+    frequency: '1 Hz',
+    image: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=800',
+  },
+  {
+    id: 'slowly-drifting',
+    title: 'Slowly Drifting',
+    subtitle: 'Sleep · Music',
+    frequency: '0.5 Hz',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800',
+  },
+  {
+    id: 'deep-focus',
+    title: 'Deep Focus',
+    subtitle: 'Focus · Pure tone',
+    frequency: '40 Hz',
+    image: 'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=800',
+  },
+];
+
+const categories = [
+  {
+    id: 'stop-overthinking',
+    title: 'Stop overthinking',
+    description: 'Quiet your mind and slow your thoughts with Theta and Alpha beats tuned for inner calm.',
+    sessions: [
+      { id: '1', title: 'Calm Mind', frequency: '8 Hz', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800' },
+      { id: '2', title: 'Inner Peace', frequency: '10 Hz', image: 'https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?w=800' },
+    ],
+  },
+];
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -55,6 +110,7 @@ export default function HomeScreen() {
   const { isPremium, trialDaysLeft, subscription } = usePayment();
 
   const [isNavigationReady, setIsNavigationReady] = useState(false);
+  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
   
@@ -99,9 +155,20 @@ export default function HomeScreen() {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+    setSelectedEmotion(emotion.id);
     router.push({
       pathname: "/recommended-sessions",
       params: { emotionId: emotion.id },
+    });
+  }, [router]);
+
+  const handleSessionPress = useCallback((sessionId: string) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push({
+      pathname: "/session",
+      params: { sessionId },
     });
   }, [router]);
 
@@ -614,276 +681,278 @@ export default function HomeScreen() {
   }
 
   return (
-    <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
-      {/* Calm landscape background */}
-      <CalmLandscape opacity={0.4} />
-      
-
-      
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          <Animated.View
-            style={[
-              styles.header,
-              {
-                opacity: fadeAnim,
-                transform: [{ scale: scaleAnim }],
-              },
-            ]}
-          >
-            <View style={styles.headerTop}>
-              <View style={styles.headerText}>
-                <Text style={styles.greeting}>Welcome back{user?.name ? `, ${user.name}` : ''}</Text>
-                <Text style={styles.title}>How are you feeling today?</Text>
-              </View>
-              <View style={styles.headerButtons}>
-                <TouchableOpacity
-                  style={styles.profileButton}
-                  onPress={() => router.push('/profile')}
-                  activeOpacity={0.7}
-                >
-                  <User size={20} color="rgba(255, 255, 255, 0.7)" />
-                </TouchableOpacity>
-                {!isPremium && (
-                  <TouchableOpacity
-                    style={styles.premiumButton}
-                    onPress={() => router.push('/subscription')}
-                    activeOpacity={0.7}
-                  >
-                    <Crown size={20} color="#fbbf24" />
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  style={styles.logoutButton}
-                  onPress={handleLogout}
-                  activeOpacity={0.7}
-                >
-                  <LogOut size={20} color="rgba(255, 255, 255, 0.7)" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Animated.View>
-
-          {/* How do you feel section */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.emotionsContainer}
-          >
-            {emotionalStates.map((emotion, index) => {
-              const isSelected = false;
-
-              return (
-                <Animated.View
-                  key={`current-${emotion.id}`}
-                  style={{
-                    opacity: fadeAnim,
-                    transform: [
-                      {
-                        translateY: (() => {
-                          try {
-                            return fadeAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [20, 0],
-                              extrapolate: 'clamp',
-                            });
-                          } catch (error) {
-                            console.warn('Home fadeAnim translateY interpolation error:', error);
-                            return 0;
-                          }
-                        })(),
-                      },
-                    ],
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => console.log(`Current feeling: ${emotion.label}`)}
-                    activeOpacity={0.8}
-                  >
-                    <LinearGradient
-                      colors={["#2a2a3e", "#1f1f2e"] as const}
-                      style={[
-                        styles.emotionCard,
-                        styles.currentEmotionCard,
-                      ]}
-                    >
-                      {getEmotionIcon(emotion, isSelected)}
-                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </Animated.View>
-              );
-            })}
-          </ScrollView>
-
-          {/* How do you want to feel section */}
-          <Animated.View
-            style={[
-              styles.wantToFeelHeader,
-              {
-                opacity: fadeAnim,
-                transform: [{ scale: scaleAnim }],
-              },
-            ]}
-          >
-            <Text style={styles.sectionTitle}>How do you want to feel?</Text>
-          </Animated.View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.emotionsContainer}
-          >
-            {emotionalStates.map((emotion, index) => {
-              const isSelected = false;
-
-              return (
-                <Animated.View
-                  key={`want-${emotion.id}`}
-                  style={{
-                    opacity: fadeAnim,
-                    transform: [
-                      {
-                        translateY: (() => {
-                          try {
-                            return fadeAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [20, 0],
-                              extrapolate: 'clamp',
-                            });
-                          } catch (error) {
-                            console.warn('Home fadeAnim translateY interpolation error:', error);
-                            return 0;
-                          }
-                        })(),
-                      },
-                    ],
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => handleEmotionSelect(emotion)}
-                    activeOpacity={0.8}
-                  >
-                    <LinearGradient
-                      colors={isSelected ? (emotion.gradient as unknown as readonly [string, string, ...string[]]) : ["#2a2a3e", "#1f1f2e"] as const}
-                      style={[
-                        styles.emotionCard,
-                        isSelected && styles.emotionCardSelected,
-                      ]}
-                    >
-                      {getEmotionIcon(emotion, isSelected)}
-                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </Animated.View>
-              );
-            })}
-          </ScrollView>
-
-
-
-          {/* Premium Upgrade Prompt */}
-          {!isPremium && (
-            <Animated.View
-              style={[
-                styles.upgradePrompt,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ scale: scaleAnim }],
-                },
-              ]}
+    <View style={styles.container}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
+        <SafeAreaView edges={['top']}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.profileButton}
+              onPress={() => router.push('/profile')}
+              activeOpacity={0.7}
             >
-              <TouchableOpacity
-                onPress={() => router.push('/subscription')}
-                activeOpacity={0.9}
-              >
-                <LinearGradient
-                  colors={["#667eea", "#764ba2"]}
-                  style={styles.upgradeGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <View style={styles.upgradeContent}>
-                    <View style={styles.upgradeIcon}>
-                      <Sparkles size={24} color="#fff" />
-                    </View>
-                    <View style={styles.upgradeText}>
-                      <Text style={styles.upgradeTitle}>Unlock Premium Features</Text>
-                      <Text style={styles.upgradeSubtitle}>
-                        Advanced sacred geometry, binaural beats & more
-                      </Text>
-                    </View>
-                    <View style={styles.upgradeArrow}>
-                      <Text style={styles.upgradeArrowText}>→</Text>
-                    </View>
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
-            </Animated.View>
-          )}
+              <User size={24} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => {}}
+              activeOpacity={0.7}
+            >
+              <MoreHorizontal size={24} color="rgba(255, 255, 255, 0.7)" />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
 
-          {/* Trial Status */}
-          {subscription?.status === 'trialing' && trialDaysLeft > 0 && (
-            <Animated.View
-              style={[
-                styles.trialStatus,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ scale: scaleAnim }],
-                },
-              ]}
+        {/* Featured Session Card */}
+        <Animated.View
+          style={[
+            styles.featuredCard,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => handleSessionPress(featuredSession.id)}
+          >
+            <ImageBackground
+              source={{ uri: featuredSession.image }}
+              style={styles.featuredImage}
+              imageStyle={styles.featuredImageStyle}
             >
               <LinearGradient
-                colors={["#4ade80", "#22c55e"]}
-                style={styles.trialGradient}
+                colors={['transparent', 'rgba(0,0,0,0.8)']}
+                style={styles.featuredGradient}
               >
-                <View style={styles.trialContent}>
-                  <Heart size={20} color="#fff" />
-                  <Text style={styles.trialText}>
-                    {trialDaysLeft} days left in your free trial
-                  </Text>
+                <View style={styles.featuredContent}>
+                  <View style={styles.frequencyBubble}>
+                    <Text style={styles.frequencyText}>{featuredSession.frequency}</Text>
+                  </View>
+                  <View style={styles.featuredInfo}>
+                    <Text style={styles.featuredTitle}>{featuredSession.title}</Text>
+                    <Text style={styles.featuredSubtitle}>{featuredSession.subtitle}</Text>
+                  </View>
+                  {featuredSession.isNew && (
+                    <View style={styles.newBadge}>
+                      <Text style={styles.newBadgeText}>NEW</Text>
+                    </View>
+                  )}
                 </View>
               </LinearGradient>
-            </Animated.View>
-          )}
+            </ImageBackground>
+          </TouchableOpacity>
+        </Animated.View>
 
-          <View style={styles.statsContainer}>
-            <Text style={styles.statsTitle}>Your Progress</Text>
-            <View style={styles.statsRow}>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>{progress.totalSessions}</Text>
-                <Text style={styles.statLabel}>Sessions</Text>
-              </View>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>{progress.totalMinutes}</Text>
-                <Text style={styles.statLabel}>Minutes</Text>
-              </View>
-              <View style={styles.statCard}>
-                <Text style={styles.statValue}>{progress.streak}</Text>
-                <Text style={styles.statLabel}>Day Streak</Text>
-              </View>
-            </View>
+        {/* How are you feeling section */}
+        {!selectedEmotion && (
+          <Animated.View
+            style={[
+              styles.emotionSection,
+              {
+                opacity: fadeAnim,
+              },
+            ]}
+          >
+            <Text style={styles.emotionTitle}>How are you feeling?</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.emotionsContainer}
+            >
+              {emotionalStates.map((emotion) => {
+                const icons: Record<string, LucideIcon> = {
+                  anxious: Cloud,
+                  stressed: Zap,
+                  sad: Moon,
+                  angry: Activity,
+                  calm: Waves,
+                  focused: Brain,
+                  happy: Sun,
+                  energized: Sparkles,
+                };
+                const Icon = icons[emotion.id] || Heart;
+
+                return (
+                  <TouchableOpacity
+                    key={emotion.id}
+                    onPress={() => handleEmotionSelect(emotion)}
+                    activeOpacity={0.8}
+                    style={styles.emotionCard}
+                  >
+                    <LinearGradient
+                      colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+                      style={styles.emotionGradient}
+                    >
+                      <Icon size={28} color="#fff" />
+                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </Animated.View>
+        )}
+
+        {/* Trending Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Trending</Text>
+          <Text style={styles.sectionSubtitle}>Explore the most popular sessions on MindEase.</Text>
+          
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.trendingContainer}
+          >
+            {trendingSessions.map((session) => (
+              <TouchableOpacity
+                key={session.id}
+                style={styles.trendingCard}
+                onPress={() => handleSessionPress(session.id)}
+                activeOpacity={0.9}
+              >
+                <ImageBackground
+                  source={{ uri: session.image }}
+                  style={styles.trendingImage}
+                  imageStyle={styles.trendingImageStyle}
+                >
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0,0,0,0.9)']}
+                    style={styles.trendingGradient}
+                  >
+                    <View style={styles.trendingFrequency}>
+                      <Text style={styles.trendingFrequencyText}>{session.frequency}</Text>
+                    </View>
+                    <View style={styles.trendingInfo}>
+                      <Text style={styles.trendingTitle}>{session.title}</Text>
+                      <Text style={styles.trendingSubtitle}>{session.subtitle}</Text>
+                    </View>
+                  </LinearGradient>
+                </ImageBackground>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Categories */}
+        {categories.map((category) => (
+          <View key={category.id} style={styles.section}>
+            <Text style={styles.sectionTitle}>{category.title}</Text>
+            <Text style={styles.sectionSubtitle}>{category.description}</Text>
+            
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoryContainer}
+            >
+              {category.sessions.map((session) => (
+                <TouchableOpacity
+                  key={session.id}
+                  style={styles.categoryCard}
+                  onPress={() => handleSessionPress(session.id)}
+                  activeOpacity={0.9}
+                >
+                  <ImageBackground
+                    source={{ uri: session.image }}
+                    style={styles.categoryImage}
+                    imageStyle={styles.categoryImageStyle}
+                  >
+                    <LinearGradient
+                      colors={['transparent', 'rgba(0,0,0,0.8)']}
+                      style={styles.categoryGradient}
+                    >
+                      <View style={styles.categoryInfo}>
+                        <Text style={styles.categoryTitle}>{session.title}</Text>
+                        <Text style={styles.categoryFrequency}>{session.frequency}</Text>
+                      </View>
+                    </LinearGradient>
+                  </ImageBackground>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </LinearGradient>
+        ))}
+
+
+
+      </ScrollView>
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
+          <Home size={24} color="#fff" />
+          <Text style={styles.navLabel}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
+          <Search size={24} color="rgba(255,255,255,0.5)" />
+          <Text style={[styles.navLabel, styles.navLabelInactive]}>Search</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
+          <Library size={24} color="rgba(255,255,255,0.5)" />
+          <Text style={[styles.navLabel, styles.navLabelInactive]}>Your Library</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Now Playing Bar */}
+      <LinearGradient
+        colors={['#6B46C1', '#9333EA']}
+        style={styles.nowPlayingBar}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <View style={styles.nowPlayingContent}>
+          <View style={styles.nowPlayingIcon}>
+            <View style={styles.nowPlayingCircle} />
+          </View>
+          <View style={styles.nowPlayingInfo}>
+            <Text style={styles.nowPlayingTitle}>Pure High Gamma Waves</Text>
+            <Text style={styles.nowPlayingSubtitle}>60 Hz · Pure tone</Text>
+          </View>
+          <TouchableOpacity style={styles.playButton} activeOpacity={0.7}>
+            <Headphones size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.playButton} activeOpacity={0.7}>
+            <Play size={24} color="#fff" fill="#fff" />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#0a0a0a',
   },
   safeArea: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    paddingBottom: 30,
+    paddingBottom: 180,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 24,
+  },
+  menuButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTop: {
     flexDirection: 'row',
@@ -975,8 +1044,9 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "600" as const,
     color: "#fff",
-    marginBottom: 16,
+    marginBottom: 8,
     letterSpacing: 0.3,
+    paddingHorizontal: 20,
   },
   sessionCard: {
     borderRadius: 20,
@@ -1166,5 +1236,264 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
   },
-
+  // New styles for Moongate design
+  featuredCard: {
+    marginHorizontal: 20,
+    marginBottom: 30,
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  featuredImage: {
+    width: '100%',
+    height: 280,
+  },
+  featuredImageStyle: {
+    borderRadius: 20,
+  },
+  featuredGradient: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 20,
+  },
+  featuredContent: {
+    position: 'relative',
+  },
+  frequencyBubble: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  frequencyText: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold' as const,
+  },
+  featuredInfo: {
+    marginBottom: 10,
+  },
+  featuredTitle: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold' as const,
+    marginBottom: 5,
+  },
+  featuredSubtitle: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 16,
+  },
+  newBadge: {
+    position: 'absolute',
+    top: -100,
+    right: 0,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  newBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold' as const,
+  },
+  emotionSection: {
+    marginBottom: 30,
+  },
+  emotionTitle: {
+    fontSize: 20,
+    fontWeight: '600' as const,
+    color: '#fff',
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  emotionGradient: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 18,
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  trendingContainer: {
+    paddingHorizontal: 20,
+    gap: 15,
+  },
+  trendingCard: {
+    width: 200,
+    height: 250,
+    marginRight: 15,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  trendingImage: {
+    width: '100%',
+    height: '100%',
+  },
+  trendingImageStyle: {
+    borderRadius: 16,
+  },
+  trendingGradient: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 16,
+  },
+  trendingFrequency: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  trendingFrequencyText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+  },
+  trendingInfo: {
+    marginBottom: 5,
+  },
+  trendingTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold' as const,
+    marginBottom: 4,
+  },
+  trendingSubtitle: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+  },
+  categoryContainer: {
+    paddingHorizontal: 20,
+    gap: 15,
+  },
+  categoryCard: {
+    width: 160,
+    height: 200,
+    marginRight: 15,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  categoryImage: {
+    width: '100%',
+    height: '100%',
+  },
+  categoryImageStyle: {
+    borderRadius: 12,
+  },
+  categoryGradient: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 12,
+  },
+  categoryInfo: {
+    marginBottom: 5,
+  },
+  categoryTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold' as const,
+    marginBottom: 2,
+  },
+  categoryFrequency: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 12,
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 70,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    backgroundColor: 'rgba(10,10,10,0.95)',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navLabel: {
+    color: '#fff',
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: '500' as const,
+  },
+  navLabelInactive: {
+    color: 'rgba(255,255,255,0.5)',
+  },
+  nowPlayingBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 70,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  nowPlayingContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: '100%',
+  },
+  nowPlayingIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  nowPlayingCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  nowPlayingInfo: {
+    flex: 1,
+  },
+  nowPlayingTitle: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600' as const,
+    marginBottom: 2,
+  },
+  nowPlayingSubtitle: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 12,
+  },
+  playButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
 });
