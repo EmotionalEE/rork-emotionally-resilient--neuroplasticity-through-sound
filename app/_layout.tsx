@@ -7,6 +7,7 @@ import { AudioProvider } from "@/providers/AudioProvider";
 import { UserProgressProvider } from "@/providers/UserProgressProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { PaymentProvider } from "@/providers/PaymentProvider";
+import { CustomMusicProvider } from "@/providers/CustomMusicProvider";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
@@ -43,9 +44,11 @@ export default function RootLayout() {
           <AuthProvider>
             <PaymentProvider>
               <UserProgressProvider>
-                <AudioProvider>
-                  <RootLayoutNav />
-                </AudioProvider>
+                <CustomMusicProvider>
+                  <AudioProvider>
+                    <RootLayoutNav />
+                  </AudioProvider>
+                </CustomMusicProvider>
               </UserProgressProvider>
             </PaymentProvider>
           </AuthProvider>
