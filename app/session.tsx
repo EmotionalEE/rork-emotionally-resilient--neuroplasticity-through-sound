@@ -26,6 +26,8 @@ import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
 import SocialShare from "@/components/SocialShare";
 import * as Haptics from "expo-haptics";
+import TorusGeometry from "@/components/geometry/TorusGeometry";
+import DodecahedronGeometry from "@/components/geometry/DodecahedronGeometry";
 
 // Sacred Geometry Component
 const SacredGeometry = ({ 
@@ -619,6 +621,30 @@ const SacredGeometry = ({
               ]}
             />
           </>
+        );
+
+      case 'torus':
+        return (
+          <Animated.View
+            style={{
+              transform: [{ rotate: rotation }, { scale: Animated.multiply(scale, pulseScale) }],
+              opacity: flowerOpacity,
+            }}
+          >
+            <TorusGeometry size={120} color={primaryColor} strokeWidth={4} />
+          </Animated.View>
+        );
+
+      case 'dodecahedron':
+        return (
+          <Animated.View
+            style={{
+              transform: [{ rotate: counterRotation }, { scale: Animated.multiply(scale, pulseScale) }],
+              opacity: flowerOpacity,
+            }}
+          >
+            <DodecahedronGeometry size={120} color={primaryColor} strokeWidth={2} />
+          </Animated.View>
         );
 
       default:

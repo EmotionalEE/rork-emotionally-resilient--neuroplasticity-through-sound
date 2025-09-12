@@ -188,4 +188,40 @@ export const sessions: Session[] = [
       colors: ['rgba(255,236,210,0.8)', 'rgba(252,182,159,0.6)', 'rgba(255,255,255,0.9)']
     },
   },
+  {
+    id: "torus-relaxation",
+    title: "Infinite Loop Relaxation",
+    description: "Soothing tones with a rotating torus to calm the mind",
+    duration: 14,
+    frequency: "432",
+    gradient: ["#89f7fe", "#66a6ff"],
+    targetEmotions: ["calm", "focused"],
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+    geometry: {
+      type: 'torus',
+      elements: 1,
+      layers: 1,
+      rotationSpeed: 5000,
+      pulseIntensity: 1.3,
+      colors: ['rgba(137,247,254,0.8)', 'rgba(102,166,255,0.6)', 'rgba(255,255,255,0.9)']
+    },
+  },
+  {
+    id: "dodeca-meditation",
+    title: "Twelve-Sided Focus",
+    description: "Deep meditation with dodecahedron-guided breathing",
+    duration: 16,
+    frequency: "963",
+    gradient: ["#fbd3e9", "#bb377d"],
+    targetEmotions: ["focused", "energized"],
+    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+    geometry: {
+      type: 'dodecahedron',
+      elements: 12,
+      layers: 2,
+      rotationSpeed: 7000,
+      pulseIntensity: 1.5,
+      colors: ['rgba(251,211,233,0.8)', 'rgba(187,55,125,0.6)', 'rgba(255,255,255,0.9)']
+    },
+  },
 ];
