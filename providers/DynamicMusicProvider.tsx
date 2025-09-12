@@ -139,6 +139,7 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorsRef = useRef<Map<string, OscillatorNode>>(new Map());
   const gainNodesRef = useRef<Map<string, GainNode>>(new Map());
+  const fadeOutTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const progressionTimeoutRef = useRef<any>(null);
   const currentStepRef = useRef(0);
 
@@ -187,7 +188,7 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
       
       oscillatorsRef.current.set(layer.id, oscillator);
       gainNodesRef.current.set(layer.id, gainNode);
-      
+
       // Add gentle fade out after some time
       const fadeTimeout = setTimeout(() => {
         const gain = gainNodesRef.current.get(layer.id);
@@ -195,7 +196,9 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
           gain.gain.linearRampToValueAtTime(0, audioContextRef.current.currentTime + 5);
         }
       }, 120000); // 2 minutes
-      
+
+      fadeOutTimeoutsRef.current.set(layer.id, fadeTimeout);
+
     } catch (error) {
       console.log('Error creating audio layer:', error);
     }
@@ -205,7 +208,13 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   const removeLayer = useCallback((layerId: string) => {
     const oscillator = oscillatorsRef.current.get(layerId);
     const gainNode = gainNodesRef.current.get(layerId);
-    
+
+    const fadeTimeout = fadeOutTimeoutsRef.current.get(layerId);
+    if (fadeTimeout) {
+      clearTimeout(fadeTimeout);
+      fadeOutTimeoutsRef.current.delete(layerId);
+    }
+
     if (oscillator && gainNode && audioContextRef.current) {
       try {
         gainNode.gain.linearRampToValueAtTime(0, audioContextRef.current.currentTime + 1);
@@ -307,6 +316,11 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
         if (gainNode && audioContextRef.current) {
           gainNode.gain.linearRampToValueAtTime(0, audioContextRef.current.currentTime + 1);
         }
+        const fadeTimeout = fadeOutTimeoutsRef.current.get(id);
+        if (fadeTimeout) {
+          clearTimeout(fadeTimeout);
+          fadeOutTimeoutsRef.current.delete(id);
+        }
         const stopTimeout = setTimeout(() => {
           oscillator.stop();
         }, 1000);
@@ -314,10 +328,11 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
         console.log('Error stopping oscillator:', error);
       }
     });
-    
+
     const cleanupTimeout = setTimeout(() => {
       oscillatorsRef.current.clear();
       gainNodesRef.current.clear();
+      fadeOutTimeoutsRef.current.clear();
       setCurrentLayers([]);
     }, 1000);
   }, []);
