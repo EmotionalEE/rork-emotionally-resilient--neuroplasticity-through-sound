@@ -58,7 +58,7 @@ function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; em
 }
 
 export default function VisualMeditation({ frequency, isPlaying, emotionGradient }: VisualMeditationProps) {
-  const [currentGeometry, setCurrentGeometry] = useState<'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral'>('flowerOfLife');
+  const [currentGeometry, setCurrentGeometry] = useState<'flowerOfLife' | 'metatronsCube' | 'vesicaPiscis' | 'merkabah' | 'seedOfLife'>('flowerOfLife');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const particleAnims = useRef(Array.from({ length: 12 }, () => new Animated.Value(0))).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
@@ -113,15 +113,15 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
       // Change geometry based on frequency
       const geometryTimer = setInterval(() => {
         if (frequency < 10) {
-          setCurrentGeometry('sriYantra');
-        } else if (frequency < 20) {
           setCurrentGeometry('vesicaPiscis');
-        } else if (frequency < 30) {
+        } else if (frequency < 20) {
           setCurrentGeometry('flowerOfLife');
-        } else if (frequency < 40) {
+        } else if (frequency < 30) {
           setCurrentGeometry('metatronsCube');
+        } else if (frequency < 40) {
+          setCurrentGeometry('merkabah');
         } else {
-          setCurrentGeometry('goldenSpiral');
+          setCurrentGeometry('seedOfLife');
         }
       }, 8000);
 

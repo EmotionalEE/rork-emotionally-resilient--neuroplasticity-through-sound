@@ -416,20 +416,20 @@ export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }
           <G stroke={color} strokeWidth={strokeWidth} fill="none">
             {/* Outer circle - the cycle of life */}
             <Circle cx="100" cy="100" r="80" strokeOpacity="0.8" />
-            
+
             {/* Inner circles representing the eternal cycle */}
             <Circle cx="100" cy="100" r="60" strokeOpacity="0.6" />
             <Circle cx="100" cy="100" r="40" strokeOpacity="0.4" />
-            
+
             {/* Center breathing circle */}
             <Circle cx="100" cy="100" r="20" strokeOpacity="1" strokeWidth={strokeWidth * 1.5} />
-            
+
             {/* Connecting lines showing the flow of life energy */}
             <Line x1="100" y1="20" x2="100" y2="40" strokeOpacity="0.5" />
             <Line x1="100" y1="160" x2="100" y2="180" strokeOpacity="0.5" />
             <Line x1="20" y1="100" x2="40" y2="100" strokeOpacity="0.5" />
             <Line x1="160" y1="100" x2="180" y2="100" strokeOpacity="0.5" />
-            
+
             {/* Diagonal flow lines */}
             <Line x1="41.4" y1="41.4" x2="58.6" y2="58.6" strokeOpacity="0.3" />
             <Line x1="158.6" y1="41.4" x2="141.4" y2="58.6" strokeOpacity="0.3" />
@@ -441,3 +441,48 @@ export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }
     </View>
   );
 };
+
+const geometryComponents = {
+  eggOfLife: EggOfLife,
+  fruitOfLife: FruitOfLife,
+  metatronsCube: MetatronsCube,
+  vesicaPiscis: VesicaPiscis,
+  seedOfLife: SeedOfLife,
+  sixPetalRosette: SixPetalRosette,
+  treeOfLife: TreeOfLife,
+  merkabah: Merkabah,
+  flowerOfLife: FlowerOfLife,
+  cubeoctahedron: Cubeoctahedron,
+  vectorEquilibrium: VectorEquilibrium,
+  tetrahedronGrid: TetrahedronGrid,
+  circleOfLife: CircleOfLife,
+};
+
+type GeometryType = keyof typeof geometryComponents;
+
+interface DefaultSacredGeometryProps extends SacredGeometryProps {
+  type: GeometryType;
+  animated?: boolean;
+  opacity?: number;
+  [key: string]: any;
+}
+
+const SacredGeometry: React.FC<DefaultSacredGeometryProps> = ({
+  type,
+  animated = false,
+  opacity = 1,
+  size,
+  color,
+  ...rest
+}) => {
+  const Component = geometryComponents[type] || FlowerOfLife;
+  const Wrapper: React.ComponentType<any> = animated ? Animated.View : View;
+
+  return (
+    <Wrapper style={{ opacity }}>
+      <Component size={size} color={color} {...rest} />
+    </Wrapper>
+  );
+};
+
+export default SacredGeometry;
