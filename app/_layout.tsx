@@ -7,6 +7,7 @@ import { AudioProvider } from "@/providers/AudioProvider";
 import { UserProgressProvider } from "@/providers/UserProgressProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { PaymentProvider } from "@/providers/PaymentProvider";
+import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,6 +26,7 @@ function RootLayoutNav() {
       <Stack.Screen name="session" options={{ presentation: "modal" }} />
       <Stack.Screen name="subscription" options={{ presentation: "modal" }} />
       <Stack.Screen name="payment-methods" options={{ presentation: "modal" }} />
+      <Stack.Screen name="backend-test" />
     </Stack>
   );
 }
@@ -35,18 +37,20 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <AuthProvider>
-          <PaymentProvider>
-            <UserProgressProvider>
-              <AudioProvider>
-                <RootLayoutNav />
-              </AudioProvider>
-            </UserProgressProvider>
-          </PaymentProvider>
-        </AuthProvider>
-      </GestureHandlerRootView>
-    </QueryClientProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <AuthProvider>
+            <PaymentProvider>
+              <UserProgressProvider>
+                <AudioProvider>
+                  <RootLayoutNav />
+                </AudioProvider>
+              </UserProgressProvider>
+            </PaymentProvider>
+          </AuthProvider>
+        </GestureHandlerRootView>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
