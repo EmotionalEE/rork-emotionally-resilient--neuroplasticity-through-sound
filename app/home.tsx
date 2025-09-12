@@ -48,6 +48,481 @@ import { usePayment } from "@/providers/PaymentProvider";
 import { EmotionalState } from "@/types/session";
 import * as Haptics from "expo-haptics";
 
+// Sacred Geometry Icon Component - moved outside to avoid hooks order issues
+const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const mandalaAnim = useRef(new Animated.Value(0)).current;
+  const spiralAnim = useRef(new Animated.Value(0)).current;
+  const counterRotationAnim = useRef(new Animated.Value(0)).current;
+  const waveAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Initialize all animation values to ensure they start from a known state
+    rotationAnim.setValue(0);
+    counterRotationAnim.setValue(0);
+    pulseAnim.setValue(1);
+    mandalaAnim.setValue(0);
+    spiralAnim.setValue(0);
+    waveAnim.setValue(0);
+
+    // Always start animations for all icons
+    const rotationAnimation = Animated.loop(
+      Animated.timing(rotationAnim, {
+        toValue: 1,
+        duration: 8000 + Math.random() * 4000, // Vary duration for each icon
+        useNativeDriver: true,
+      })
+    );
+    rotationAnimation.start();
+
+    const counterRotationAnimation = Animated.loop(
+      Animated.timing(counterRotationAnim, {
+        toValue: 1,
+        duration: 12000 + Math.random() * 6000, // Vary duration for each icon
+        useNativeDriver: true,
+      })
+    );
+    counterRotationAnimation.start();
+
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: isSelected ? 1.3 : 1.1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulseAnimation.start();
+
+    const mandalaAnimation = Animated.loop(
+      Animated.timing(mandalaAnim, {
+        toValue: 1,
+        duration: 3000 + Math.random() * 2000, // Vary duration for each icon
+        useNativeDriver: true,
+      })
+    );
+    mandalaAnimation.start();
+
+    const spiralAnimation = Animated.loop(
+      Animated.timing(spiralAnim, {
+        toValue: 1,
+        duration: 5000 + Math.random() * 3000, // Vary duration for each icon
+        useNativeDriver: true,
+      })
+    );
+    spiralAnimation.start();
+
+    const waveAnimation = Animated.loop(
+      Animated.timing(waveAnim, {
+        toValue: 1,
+        duration: 2000 + Math.random() * 1000, // Vary duration for each icon
+        useNativeDriver: true,
+      })
+    );
+    waveAnimation.start();
+
+    // Cleanup function to stop animations when component unmounts
+    return () => {
+      rotationAnimation.stop();
+      counterRotationAnimation.stop();
+      pulseAnimation.stop();
+      mandalaAnimation.stop();
+      spiralAnimation.stop();
+      waveAnimation.stop();
+    };
+  }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim, counterRotationAnim, waveAnim]);
+
+  // Create interpolations for animations
+  const rotationInterpolation = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+    extrapolate: 'clamp',
+  });
+
+  const counterRotationInterpolation = counterRotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['360deg', '0deg'],
+    extrapolate: 'clamp',
+  });
+
+  const spiralScaleInterpolation = spiralAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.8, 1.2, 0.8],
+    extrapolate: 'clamp',
+  });
+
+  const waveScaleInterpolation = waveAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 1.4, 1],
+    extrapolate: 'clamp',
+  });
+
+  const pulseScaleInterpolation = pulseAnim.interpolate({
+    inputRange: [1, 1.3],
+    outputRange: [1, 1.3],
+    extrapolate: 'clamp',
+  });
+
+  const icons: Record<string, LucideIcon> = {
+    anxious: Cloud,
+    stressed: Zap,
+    sad: Moon,
+    angry: Activity,
+    calm: Waves,
+    focused: Brain,
+    happy: Sun,
+    energized: Sparkles,
+  };
+  const Icon = icons[emotion.id] || Heart;
+
+  // Get color based on emotion
+  const getGeometryColor = (emotionId: string): string => {
+    switch (emotionId) {
+      case 'anxious': return 'rgba(255,100,100,0.7)';
+      case 'stressed': return 'rgba(255,200,0,0.7)';
+      case 'sad': return 'rgba(150,150,255,0.7)';
+      case 'angry': return 'rgba(255,80,120,0.8)';
+      case 'calm': return 'rgba(100,200,255,0.7)';
+      case 'focused': return 'rgba(100,255,150,0.7)';
+      case 'happy': return 'rgba(255,200,100,0.8)';
+      case 'energized': return 'rgba(100,255,255,0.8)';
+      default: return 'rgba(255,255,255,0.6)';
+    }
+  };
+
+  // Render different sacred geometry based on emotion
+  const renderSacredGeometry = () => {
+    const baseOpacity = 1; // Always show geometry at full brightness
+    const geometryColor = getGeometryColor(emotion.id);
+
+    switch (emotion.id) {
+      case 'anxious':
+        // Chaotic swirling pattern for anxiety - using Tetrahedron Grid for dissolution
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: rotationInterpolation }, 
+                    { scale: pulseScaleInterpolation }
+                  ],
+                  opacity: baseOpacity * 0.8,
+                },
+              ]}
+            >
+              <TetrahedronGrid size={50} color={geometryColor} strokeWidth={1.5} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: counterRotationInterpolation }, 
+                    { scale: spiralScaleInterpolation }
+                  ],
+                  opacity: 0.6 * baseOpacity,
+                },
+              ]}
+            >
+              <VesicaPiscis size={35} color={geometryColor} strokeWidth={1} />
+            </Animated.View>
+          </>
+        );
+
+      case 'stressed':
+        // Sharp, precise patterns for stress - using Merkabah
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: rotationInterpolation }, 
+                    { scale: pulseScaleInterpolation }
+                  ],
+                  opacity: 0.8 * baseOpacity,
+                },
+              ]}
+            >
+              <Merkabah size={45} color={geometryColor} strokeWidth={2} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: counterRotationInterpolation }, 
+                    { scale: spiralScaleInterpolation }
+                  ],
+                  opacity: baseOpacity * 0.6,
+                },
+              ]}
+            >
+              <TreeOfLife size={30} color={geometryColor} strokeWidth={1} />
+            </Animated.View>
+          </>
+        );
+
+      case 'sad':
+        // Gentle, flowing patterns - using Seed of Life
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { scale: waveScaleInterpolation }, 
+                    { rotate: rotationInterpolation }
+                  ],
+                  opacity: baseOpacity * 0.7,
+                },
+              ]}
+            >
+              <SeedOfLife size={45} color={geometryColor} strokeWidth={1.5} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: counterRotationInterpolation }, 
+                    { scale: spiralScaleInterpolation }
+                  ],
+                  opacity: 0.5 * baseOpacity,
+                },
+              ]}
+            >
+              <VesicaPiscis size={30} color={geometryColor} strokeWidth={1} />
+            </Animated.View>
+          </>
+        );
+
+      case 'angry':
+        // Intense, powerful patterns - using Metatron's Cube
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: rotationInterpolation }, 
+                    { scale: pulseScaleInterpolation }
+                  ],
+                  opacity: baseOpacity * 0.8,
+                },
+              ]}
+            >
+              <MetatronsCube size={50} color={geometryColor} strokeWidth={2} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: counterRotationInterpolation }, 
+                    { scale: spiralScaleInterpolation }
+                  ],
+                  opacity: 0.6 * baseOpacity,
+                },
+              ]}
+            >
+              <Merkabah size={35} color={geometryColor} strokeWidth={1.5} />
+            </Animated.View>
+          </>
+        );
+
+      case 'calm':
+        // Smooth, flowing patterns - using Flower of Life
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [{ scale: waveScaleInterpolation }],
+                  opacity: baseOpacity * 0.7,
+                },
+              ]}
+            >
+              <FlowerOfLife size={50} color={geometryColor} strokeWidth={1} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: rotationInterpolation }, 
+                    { scale: spiralScaleInterpolation }
+                  ],
+                  opacity: 0.5 * baseOpacity,
+                },
+              ]}
+            >
+              <SeedOfLife size={30} color={geometryColor} strokeWidth={1} />
+            </Animated.View>
+          </>
+        );
+
+      case 'focused':
+        // Precise, geometric patterns - using Vector Equilibrium
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: rotationInterpolation }, 
+                    { scale: pulseScaleInterpolation }
+                  ],
+                  opacity: baseOpacity * 0.8,
+                },
+              ]}
+            >
+              <VectorEquilibrium size={50} color={geometryColor} strokeWidth={1.5} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: counterRotationInterpolation }, 
+                    { scale: spiralScaleInterpolation }
+                  ],
+                  opacity: 0.6 * baseOpacity,
+                },
+              ]}
+            >
+              <Cubeoctahedron size={35} color={geometryColor} strokeWidth={1} />
+            </Animated.View>
+          </>
+        );
+
+      case 'happy':
+        // Bright, radiating patterns - using Six-Petal Rosette
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: rotationInterpolation }, 
+                    { scale: pulseScaleInterpolation }
+                  ],
+                  opacity: baseOpacity * 0.8,
+                },
+              ]}
+            >
+              <SixPetalRosette size={50} color={geometryColor} strokeWidth={1.5} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { scale: waveScaleInterpolation }, 
+                    { rotate: counterRotationInterpolation }
+                  ],
+                  opacity: 0.6 * baseOpacity,
+                },
+              ]}
+            >
+              <FlowerOfLife size={35} color={geometryColor} strokeWidth={1} />
+            </Animated.View>
+          </>
+        );
+
+      case 'energized':
+        // Dynamic, electric patterns - using Fruit of Life
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: rotationInterpolation }, 
+                    { scale: pulseScaleInterpolation }
+                  ],
+                  opacity: baseOpacity * 0.8,
+                },
+              ]}
+            >
+              <FruitOfLife size={50} color={geometryColor} strokeWidth={1.5} />
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: counterRotationInterpolation }, 
+                    { scale: spiralScaleInterpolation }
+                  ],
+                  opacity: 0.7 * baseOpacity,
+                },
+              ]}
+            >
+              <EggOfLife size={35} color={geometryColor} strokeWidth={1} />
+            </Animated.View>
+          </>
+        );
+
+      default:
+        // Default pattern - using Egg of Life
+        return (
+          <>
+            <Animated.View
+              style={[
+                styles.geometryContainer,
+                {
+                  transform: [
+                    { rotate: rotationInterpolation }, 
+                    { scale: pulseScaleInterpolation }
+                  ],
+                  opacity: baseOpacity * 0.7,
+                },
+              ]}
+            >
+              <EggOfLife size={45} color={geometryColor} strokeWidth={1.5} />
+            </Animated.View>
+          </>
+        );
+    }
+  };
+
+  return (
+    <View style={styles.iconContainer}>
+      {/* Sacred Geometry Background */}
+      {renderSacredGeometry()}
+
+      {/* Main Icon */}
+      <Animated.View
+        style={[
+          styles.mainIcon,
+          {
+            transform: [{ scale: isSelected ? pulseScaleInterpolation : 1 }],
+          },
+        ]}
+      >
+        <Icon size={24} color="#fff" />
+      </Animated.View>
+    </View>
+  );
+};
+
 export default function HomeScreen() {
   const router = useRouter();
   const { progress } = useUserProgress();
@@ -57,10 +532,6 @@ export default function HomeScreen() {
   const [isNavigationReady, setIsNavigationReady] = useState(false);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
-  
-
-
-
 
   // Use useFocusEffect to handle navigation when screen is focused
   useFocusEffect(
@@ -90,8 +561,6 @@ export default function HomeScreen() {
           useNativeDriver: true,
         }),
       ]).start();
-      
-
     }
   }, [isNavigationReady, fadeAnim, scaleAnim]);
 
@@ -105,8 +574,6 @@ export default function HomeScreen() {
     });
   }, [router]);
 
-
-
   const handleLogout = useCallback(async () => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -119,486 +586,9 @@ export default function HomeScreen() {
     }
   }, [logout, router]);
 
-  // Sacred Geometry Icon Component
-  const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
-    const rotationAnim = useRef(new Animated.Value(0)).current;
-    const pulseAnim = useRef(new Animated.Value(1)).current;
-    const mandalaAnim = useRef(new Animated.Value(0)).current;
-    const spiralAnim = useRef(new Animated.Value(0)).current;
-    const counterRotationAnim = useRef(new Animated.Value(0)).current;
-    const waveAnim = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-      // Initialize all animation values to ensure they start from a known state
-      rotationAnim.setValue(0);
-      counterRotationAnim.setValue(0);
-      pulseAnim.setValue(1);
-      mandalaAnim.setValue(0);
-      spiralAnim.setValue(0);
-      waveAnim.setValue(0);
-
-      // Always start animations for all icons
-      const rotationAnimation = Animated.loop(
-        Animated.timing(rotationAnim, {
-          toValue: 1,
-          duration: 8000 + Math.random() * 4000, // Vary duration for each icon
-          useNativeDriver: true,
-        })
-      );
-      rotationAnimation.start();
-
-      const counterRotationAnimation = Animated.loop(
-        Animated.timing(counterRotationAnim, {
-          toValue: 1,
-          duration: 12000 + Math.random() * 6000, // Vary duration for each icon
-          useNativeDriver: true,
-        })
-      );
-      counterRotationAnimation.start();
-
-      const pulseAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: isSelected ? 1.3 : 1.1,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      pulseAnimation.start();
-
-      const mandalaAnimation = Animated.loop(
-        Animated.timing(mandalaAnim, {
-          toValue: 1,
-          duration: 3000 + Math.random() * 2000, // Vary duration for each icon
-          useNativeDriver: true,
-        })
-      );
-      mandalaAnimation.start();
-
-      const spiralAnimation = Animated.loop(
-        Animated.timing(spiralAnim, {
-          toValue: 1,
-          duration: 5000 + Math.random() * 3000, // Vary duration for each icon
-          useNativeDriver: true,
-        })
-      );
-      spiralAnimation.start();
-
-      const waveAnimation = Animated.loop(
-        Animated.timing(waveAnim, {
-          toValue: 1,
-          duration: 2000 + Math.random() * 1000, // Vary duration for each icon
-          useNativeDriver: true,
-        })
-      );
-      waveAnimation.start();
-
-      // Cleanup function to stop animations when component unmounts
-      return () => {
-        rotationAnimation.stop();
-        counterRotationAnimation.stop();
-        pulseAnimation.stop();
-        mandalaAnimation.stop();
-        spiralAnimation.stop();
-        waveAnimation.stop();
-      };
-    }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim, counterRotationAnim, waveAnim]);
-
-    // Create interpolations for animations
-    const rotationInterpolation = rotationAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', '360deg'],
-      extrapolate: 'clamp',
-    });
-
-    const counterRotationInterpolation = counterRotationAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['360deg', '0deg'],
-      extrapolate: 'clamp',
-    });
-
-    const spiralScaleInterpolation = spiralAnim.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [0.8, 1.2, 0.8],
-      extrapolate: 'clamp',
-    });
-
-    const waveScaleInterpolation = waveAnim.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [1, 1.4, 1],
-      extrapolate: 'clamp',
-    });
-
-    const pulseScaleInterpolation = pulseAnim.interpolate({
-      inputRange: [1, 1.3],
-      outputRange: [1, 1.3],
-      extrapolate: 'clamp',
-    });
-
-    const icons: Record<string, LucideIcon> = {
-      anxious: Cloud,
-      stressed: Zap,
-      sad: Moon,
-      angry: Activity,
-      calm: Waves,
-      focused: Brain,
-      happy: Sun,
-      energized: Sparkles,
-    };
-    const Icon = icons[emotion.id] || Heart;
-
-    // Render different sacred geometry based on emotion
-    const renderSacredGeometry = () => {
-      const baseOpacity = 1; // Always show geometry at full brightness
-      const geometryColor = getGeometryColor(emotion.id);
-
-      switch (emotion.id) {
-        case 'anxious':
-          // Chaotic swirling pattern for anxiety - using Tetrahedron Grid for dissolution
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.8,
-                  },
-                ]}
-              >
-                <TetrahedronGrid size={50} color={geometryColor} strokeWidth={1.5} />
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: counterRotationInterpolation }, 
-                      { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: 0.6 * baseOpacity,
-                  },
-                ]}
-              >
-                <VesicaPiscis size={35} color={geometryColor} strokeWidth={1} />
-              </Animated.View>
-            </>
-          );
-
-        case 'stressed':
-          // Sharp, precise patterns for stress - using Merkabah
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: 0.8 * baseOpacity,
-                  },
-                ]}
-              >
-                <Merkabah size={45} color={geometryColor} strokeWidth={2} />
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: counterRotationInterpolation }, 
-                      { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.6,
-                  },
-                ]}
-              >
-                <TreeOfLife size={30} color={geometryColor} strokeWidth={1} />
-              </Animated.View>
-            </>
-          );
-
-        case 'sad':
-          // Gentle, flowing patterns - using Seed of Life
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { scale: waveScaleInterpolation }, 
-                      { rotate: rotationInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.7,
-                  },
-                ]}
-              >
-                <SeedOfLife size={45} color={geometryColor} strokeWidth={1.5} />
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: counterRotationInterpolation }, 
-                      { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: 0.5 * baseOpacity,
-                  },
-                ]}
-              >
-                <VesicaPiscis size={30} color={geometryColor} strokeWidth={1} />
-              </Animated.View>
-            </>
-          );
-
-        case 'angry':
-          // Intense, powerful patterns - using Metatron's Cube
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.8,
-                  },
-                ]}
-              >
-                <MetatronsCube size={50} color={geometryColor} strokeWidth={2} />
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: counterRotationInterpolation }, 
-                      { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: 0.6 * baseOpacity,
-                  },
-                ]}
-              >
-                <Merkabah size={35} color={geometryColor} strokeWidth={1.5} />
-              </Animated.View>
-            </>
-          );
-
-        case 'calm':
-          // Smooth, flowing patterns - using Flower of Life
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [{ scale: waveScaleInterpolation }],
-                    opacity: baseOpacity * 0.7,
-                  },
-                ]}
-              >
-                <FlowerOfLife size={50} color={geometryColor} strokeWidth={1} />
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: 0.5 * baseOpacity,
-                  },
-                ]}
-              >
-                <SeedOfLife size={30} color={geometryColor} strokeWidth={1} />
-              </Animated.View>
-            </>
-          );
-
-        case 'focused':
-          // Precise, geometric patterns - using Vector Equilibrium
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.8,
-                  },
-                ]}
-              >
-                <VectorEquilibrium size={50} color={geometryColor} strokeWidth={1.5} />
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: counterRotationInterpolation }, 
-                      { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: 0.6 * baseOpacity,
-                  },
-                ]}
-              >
-                <Cubeoctahedron size={35} color={geometryColor} strokeWidth={1} />
-              </Animated.View>
-            </>
-          );
-
-        case 'happy':
-          // Bright, radiating patterns - using Six-Petal Rosette
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.8,
-                  },
-                ]}
-              >
-                <SixPetalRosette size={50} color={geometryColor} strokeWidth={1.5} />
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { scale: waveScaleInterpolation }, 
-                      { rotate: counterRotationInterpolation }
-                    ],
-                    opacity: 0.6 * baseOpacity,
-                  },
-                ]}
-              >
-                <FlowerOfLife size={35} color={geometryColor} strokeWidth={1} />
-              </Animated.View>
-            </>
-          );
-
-        case 'energized':
-          // Dynamic, electric patterns - using Fruit of Life
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.8,
-                  },
-                ]}
-              >
-                <FruitOfLife size={50} color={geometryColor} strokeWidth={1.5} />
-              </Animated.View>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: counterRotationInterpolation }, 
-                      { scale: spiralScaleInterpolation }
-                    ],
-                    opacity: 0.7 * baseOpacity,
-                  },
-                ]}
-              >
-                <EggOfLife size={35} color={geometryColor} strokeWidth={1} />
-              </Animated.View>
-            </>
-          );
-
-        default:
-          // Default pattern - using Egg of Life
-          return (
-            <>
-              <Animated.View
-                style={[
-                  styles.geometryContainer,
-                  {
-                    transform: [
-                      { rotate: rotationInterpolation }, 
-                      { scale: pulseScaleInterpolation }
-                    ],
-                    opacity: baseOpacity * 0.7,
-                  },
-                ]}
-              >
-                <EggOfLife size={45} color={geometryColor} strokeWidth={1.5} />
-              </Animated.View>
-            </>
-          );
-      }
-    };
-
-    // Get color based on emotion
-    const getGeometryColor = (emotionId: string): string => {
-      switch (emotionId) {
-        case 'anxious': return 'rgba(255,100,100,0.7)';
-        case 'stressed': return 'rgba(255,200,0,0.7)';
-        case 'sad': return 'rgba(150,150,255,0.7)';
-        case 'angry': return 'rgba(255,80,120,0.8)';
-        case 'calm': return 'rgba(100,200,255,0.7)';
-        case 'focused': return 'rgba(100,255,150,0.7)';
-        case 'happy': return 'rgba(255,200,100,0.8)';
-        case 'energized': return 'rgba(100,255,255,0.8)';
-        default: return 'rgba(255,255,255,0.6)';
-      }
-    };
-
-    return (
-      <View style={styles.iconContainer}>
-        {/* Sacred Geometry Background */}
-        {renderSacredGeometry()}
-
-        {/* Main Icon */}
-        <Animated.View
-          style={[
-            styles.mainIcon,
-            {
-              transform: [{ scale: isSelected ? pulseScaleInterpolation : 1 }],
-            },
-          ]}
-        >
-          <Icon size={24} color="#fff" />
-        </Animated.View>
-      </View>
-    );
-  };
-
   const getEmotionIcon = useCallback((emotion: EmotionalState, isSelected: boolean) => {
     return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} />;
   }, []);
-
-
 
   // Show loading state while navigation is not ready
   if (!isNavigationReady) {
@@ -617,8 +607,6 @@ export default function HomeScreen() {
     <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
       {/* Calm landscape background */}
       <CalmLandscape opacity={0.4} />
-      
-
       
       <SafeAreaView style={styles.safeArea}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -676,25 +664,28 @@ export default function HomeScreen() {
               return (
                 <Animated.View
                   key={`current-${emotion.id}`}
-                  style={{
-                    opacity: fadeAnim,
-                    transform: [
-                      {
-                        translateY: (() => {
-                          try {
-                            return fadeAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [20, 0],
-                              extrapolate: 'clamp',
-                            });
-                          } catch (error) {
-                            console.warn('Home fadeAnim translateY interpolation error:', error);
-                            return 0;
-                          }
-                        })(),
-                      },
-                    ],
-                  }}
+                  style={[
+                    styles.animatedEmotionCard,
+                    {
+                      opacity: fadeAnim,
+                      transform: [
+                        {
+                          translateY: (() => {
+                            try {
+                              return fadeAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [20, 0],
+                                extrapolate: 'clamp',
+                              });
+                            } catch (error) {
+                              console.warn('Home fadeAnim translateY interpolation error:', error);
+                              return 0;
+                            }
+                          })(),
+                        },
+                      ],
+                    },
+                  ]}
                 >
                   <TouchableOpacity
                     onPress={() => console.log(`Current feeling: ${emotion.label}`)}
@@ -740,25 +731,28 @@ export default function HomeScreen() {
               return (
                 <Animated.View
                   key={`want-${emotion.id}`}
-                  style={{
-                    opacity: fadeAnim,
-                    transform: [
-                      {
-                        translateY: (() => {
-                          try {
-                            return fadeAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [20, 0],
-                              extrapolate: 'clamp',
-                            });
-                          } catch (error) {
-                            console.warn('Home fadeAnim translateY interpolation error:', error);
-                            return 0;
-                          }
-                        })(),
-                      },
-                    ],
-                  }}
+                  style={[
+                    styles.animatedEmotionCard,
+                    {
+                      opacity: fadeAnim,
+                      transform: [
+                        {
+                          translateY: (() => {
+                            try {
+                              return fadeAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [20, 0],
+                                extrapolate: 'clamp',
+                              });
+                            } catch (error) {
+                              console.warn('Home fadeAnim translateY interpolation error:', error);
+                              return 0;
+                            }
+                          })(),
+                        },
+                      ],
+                    },
+                  ]}
                 >
                   <TouchableOpacity
                     onPress={() => handleEmotionSelect(emotion)}
@@ -779,8 +773,6 @@ export default function HomeScreen() {
               );
             })}
           </ScrollView>
-
-
 
           {/* Premium Upgrade Prompt */}
           {!isPremium && (
@@ -1166,5 +1158,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
   },
-
+  animatedEmotionCard: {
+    // Base style for animated emotion cards
+  },
 });
