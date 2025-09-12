@@ -58,8 +58,8 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       // Create sound with better error handling
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: url },
-        { 
-          shouldPlay: true, 
+        {
+          shouldPlay: true,
           isLooping: true,
           // Add web-specific options
           ...(Platform.OS === 'web' && {
@@ -70,7 +70,14 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       );
 
       setSound(newSound);
-      setIsPlaying(true);
+
+      try {
+        await newSound.playAsync();
+        setIsPlaying(true);
+      } catch (playError) {
+        console.error("Error starting playback:", playError);
+        setIsPlaying(false);
+      }
 
       // Set up playback status update
       newSound.setOnPlaybackStatusUpdate((status) => {
