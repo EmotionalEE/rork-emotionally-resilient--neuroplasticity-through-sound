@@ -24,6 +24,7 @@ import {
 import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
+import { useCustomMusic } from "@/providers/CustomMusicProvider";
 import SocialShare from "@/components/SocialShare";
 import * as Haptics from "expo-haptics";
 import TorusGeometry from "@/components/geometry/TorusGeometry";
@@ -688,8 +689,15 @@ export default function SessionScreen() {
   const { sessionId } = useLocalSearchParams();
   const { playSound, stopSound, isPlaying } = useAudio();
   const { addSession } = useUserProgress();
-  
-  const session = useMemo(() => sessions.find((s) => s.id === sessionId), [sessionId]);
+  const { getSessionMusic } = useCustomMusic();
+
+  const { session, sessionMusic } = useMemo(() => {
+    const found = sessions.find((s) => s.id === sessionId);
+    return {
+      session: found,
+      sessionMusic: found ? getSessionMusic(found.id) : undefined,
+    };
+  }, [sessionId, getSessionMusic]);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -908,21 +916,23 @@ export default function SessionScreen() {
 
   const handleShare = useCallback((type: 'session') => {
     if (!session) return;
-    
+
     const sessionMinutes = Math.floor(timeElapsed / 60);
     const title = `Completed: ${session.title}`;
-    const description = `Just finished a ${sessionMinutes}-minute ${session.title.toLowerCase()} session. Feeling more centered and peaceful!`;
-    
-    setShareData({ 
-      type, 
-      title, 
+    const description = sessionMusic
+      ? `Just finished a ${sessionMinutes}-minute session using "${sessionMusic.name}". Feeling more centered and peaceful!`
+      : `Just finished a ${sessionMinutes}-minute ${session.title.toLowerCase()} session. Feeling more centered and peaceful!`;
+
+    setShareData({
+      type,
+      title,
       description,
       stats: {
         minutes: sessionMinutes,
       }
     });
     setShareModalVisible(true);
-  }, [session, timeElapsed]);
+  }, [session, timeElapsed, sessionMusic]);
 
   const handleComplete = useCallback(async () => {
     if (Platform.OS !== "web") {
@@ -984,11 +994,11 @@ export default function SessionScreen() {
       setIsPaused(true);
     } else {
       if (session) {
-        await playSound(session.audioUrl);
+        await playSound(sessionMusic?.url ?? session.audioUrl);
         setIsPaused(false);
       }
     }
-  }, [isPlaying, session, playSound, stopSound]);
+  }, [isPlaying, session, sessionMusic, playSound, stopSound]);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
