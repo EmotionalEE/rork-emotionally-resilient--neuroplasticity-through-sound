@@ -13,17 +13,23 @@ function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; em
   const ringAnims = useRef(Array.from({ length: 5 }, () => new Animated.Value(0))).current;
 
   useEffect(() => {
+    const loops: Animated.CompositeAnimation[] = [];
     if (isPlaying) {
       ringAnims.forEach((ringAnim, index) => {
-        Animated.loop(
+        const loop = Animated.loop(
           Animated.timing(ringAnim, {
             toValue: 1,
             duration: 3000 + (index * 500),
             useNativeDriver: true,
           })
-        ).start();
+        );
+        loop.start();
+        loops.push(loop);
       });
     }
+    return () => {
+      loops.forEach(loop => loop.stop());
+    };
   }, [isPlaying, ringAnims]);
 
   return (
@@ -65,6 +71,11 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
   const colorShiftAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    let breathLoop: Animated.CompositeAnimation | null = null;
+    let colorLoop: Animated.CompositeAnimation | null = null;
+    const particleLoops: Animated.CompositeAnimation[] = [];
+    let geometryTimer: NodeJS.Timeout | null = null;
+
     if (isPlaying) {
       // Fade in animation
       Animated.timing(fadeAnim, {
@@ -75,7 +86,7 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
 
       // Breathing animation based on frequency
       const breathDuration = Math.max(2000, 8000 - (frequency * 10));
-      Animated.loop(
+      breathLoop = Animated.loop(
         Animated.sequence([
           Animated.timing(breathAnim, {
             toValue: 1,
@@ -88,30 +99,34 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
+      breathLoop.start();
 
       // Color shifting animation
-      Animated.loop(
+      colorLoop = Animated.loop(
         Animated.timing(colorShiftAnim, {
           toValue: 1,
           duration: 10000,
           useNativeDriver: false,
         })
-      ).start();
+      );
+      colorLoop.start();
 
       // Particle animations
       particleAnims.forEach((anim, index) => {
-        Animated.loop(
+        const loop = Animated.loop(
           Animated.timing(anim, {
             toValue: 1,
             duration: 5000 + (index * 200),
             useNativeDriver: true,
           })
-        ).start();
+        );
+        loop.start();
+        particleLoops.push(loop);
       });
 
       // Change geometry based on frequency
-      const geometryTimer = setInterval(() => {
+      geometryTimer = setInterval(() => {
         if (frequency < 10) {
           setCurrentGeometry('sriYantra');
         } else if (frequency < 20) {
@@ -124,8 +139,6 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
           setCurrentGeometry('goldenSpiral');
         }
       }, 8000);
-
-      return () => clearInterval(geometryTimer);
     } else {
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -133,6 +146,13 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
         useNativeDriver: true,
       }).start();
     }
+
+    return () => {
+      breathLoop?.stop();
+      colorLoop?.stop();
+      particleLoops.forEach(loop => loop.stop());
+      if (geometryTimer) clearInterval(geometryTimer);
+    };
   }, [isPlaying, frequency, fadeAnim, breathAnim, colorShiftAnim, particleAnims]);
 
   const renderParticles = () => {
