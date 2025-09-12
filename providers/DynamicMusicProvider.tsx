@@ -148,6 +148,9 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     if (Platform.OS === 'web' && !audioContextRef.current) {
       try {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume();
+        }
       } catch (error) {
         console.log('Web Audio not supported:', error);
       }
@@ -270,12 +273,12 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     }
     
     initAudioContext();
-    
+
     if (!audioContextRef.current) {
       console.log('Could not initialize audio context');
       return;
     }
-    
+    audioContextRef.current.resume();
     setIsPlaying(true);
     setCurrentSessionId(sessionId);
     
