@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,90 +7,60 @@ import {
   TouchableOpacity,
   Platform,
   Animated,
-  ImageBackground,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import {
+  Brain,
+  Heart,
+  Sparkles,
+  Waves,
+  Activity,
   Moon,
+  Sun,
+  Cloud,
+  Zap,
+  LogOut,
   User,
   LucideIcon,
-  Home,
-  Search,
-  Library,
-  Play,
-  Headphones,
-  Smile,
-  Frown,
-  Meh,
-  AlertCircle,
-  Battery,
-  Wind,
-  Target,
-  Zap as Lightning,
+  Crown,
 } from "lucide-react-native";
+import {
+  EggOfLife,
+  FruitOfLife,
+  MetatronsCube,
+  VesicaPiscis,
+  SeedOfLife,
+  SixPetalRosette,
+  TreeOfLife,
+  Merkabah,
+  FlowerOfLife,
+  Cubeoctahedron,
+  VectorEquilibrium,
+  TetrahedronGrid,
+} from "@/components/SacredGeometry";
 import { CalmLandscape } from "@/components/CalmLandscape";
-import { CalmingSacredGeometry } from "@/components/CalmingSacredGeometry";
 import { emotionalStates } from "@/constants/sessions";
+import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useAuth } from "@/providers/AuthProvider";
+import { usePayment } from "@/providers/PaymentProvider";
 import { EmotionalState } from "@/types/session";
 import * as Haptics from "expo-haptics";
 
-// Session data
-const harmonySessions = [
-  {
-    id: 'morning-harmony',
-    title: 'Morning Harmony',
-    subtitle: 'Start your day balanced',
-    duration: '15 min',
-    image: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800',
-    color: ['#FFB6C1', '#FFA07A'],
-  },
-  {
-    id: 'peaceful-mind',
-    title: 'Peaceful Mind',
-    subtitle: 'Release mental tension',
-    duration: '20 min',
-    image: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=800',
-    color: ['#87CEEB', '#98D8C8'],
-  },
-  {
-    id: 'emotional-balance',
-    title: 'Emotional Balance',
-    subtitle: 'Find your center',
-    duration: '25 min',
-    image: 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=800',
-    color: ['#DDA0DD', '#BA55D3'],
-  },
-  {
-    id: 'evening-calm',
-    title: 'Evening Calm',
-    subtitle: 'Wind down peacefully',
-    duration: '30 min',
-    image: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800',
-    color: ['#4B0082', '#8A2BE2'],
-  },
-];
-
-const emotionIcons: Record<string, { icon: LucideIcon; label: string; color: readonly [string, string] }> = {
-  happy: { icon: Smile, label: 'Happy', color: ['#FFD700', '#FFA500'] as const },
-  sad: { icon: Frown, label: 'Sad', color: ['#4682B4', '#5F9EA0'] as const },
-  anxious: { icon: AlertCircle, label: 'Anxious', color: ['#FF6B6B', '#FF8E53'] as const },
-  calm: { icon: Wind, label: 'Calm', color: ['#48C9B0', '#45B7D1'] as const },
-  stressed: { icon: Lightning, label: 'Stressed', color: ['#F39C12', '#E74C3C'] as const },
-  neutral: { icon: Meh, label: 'Neutral', color: ['#95A5A6', '#7F8C8D'] as const },
-  energized: { icon: Battery, label: 'Energized', color: ['#F1C40F', '#E67E22'] as const },
-  focused: { icon: Target, label: 'Focused', color: ['#9B59B6', '#8E44AD'] as const },
-};
-
 export default function HomeScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { progress } = useUserProgress();
+  const { user, logout } = useAuth();
+  const { isPremium, trialDaysLeft, subscription } = usePayment();
+
   const [isNavigationReady, setIsNavigationReady] = useState(false);
-  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.95), []);
+  
+
+
+
 
   // Use useFocusEffect to handle navigation when screen is focused
   useFocusEffect(
@@ -120,6 +90,8 @@ export default function HomeScreen() {
           useNativeDriver: true,
         }),
       ]).start();
+      
+
     }
   }, [isNavigationReady, fadeAnim, scaleAnim]);
 
@@ -127,22 +99,506 @@ export default function HomeScreen() {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    setSelectedEmotion(emotion.id);
     router.push({
       pathname: "/recommended-sessions",
       params: { emotionId: emotion.id },
     });
   }, [router]);
 
-  const handleSessionPress = useCallback((sessionId: string) => {
+
+
+  const handleLogout = useCallback(async () => {
     if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    router.push({
-      pathname: "/session",
-      params: { sessionId },
+    await logout();
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/welcome");
+    }
+  }, [logout, router]);
+
+  // Sacred Geometry Icon Component
+  const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; isSelected: boolean }) => {
+    const rotationAnim = useRef(new Animated.Value(0)).current;
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+    const mandalaAnim = useRef(new Animated.Value(0)).current;
+    const spiralAnim = useRef(new Animated.Value(0)).current;
+    const counterRotationAnim = useRef(new Animated.Value(0)).current;
+    const waveAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      // Initialize all animation values to ensure they start from a known state
+      rotationAnim.setValue(0);
+      counterRotationAnim.setValue(0);
+      pulseAnim.setValue(1);
+      mandalaAnim.setValue(0);
+      spiralAnim.setValue(0);
+      waveAnim.setValue(0);
+
+      // Always start animations for all icons
+      const rotationAnimation = Animated.loop(
+        Animated.timing(rotationAnim, {
+          toValue: 1,
+          duration: 8000 + Math.random() * 4000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      );
+      rotationAnimation.start();
+
+      const counterRotationAnimation = Animated.loop(
+        Animated.timing(counterRotationAnim, {
+          toValue: 1,
+          duration: 12000 + Math.random() * 6000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      );
+      counterRotationAnimation.start();
+
+      const pulseAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: isSelected ? 1.3 : 1.1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulseAnimation.start();
+
+      const mandalaAnimation = Animated.loop(
+        Animated.timing(mandalaAnim, {
+          toValue: 1,
+          duration: 3000 + Math.random() * 2000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      );
+      mandalaAnimation.start();
+
+      const spiralAnimation = Animated.loop(
+        Animated.timing(spiralAnim, {
+          toValue: 1,
+          duration: 5000 + Math.random() * 3000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      );
+      spiralAnimation.start();
+
+      const waveAnimation = Animated.loop(
+        Animated.timing(waveAnim, {
+          toValue: 1,
+          duration: 2000 + Math.random() * 1000, // Vary duration for each icon
+          useNativeDriver: true,
+        })
+      );
+      waveAnimation.start();
+
+      // Cleanup function to stop animations when component unmounts
+      return () => {
+        rotationAnimation.stop();
+        counterRotationAnimation.stop();
+        pulseAnimation.stop();
+        mandalaAnimation.stop();
+        spiralAnimation.stop();
+        waveAnimation.stop();
+      };
+    }, [isSelected, rotationAnim, pulseAnim, mandalaAnim, spiralAnim, counterRotationAnim, waveAnim]);
+
+    // Create interpolations for animations
+    const rotationInterpolation = rotationAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg'],
+      extrapolate: 'clamp',
     });
-  }, [router]);
+
+    const counterRotationInterpolation = counterRotationAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['360deg', '0deg'],
+      extrapolate: 'clamp',
+    });
+
+    const spiralScaleInterpolation = spiralAnim.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0.8, 1.2, 0.8],
+      extrapolate: 'clamp',
+    });
+
+    const waveScaleInterpolation = waveAnim.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [1, 1.4, 1],
+      extrapolate: 'clamp',
+    });
+
+    const pulseScaleInterpolation = pulseAnim.interpolate({
+      inputRange: [1, 1.3],
+      outputRange: [1, 1.3],
+      extrapolate: 'clamp',
+    });
+
+    const icons: Record<string, LucideIcon> = {
+      anxious: Cloud,
+      stressed: Zap,
+      sad: Moon,
+      angry: Activity,
+      calm: Waves,
+      focused: Brain,
+      happy: Sun,
+      energized: Sparkles,
+    };
+    const Icon = icons[emotion.id] || Heart;
+
+    // Render different sacred geometry based on emotion
+    const renderSacredGeometry = () => {
+      const baseOpacity = 1; // Always show geometry at full brightness
+      const geometryColor = getGeometryColor(emotion.id);
+
+      switch (emotion.id) {
+        case 'anxious':
+          // Chaotic swirling pattern for anxiety - using Tetrahedron Grid for dissolution
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.8,
+                  },
+                ]}
+              >
+                <TetrahedronGrid size={50} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
+                    ],
+                    opacity: 0.6 * baseOpacity,
+                  },
+                ]}
+              >
+                <VesicaPiscis size={35} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+            </>
+          );
+
+        case 'stressed':
+          // Sharp, precise patterns for stress - using Merkabah
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: 0.8 * baseOpacity,
+                  },
+                ]}
+              >
+                <Merkabah size={45} color={geometryColor} strokeWidth={2} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.6,
+                  },
+                ]}
+              >
+                <TreeOfLife size={30} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+            </>
+          );
+
+        case 'sad':
+          // Gentle, flowing patterns - using Seed of Life
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { scale: waveScaleInterpolation }, 
+                      { rotate: rotationInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.7,
+                  },
+                ]}
+              >
+                <SeedOfLife size={45} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
+                    ],
+                    opacity: 0.5 * baseOpacity,
+                  },
+                ]}
+              >
+                <VesicaPiscis size={30} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+            </>
+          );
+
+        case 'angry':
+          // Intense, powerful patterns - using Metatron's Cube
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.8,
+                  },
+                ]}
+              >
+                <MetatronsCube size={50} color={geometryColor} strokeWidth={2} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
+                    ],
+                    opacity: 0.6 * baseOpacity,
+                  },
+                ]}
+              >
+                <Merkabah size={35} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+            </>
+          );
+
+        case 'calm':
+          // Smooth, flowing patterns - using Flower of Life
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [{ scale: waveScaleInterpolation }],
+                    opacity: baseOpacity * 0.7,
+                  },
+                ]}
+              >
+                <FlowerOfLife size={50} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
+                    ],
+                    opacity: 0.5 * baseOpacity,
+                  },
+                ]}
+              >
+                <SeedOfLife size={30} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+            </>
+          );
+
+        case 'focused':
+          // Precise, geometric patterns - using Vector Equilibrium
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.8,
+                  },
+                ]}
+              >
+                <VectorEquilibrium size={50} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
+                    ],
+                    opacity: 0.6 * baseOpacity,
+                  },
+                ]}
+              >
+                <Cubeoctahedron size={35} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+            </>
+          );
+
+        case 'happy':
+          // Bright, radiating patterns - using Six-Petal Rosette
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.8,
+                  },
+                ]}
+              >
+                <SixPetalRosette size={50} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { scale: waveScaleInterpolation }, 
+                      { rotate: counterRotationInterpolation }
+                    ],
+                    opacity: 0.6 * baseOpacity,
+                  },
+                ]}
+              >
+                <FlowerOfLife size={35} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+            </>
+          );
+
+        case 'energized':
+          // Dynamic, electric patterns - using Fruit of Life
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.8,
+                  },
+                ]}
+              >
+                <FruitOfLife size={50} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: counterRotationInterpolation }, 
+                      { scale: spiralScaleInterpolation }
+                    ],
+                    opacity: 0.7 * baseOpacity,
+                  },
+                ]}
+              >
+                <EggOfLife size={35} color={geometryColor} strokeWidth={1} />
+              </Animated.View>
+            </>
+          );
+
+        default:
+          // Default pattern - using Egg of Life
+          return (
+            <>
+              <Animated.View
+                style={[
+                  styles.geometryContainer,
+                  {
+                    transform: [
+                      { rotate: rotationInterpolation }, 
+                      { scale: pulseScaleInterpolation }
+                    ],
+                    opacity: baseOpacity * 0.7,
+                  },
+                ]}
+              >
+                <EggOfLife size={45} color={geometryColor} strokeWidth={1.5} />
+              </Animated.View>
+            </>
+          );
+      }
+    };
+
+    // Get color based on emotion
+    const getGeometryColor = (emotionId: string): string => {
+      switch (emotionId) {
+        case 'anxious': return 'rgba(255,100,100,0.7)';
+        case 'stressed': return 'rgba(255,200,0,0.7)';
+        case 'sad': return 'rgba(150,150,255,0.7)';
+        case 'angry': return 'rgba(255,80,120,0.8)';
+        case 'calm': return 'rgba(100,200,255,0.7)';
+        case 'focused': return 'rgba(100,255,150,0.7)';
+        case 'happy': return 'rgba(255,200,100,0.8)';
+        case 'energized': return 'rgba(100,255,255,0.8)';
+        default: return 'rgba(255,255,255,0.6)';
+      }
+    };
+
+    return (
+      <View style={styles.iconContainer}>
+        {/* Sacred Geometry Background */}
+        {renderSacredGeometry()}
+
+        {/* Main Icon */}
+        <Animated.View
+          style={[
+            styles.mainIcon,
+            {
+              transform: [{ scale: isSelected ? pulseScaleInterpolation : 1 }],
+            },
+          ]}
+        >
+          <Icon size={24} color="#fff" />
+        </Animated.View>
+      </View>
+    );
+  };
+
+  const getEmotionIcon = useCallback((emotion: EmotionalState, isSelected: boolean) => {
+    return <SacredGeometryIcon emotion={emotion} isSelected={isSelected} />;
+  }, []);
+
+
 
   // Show loading state while navigation is not ready
   if (!isNavigationReady) {
@@ -158,369 +614,451 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Background Elements */}
-      <CalmLandscape opacity={0.2} />
-      <CalmingSacredGeometry size={150} opacity={0.3} color="rgba(147, 51, 234, 0.3)" />
+    <LinearGradient colors={["#1a1a2e", "#16213e", "#0f3460"]} style={styles.container}>
+      {/* Calm landscape background */}
+      <CalmLandscape opacity={0.4} />
       
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Header */}
-        <SafeAreaView edges={['top']}>
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              <Text style={styles.greeting}>Welcome back,</Text>
-              <Text style={styles.userName}>{user?.name || 'Friend'}</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.profileButton}
-              onPress={() => router.push('/profile')}
-              activeOpacity={0.7}
-            >
-              <User size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
 
-        {/* How are you feeling section */}
-        <Animated.View
-          style={[
-            styles.emotionSection,
-            {
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
-        >
-          <Text style={styles.sectionTitle}>How are you feeling?</Text>
-          <View style={styles.emotionGrid}>
-            {Object.entries(emotionIcons).map(([key, emotion]) => {
-              const Icon = emotion.icon;
-              const isSelected = selectedEmotion === key;
-              return (
+      
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          <Animated.View
+            style={[
+              styles.header,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            <View style={styles.headerTop}>
+              <View style={styles.headerText}>
+                <Text style={styles.greeting}>Welcome back{user?.name ? `, ${user.name}` : ''}</Text>
+                <Text style={styles.title}>How are you feeling today?</Text>
+              </View>
+              <View style={styles.headerButtons}>
                 <TouchableOpacity
-                  key={key}
-                  onPress={() => {
-                    setSelectedEmotion(key);
-                    const emotionState = emotionalStates.find(e => e.id === key);
-                    if (emotionState) {
-                      handleEmotionSelect(emotionState);
-                    }
-                  }}
+                  style={styles.profileButton}
+                  onPress={() => router.push('/profile')}
                   activeOpacity={0.7}
-                  style={styles.emotionItem}
                 >
-                  <LinearGradient
-                    colors={isSelected ? emotion.color : ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
-                    style={styles.emotionButton}
-                  >
-                    <Icon size={28} color={isSelected ? '#fff' : 'rgba(255,255,255,0.8)'} />
-                  </LinearGradient>
-                  <Text style={[styles.emotionLabel, isSelected && styles.emotionLabelSelected]}>
-                    {emotion.label}
-                  </Text>
+                  <User size={20} color="rgba(255, 255, 255, 0.7)" />
                 </TouchableOpacity>
+                {!isPremium && (
+                  <TouchableOpacity
+                    style={styles.premiumButton}
+                    onPress={() => router.push('/subscription')}
+                    activeOpacity={0.7}
+                  >
+                    <Crown size={20} color="#fbbf24" />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={styles.logoutButton}
+                  onPress={handleLogout}
+                  activeOpacity={0.7}
+                >
+                  <LogOut size={20} color="rgba(255, 255, 255, 0.7)" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Animated.View>
+
+          {/* How do you feel section */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.emotionsContainer}
+          >
+            {emotionalStates.map((emotion, index) => {
+              const isSelected = false;
+
+              return (
+                <Animated.View
+                  key={`current-${emotion.id}`}
+                  style={{
+                    opacity: fadeAnim,
+                    transform: [
+                      {
+                        translateY: (() => {
+                          try {
+                            return fadeAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [20, 0],
+                              extrapolate: 'clamp',
+                            });
+                          } catch (error) {
+                            console.warn('Home fadeAnim translateY interpolation error:', error);
+                            return 0;
+                          }
+                        })(),
+                      },
+                    ],
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => console.log(`Current feeling: ${emotion.label}`)}
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={["#2a2a3e", "#1f1f2e"] as const}
+                      style={[
+                        styles.emotionCard,
+                        styles.currentEmotionCard,
+                      ]}
+                    >
+                      {getEmotionIcon(emotion, isSelected)}
+                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </Animated.View>
               );
             })}
-          </View>
-        </Animated.View>
+          </ScrollView>
 
-        {/* Harmonious Sessions */}
-        <View style={styles.sessionsSection}>
-          <Text style={styles.sectionTitle}>Harmonious Sessions</Text>
-          <Text style={styles.sectionSubtitle}>Find balance through emotional training</Text>
-          
-          <View style={styles.sessionGrid}>
-            {harmonySessions.map((session, index) => (
+          {/* How do you want to feel section */}
+          <Animated.View
+            style={[
+              styles.wantToFeelHeader,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            <Text style={styles.sectionTitle}>How do you want to feel?</Text>
+          </Animated.View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.emotionsContainer}
+          >
+            {emotionalStates.map((emotion, index) => {
+              const isSelected = false;
+
+              return (
+                <Animated.View
+                  key={`want-${emotion.id}`}
+                  style={{
+                    opacity: fadeAnim,
+                    transform: [
+                      {
+                        translateY: (() => {
+                          try {
+                            return fadeAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [20, 0],
+                              extrapolate: 'clamp',
+                            });
+                          } catch (error) {
+                            console.warn('Home fadeAnim translateY interpolation error:', error);
+                            return 0;
+                          }
+                        })(),
+                      },
+                    ],
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => handleEmotionSelect(emotion)}
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={isSelected ? (emotion.gradient as unknown as readonly [string, string, ...string[]]) : ["#2a2a3e", "#1f1f2e"] as const}
+                      style={[
+                        styles.emotionCard,
+                        isSelected && styles.emotionCardSelected,
+                      ]}
+                    >
+                      {getEmotionIcon(emotion, isSelected)}
+                      <Text style={styles.emotionLabel}>{emotion.label}</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })}
+          </ScrollView>
+
+
+
+          {/* Premium Upgrade Prompt */}
+          {!isPremium && (
+            <Animated.View
+              style={[
+                styles.upgradePrompt,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }],
+                },
+              ]}
+            >
               <TouchableOpacity
-                key={session.id}
-                style={[
-                  styles.sessionCard,
-                  index % 2 === 1 && styles.sessionCardRight,
-                ]}
-                onPress={() => handleSessionPress(session.id)}
+                onPress={() => router.push('/subscription')}
                 activeOpacity={0.9}
               >
-                <ImageBackground
-                  source={{ uri: session.image }}
-                  style={styles.sessionImage}
-                  imageStyle={styles.sessionImageStyle}
+                <LinearGradient
+                  colors={["#667eea", "#764ba2"]}
+                  style={styles.upgradeGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
                 >
-                  <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.7)']}
-                    style={styles.sessionGradient}
-                  >
-                    <View style={styles.sessionContent}>
-                      <Text style={styles.sessionTitle}>{session.title}</Text>
-                      <Text style={styles.sessionSubtitle}>{session.subtitle}</Text>
-                      <View style={styles.sessionMeta}>
-                        <View style={styles.sessionDuration}>
-                          <Play size={12} color="#fff" fill="#fff" />
-                          <Text style={styles.sessionDurationText}>{session.duration}</Text>
-                        </View>
-                      </View>
+                  <View style={styles.upgradeContent}>
+                    <View style={styles.upgradeIcon}>
+                      <Sparkles size={24} color="#fff" />
                     </View>
-                  </LinearGradient>
-                </ImageBackground>
+                    <View style={styles.upgradeText}>
+                      <Text style={styles.upgradeTitle}>Unlock Premium Features</Text>
+                      <Text style={styles.upgradeSubtitle}>
+                        Advanced sacred geometry, binaural beats & more
+                      </Text>
+                    </View>
+                    <View style={styles.upgradeArrow}>
+                      <Text style={styles.upgradeArrowText}>→</Text>
+                    </View>
+                  </View>
+                </LinearGradient>
               </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+            </Animated.View>
+          )}
 
-        {/* Quick Actions */}
-        <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionCard} activeOpacity={0.8}>
-            <LinearGradient
-              colors={['#667EEA', '#764BA2']}
-              style={styles.actionGradient}
+          {/* Trial Status */}
+          {subscription?.status === 'trialing' && trialDaysLeft > 0 && (
+            <Animated.View
+              style={[
+                styles.trialStatus,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ scale: scaleAnim }],
+                },
+              ]}
             >
-              <Headphones size={24} color="#fff" />
-              <Text style={styles.actionTitle}>Daily Focus</Text>
-              <Text style={styles.actionSubtitle}>10 min session</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.actionCard} activeOpacity={0.8}>
-            <LinearGradient
-              colors={['#F093FB', '#F5576C']}
-              style={styles.actionGradient}
-            >
-              <Moon size={24} color="#fff" />
-              <Text style={styles.actionTitle}>Sleep Better</Text>
-              <Text style={styles.actionSubtitle}>30 min session</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+              <LinearGradient
+                colors={["#4ade80", "#22c55e"]}
+                style={styles.trialGradient}
+              >
+                <View style={styles.trialContent}>
+                  <Heart size={20} color="#fff" />
+                  <Text style={styles.trialText}>
+                    {trialDaysLeft} days left in your free trial
+                  </Text>
+                </View>
+              </LinearGradient>
+            </Animated.View>
+          )}
 
-      </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
-          <Home size={24} color="#fff" />
-          <Text style={styles.navLabel}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
-          <Search size={24} color="rgba(255,255,255,0.5)" />
-          <Text style={[styles.navLabel, styles.navLabelInactive]}>Search</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.7}>
-          <Library size={24} color="rgba(255,255,255,0.5)" />
-          <Text style={[styles.navLabel, styles.navLabelInactive]}>Your Library</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Now Playing Bar */}
-      <LinearGradient
-        colors={['#6B46C1', '#9333EA']}
-        style={styles.nowPlayingBar}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
-        <View style={styles.nowPlayingContent}>
-          <View style={styles.nowPlayingIcon}>
-            <View style={styles.nowPlayingCircle} />
+          <View style={styles.statsContainer}>
+            <Text style={styles.statsTitle}>Your Progress</Text>
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{progress.totalSessions}</Text>
+                <Text style={styles.statLabel}>Sessions</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{progress.totalMinutes}</Text>
+                <Text style={styles.statLabel}>Minutes</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{progress.streak}</Text>
+                <Text style={styles.statLabel}>Day Streak</Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.nowPlayingInfo}>
-            <Text style={styles.nowPlayingTitle}>Pure High Gamma Waves</Text>
-            <Text style={styles.nowPlayingSubtitle}>60 Hz · Pure tone</Text>
-          </View>
-          <TouchableOpacity style={styles.playButton} activeOpacity={0.7}>
-            <Headphones size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.playButton} activeOpacity={0.7}>
-            <Play size={24} color="#fff" fill="#fff" />
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    </View>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F1E',
   },
   safeArea: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
   scrollContent: {
-    paddingBottom: 180,
+    paddingBottom: 30,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
-  headerLeft: {
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  headerText: {
     flex: 1,
   },
-  greeting: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
-    marginBottom: 2,
-    fontWeight: "400" as const,
-  },
-  userName: {
-    fontSize: 24,
-    color: "#fff",
-    fontWeight: "600" as const,
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
   },
   profileButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(147, 51, 234, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  premiumButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(251, 191, 36, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(147, 51, 234, 0.3)',
+    borderColor: 'rgba(251, 191, 36, 0.3)',
   },
-  emotionSection: {
-    marginBottom: 30,
-    paddingHorizontal: 20,
-  },
-  emotionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  emotionItem: {
-    width: '23%',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  emotionButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  emotionLabel: {
-    color: "rgba(255,255,255,0.6)",
-    fontSize: 12,
-    fontWeight: "400" as const,
-    textAlign: "center" as const,
-  },
-  emotionLabelSelected: {
-    color: "#fff",
+  greeting: {
+    fontSize: 18,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 4,
     fontWeight: "500" as const,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600" as const,
+  title: {
+    fontSize: 24,
+    fontWeight: "700" as const,
     color: "#fff",
-    marginBottom: 4,
+    letterSpacing: 0.5,
   },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
-    marginBottom: 16,
+  emotionsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  emotionCard: {
+    width: 95,
+    height: 95,
+    borderRadius: 18,
+    marginRight: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  emotionCardSelected: {
+    borderColor: "rgba(255,255,255,0.5)",
+  },
+  emotionLabel: {
+    color: "#fff",
+    fontSize: 13,
+    marginTop: 6,
+    fontWeight: "500" as const,
+    textAlign: "center" as const,
   },
   sessionsSection: {
     paddingHorizontal: 20,
-    marginBottom: 30,
+    marginTop: 10,
   },
-  sessionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  sessionCard: {
-    width: '48%',
-    height: 180,
-    marginBottom: 16,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  sessionCardRight: {
-    marginLeft: '4%',
-  },
-  sessionImage: {
-    width: '100%',
-    height: '100%',
-  },
-  sessionImageStyle: {
-    borderRadius: 16,
-  },
-  sessionGradient: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: 16,
-  },
-  sessionContent: {
-    justifyContent: 'flex-end',
-  },
-  sessionTitle: {
-    fontSize: 16,
+  sectionTitle: {
+    fontSize: 22,
     fontWeight: "600" as const,
     color: "#fff",
-    marginBottom: 4,
+    marginBottom: 16,
+    letterSpacing: 0.3,
   },
-  sessionSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
+  sessionCard: {
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    minHeight: 120,
+  },
+  sessionContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  sessionInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  sessionTitle: {
+    fontSize: 18,
+    fontWeight: "bold" as const,
+    color: "#fff",
     marginBottom: 8,
+  },
+  sessionDescription: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 12,
+    lineHeight: 20,
   },
   sessionMeta: {
     flexDirection: "row",
-    alignItems: 'center',
+    gap: 8,
   },
-  sessionDuration: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 8,
+  sessionTag: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  sessionDurationText: {
-    color: '#fff',
-    fontSize: 11,
-    marginLeft: 4,
-    fontWeight: '500' as const,
+  sessionTagText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600" as const,
   },
-  quickActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  sessionIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statsContainer: {
     paddingHorizontal: 20,
-    marginBottom: 30,
+    marginTop: 30,
   },
-  actionCard: {
-    width: '48%',
-    height: 120,
-    borderRadius: 16,
-    overflow: 'hidden',
+  statsTitle: {
+    fontSize: 20,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 16,
   },
-  actionGradient: {
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  statCard: {
     flex: 1,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 16,
     padding: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
   },
-  actionTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600' as const,
-    marginTop: 8,
+  statValue: {
+    fontSize: 24,
+    fontWeight: "bold" as const,
+    color: "#fff",
     marginBottom: 4,
   },
-  actionSubtitle: {
-    color: 'rgba(255,255,255,0.8)',
+  statLabel: {
     fontSize: 12,
+    color: "rgba(255,255,255,0.7)",
   },
   loadingContainer: {
     flex: 1,
@@ -532,80 +1070,101 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600" as const,
   },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 70,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    backgroundColor: 'rgba(15,15,30,0.98)',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(147,51,234,0.2)',
+  // Sacred Geometry Icon Styles
+  iconContainer: {
+    width: 60,
+    height: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
   },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  geometryContainer: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  navLabel: {
-    color: '#fff',
-    fontSize: 11,
-    marginTop: 4,
-    fontWeight: '500' as const,
+  mainIcon: {
+    zIndex: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  navLabelInactive: {
-    color: 'rgba(255,255,255,0.5)',
+  upgradePrompt: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 20,
+    overflow: "hidden",
   },
-  nowPlayingBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 70,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+  upgradeGradient: {
+    padding: 20,
   },
-  nowPlayingContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: '100%',
+  upgradeContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
   },
-  nowPlayingIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
+  upgradeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  nowPlayingCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  nowPlayingInfo: {
+  upgradeText: {
     flex: 1,
   },
-  nowPlayingTitle: {
-    color: '#fff',
+  upgradeTitle: {
+    fontSize: 18,
+    fontWeight: "bold" as const,
+    color: "#fff",
+    marginBottom: 4,
+  },
+  upgradeSubtitle: {
     fontSize: 14,
-    fontWeight: '600' as const,
-    marginBottom: 2,
+    color: "rgba(255,255,255,0.8)",
+    lineHeight: 20,
   },
-  nowPlayingSubtitle: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 12,
+  upgradeArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  playButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
+  upgradeArrowText: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "bold" as const,
   },
+  trialStatus: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  trialGradient: {
+    padding: 16,
+  },
+  trialContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  trialText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "#fff",
+  },
+  wantToFeelHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 8,
+  },
+  currentEmotionCard: {
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+
 });
