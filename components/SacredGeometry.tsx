@@ -31,6 +31,78 @@ export const EggOfLife: React.FC<SacredGeometryProps> = ({
   );
 };
 
+// Default SacredGeometry wrapper
+interface SacredGeometryWrapperProps extends SacredGeometryProps {
+  type: 'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral';
+  animated?: boolean;
+  opacity?: number;
+}
+
+const SacredGeometry: React.FC<SacredGeometryWrapperProps> = ({
+  type,
+  size = 40,
+  color = 'rgba(255,255,255,0.6)',
+  strokeWidth = 1,
+  animated = false,
+  opacity = 1,
+}) => {
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (animated) {
+      const loop = Animated.loop(
+        Animated.timing(rotationAnim, {
+          toValue: 1,
+          duration: 20000,
+          useNativeDriver: true,
+        })
+      );
+      loop.start();
+      return () => loop.stop();
+    }
+  }, [animated, rotationAnim]);
+
+  const rotation = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const commonProps = { size, color, strokeWidth };
+
+  let GeometryComponent: React.FC<SacredGeometryProps>;
+  switch (type) {
+    case 'metatronsCube':
+      GeometryComponent = MetatronsCube;
+      break;
+    case 'vesicaPiscis':
+      GeometryComponent = VesicaPiscis;
+      break;
+    case 'sriYantra':
+      GeometryComponent = SriYantra;
+      break;
+    case 'goldenSpiral':
+      GeometryComponent = GoldenSpiral;
+      break;
+    case 'flowerOfLife':
+    default:
+      GeometryComponent = FlowerOfLife;
+  }
+
+  const content = <GeometryComponent {...commonProps} />;
+
+  if (animated) {
+    return (
+      <Animated.View style={{ transform: [{ rotate: rotation }], opacity }}>
+        {content}
+      </Animated.View>
+    );
+  }
+
+  return <View style={{ opacity }}>{content}</View>;
+};
+
+export default SacredGeometry;
+
 // Fruit of Life
 export const FruitOfLife: React.FC<SacredGeometryProps> = ({
   size = 40, 
@@ -518,16 +590,44 @@ const SacredGeometry: React.FC<DefaultSacredGeometryProps> = ({
   opacity = 1,
   size,
   color,
+  strokeWidth,
   ...rest
 }) => {
   const Component = geometryComponents[type] || FlowerOfLife;
-  const Wrapper: React.ComponentType<any> = animated ? Animated.View : View;
+  const rotationAnim = useRef(new Animated.Value(0)).current;
 
-  return (
-    <Wrapper style={{ opacity }}>
-      <Component size={size} color={color} {...rest} />
-    </Wrapper>
+  useEffect(() => {
+    if (animated) {
+      const loop = Animated.loop(
+        Animated.timing(rotationAnim, {
+          toValue: 1,
+          duration: 20000,
+          useNativeDriver: true,
+        })
+      );
+      loop.start();
+      return () => loop.stop();
+    }
+  }, [animated, rotationAnim]);
+
+  const rotation = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const content = (
+    <Component size={size} color={color} strokeWidth={strokeWidth} {...rest} />
   );
+
+  if (animated) {
+    return (
+      <Animated.View style={{ transform: [{ rotate: rotation }], opacity }}>
+        {content}
+      </Animated.View>
+    );
+  }
+
+  return <View style={{ opacity }}>{content}</View>;
 };
 
 export default SacredGeometry;
