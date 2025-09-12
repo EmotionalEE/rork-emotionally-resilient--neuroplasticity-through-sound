@@ -5,7 +5,18 @@ export interface EmotionalState {
 }
 
 export interface GeometryConfig {
-  type: 'mandala' | 'flower' | 'spiral' | 'triangle' | 'hexagon' | 'star' | 'lotus' | 'merkaba' | 'sri_yantra';
+  type:
+    | 'mandala'
+    | 'flower'
+    | 'spiral'
+    | 'triangle'
+    | 'hexagon'
+    | 'star'
+    | 'lotus'
+    | 'merkaba'
+    | 'sri_yantra'
+    | 'torus'
+    | 'dodecahedron';
   elements: number;
   layers: number;
   rotationSpeed: number;
