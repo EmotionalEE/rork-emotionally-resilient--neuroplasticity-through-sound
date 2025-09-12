@@ -31,6 +31,78 @@ export const EggOfLife: React.FC<SacredGeometryProps> = ({
   );
 };
 
+// Default SacredGeometry wrapper
+interface SacredGeometryWrapperProps extends SacredGeometryProps {
+  type: 'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral';
+  animated?: boolean;
+  opacity?: number;
+}
+
+const SacredGeometry: React.FC<SacredGeometryWrapperProps> = ({
+  type,
+  size = 40,
+  color = 'rgba(255,255,255,0.6)',
+  strokeWidth = 1,
+  animated = false,
+  opacity = 1,
+}) => {
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (animated) {
+      const loop = Animated.loop(
+        Animated.timing(rotationAnim, {
+          toValue: 1,
+          duration: 20000,
+          useNativeDriver: true,
+        })
+      );
+      loop.start();
+      return () => loop.stop();
+    }
+  }, [animated, rotationAnim]);
+
+  const rotation = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const commonProps = { size, color, strokeWidth };
+
+  let GeometryComponent: React.FC<SacredGeometryProps>;
+  switch (type) {
+    case 'metatronsCube':
+      GeometryComponent = MetatronsCube;
+      break;
+    case 'vesicaPiscis':
+      GeometryComponent = VesicaPiscis;
+      break;
+    case 'sriYantra':
+      GeometryComponent = SriYantra;
+      break;
+    case 'goldenSpiral':
+      GeometryComponent = GoldenSpiral;
+      break;
+    case 'flowerOfLife':
+    default:
+      GeometryComponent = FlowerOfLife;
+  }
+
+  const content = <GeometryComponent {...commonProps} />;
+
+  if (animated) {
+    return (
+      <Animated.View style={{ transform: [{ rotate: rotation }], opacity }}>
+        {content}
+      </Animated.View>
+    );
+  }
+
+  return <View style={{ opacity }}>{content}</View>;
+};
+
+export default SacredGeometry;
+
 // Fruit of Life
 export const FruitOfLife: React.FC<SacredGeometryProps> = ({ 
   size = 40, 
@@ -322,10 +394,10 @@ export const VectorEquilibrium: React.FC<SacredGeometryProps> = ({
 };
 
 // 64-Tetrahedron Grid (simplified)
-export const TetrahedronGrid: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const TetrahedronGrid: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = 'rgba(255,255,255,0.6)',
+  strokeWidth = 1
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -342,16 +414,60 @@ export const TetrahedronGrid: React.FC<SacredGeometryProps> = ({
         {/* Inner pattern */}
         <Circle cx="50" cy="50" r="15" />
         <Polygon points="50,40 58,55 42,55" />
-        <Polygon points="50,60 42,45 58,45" />
+      <Polygon points="50,60 42,45 58,45" />
+    </G>
+  </Svg>
+  );
+};
+
+// Sri Yantra
+export const SriYantra: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = 'rgba(255,255,255,0.6)',
+  strokeWidth = 1
+}) => {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        <Circle cx="50" cy="50" r="45" />
+        {/* Interlocking triangles */}
+        <Polygon points="50,20 85,80 15,80" />
+        <Polygon points="50,80 85,20 15,20" />
+        <Polygon points="25,40 75,40 50,85" />
+        <Polygon points="75,60 25,60 50,15" />
+      </G>
+    </Svg>
+  );
+};
+
+// Golden Spiral (simplified)
+export const GoldenSpiral: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = 'rgba(255,255,255,0.6)',
+  strokeWidth = 1
+}) => {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <G stroke={color} strokeWidth={strokeWidth} fill="none">
+        <Path
+          d="M50 5
+             A45 45 0 0 1 95 50
+             A45 45 0 0 1 50 95
+             A28 28 0 0 0 22 67
+             A17 17 0 0 1 39 50
+             A11 11 0 0 0 28 39
+             A7 7 0 0 1 35 32
+             A4 4 0 0 0 31 28"
+        />
       </G>
     </Svg>
   );
 };
 
 // Circle of Life - Pulsating breathing circle for sadness transformation
-export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }> = ({ 
-  size = 200, 
-  color = 'rgba(255,255,255,0.8)', 
+export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }> = ({
+  size = 200,
+  color = 'rgba(255,255,255,0.8)',
   strokeWidth = 2,
   isActive = false
 }) => {
