@@ -26,47 +26,37 @@ const MOCK_USERS_KEY = "mock_users";
 export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   const loadUser = useCallback(async () => {
     try {
-      console.log("[AUTH] Loading user from AsyncStorage...");
+      console.log("Loading user from AsyncStorage...");
       const stored = await AsyncStorage.getItem(AUTH_KEY);
       if (stored) {
         const userData = JSON.parse(stored);
-        console.log("[AUTH] User loaded from storage:", userData.email);
+        console.log("User loaded from storage:", userData);
         setUser(userData);
       } else {
-        console.log("[AUTH] No user found in storage");
-        setUser(null);
+        console.log("No user found in storage");
       }
     } catch (error) {
-      console.error("[AUTH] Error loading user:", error);
-      setUser(null);
+      console.error("Error loading user:", error);
     } finally {
-      console.log("[AUTH] Loading complete, setting initialized to true");
       setIsLoading(false);
-      setIsInitialized(true);
     }
   }, []);
 
   useEffect(() => {
-    console.log("[AUTH] AuthProvider mounted, loading user...");
     loadUser();
   }, [loadUser]);
 
   const saveUser = useCallback(async (userData: User) => {
     try {
-      console.log("[AUTH] Saving user to AsyncStorage:", userData.email);
+      console.log("Saving user to AsyncStorage:", userData);
       await AsyncStorage.setItem(AUTH_KEY, JSON.stringify(userData));
       setUser(userData);
-      console.log("[AUTH] User saved successfully and state updated");
-      
-      // Verify the save worked
-      const verification = await AsyncStorage.getItem(AUTH_KEY);
-      console.log("[AUTH] Verification - user persisted:", verification ? 'YES' : 'NO');
+      console.log("User saved successfully and state updated");
     } catch (error) {
-      console.error("[AUTH] Error saving user:", error);
+      console.error("Error saving user:", error);
     }
   }, []);
 
@@ -90,7 +80,6 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      console.log("[AUTH] Starting login for:", email);
       setIsLoading(true);
       
       // Simulate API delay
@@ -100,18 +89,16 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
       const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
       if (!foundUser) {
-        console.log("[AUTH] User not found:", email);
         return { success: false, error: "User not found" };
       }
       
       // In a real app, you'd verify the password hash
       // For demo purposes, we'll accept any password
       
-      console.log("[AUTH] Login successful, saving user:", foundUser.email);
       await saveUser(foundUser);
       return { success: true };
     } catch (error) {
-      console.error("[AUTH] Login error:", error);
+      console.error("Login error:", error);
       return { success: false, error: "Login failed" };
     } finally {
       setIsLoading(false);
@@ -165,32 +152,19 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
 
   const logout = useCallback(async () => {
     try {
-      console.log("[AUTH] Logging out user");
       await AsyncStorage.removeItem(AUTH_KEY);
       setUser(null);
-      console.log("[AUTH] User logged out successfully");
     } catch (error) {
-      console.error("[AUTH] Logout error:", error);
+      console.error("Logout error:", error);
     }
   }, []);
 
-  return useMemo(() => {
-    const authState = {
-      user,
-      isAuthenticated: !!user && isInitialized,
-      isLoading: isLoading || !isInitialized,
-      login,
-      register,
-      logout,
-    };
-    
-    console.log("[AUTH] Current state:", {
-      hasUser: !!user,
-      isAuthenticated: authState.isAuthenticated,
-      isLoading: authState.isLoading,
-      isInitialized
-    });
-    
-    return authState;
-  }, [user, isLoading, isInitialized, login, register, logout]);
+  return useMemo(() => ({
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    login,
+    register,
+    logout,
+  }), [user, isLoading, login, register, logout]);
 });

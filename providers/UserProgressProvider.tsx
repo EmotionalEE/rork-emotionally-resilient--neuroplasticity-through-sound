@@ -23,7 +23,6 @@ interface UserProgressContextType {
   progress: UserProgress;
   hasCompletedOnboarding: boolean;
   hasSeenWelcome: boolean;
-  isLoading: boolean;
   completeOnboarding: () => Promise<void>;
   completeWelcome: () => Promise<void>;
   addSession: (sessionId: string, duration: number, targetEmotions: string[]) => Promise<void>;
@@ -48,64 +47,40 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
   const [progress, setProgress] = useState<UserProgress>(defaultProgress);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const loadProgress = useCallback(async () => {
     try {
-      console.log("[PROGRESS] Loading progress from AsyncStorage...");
       const stored = await AsyncStorage.getItem(PROGRESS_KEY);
       if (stored) {
-        const progressData = JSON.parse(stored);
-        console.log("[PROGRESS] Progress loaded:", progressData.totalSessions, "sessions");
-        setProgress(progressData);
-      } else {
-        console.log("[PROGRESS] No progress found, using defaults");
+        setProgress(JSON.parse(stored));
       }
     } catch (error) {
-      console.error("[PROGRESS] Error loading progress:", error);
+      console.error("Error loading progress:", error);
     }
   }, []);
 
   const checkOnboarding = useCallback(async () => {
     try {
-      console.log("[PROGRESS] Checking onboarding status...");
       const completed = await AsyncStorage.getItem(ONBOARDING_KEY);
-      const hasCompleted = completed === "true";
-      console.log("[PROGRESS] Onboarding completed:", hasCompleted);
-      setHasCompletedOnboarding(hasCompleted);
+      setHasCompletedOnboarding(completed === "true");
     } catch (error) {
-      console.error("[PROGRESS] Error checking onboarding:", error);
+      console.error("Error checking onboarding:", error);
     }
   }, []);
 
   const checkWelcome = useCallback(async () => {
     try {
-      console.log("[PROGRESS] Checking welcome status...");
       const seen = await AsyncStorage.getItem(WELCOME_KEY);
-      const hasSeen = seen === "true";
-      console.log("[PROGRESS] Welcome seen:", hasSeen);
-      setHasSeenWelcome(hasSeen);
+      setHasSeenWelcome(seen === "true");
     } catch (error) {
-      console.error("[PROGRESS] Error checking welcome:", error);
+      console.error("Error checking welcome:", error);
     }
   }, []);
 
   useEffect(() => {
-    const loadAllData = async () => {
-      console.log("[PROGRESS] UserProgressProvider mounted, loading all data...");
-      setIsLoading(true);
-      
-      await Promise.all([
-        loadProgress(),
-        checkOnboarding(),
-        checkWelcome()
-      ]);
-      
-      console.log("[PROGRESS] All data loaded, setting loading to false");
-      setIsLoading(false);
-    };
-    
-    loadAllData();
+    loadProgress();
+    checkOnboarding();
+    checkWelcome();
   }, [loadProgress, checkOnboarding, checkWelcome]);
 
   const completeOnboarding = useCallback(async () => {
@@ -207,26 +182,14 @@ export const [UserProgressProvider, useUserProgress] = createContextHook<UserPro
     return progress.emotionProgress.find(ep => ep.emotionId === emotionId) || null;
   }, [progress.emotionProgress]);
 
-  return useMemo(() => {
-    const progressState = {
-      progress,
-      hasCompletedOnboarding,
-      hasSeenWelcome,
-      isLoading,
-      completeOnboarding,
-      completeWelcome,
-      addSession,
-      resetProgress,
-      getEmotionProgress,
-    };
-    
-    console.log("[PROGRESS] Current state:", {
-      hasSeenWelcome,
-      hasCompletedOnboarding,
-      isLoading,
-      totalSessions: progress.totalSessions
-    });
-    
-    return progressState;
-  }, [progress, hasCompletedOnboarding, hasSeenWelcome, isLoading, completeOnboarding, completeWelcome, addSession, resetProgress, getEmotionProgress]);
+  return useMemo(() => ({
+    progress,
+    hasCompletedOnboarding,
+    hasSeenWelcome,
+    completeOnboarding,
+    completeWelcome,
+    addSession,
+    resetProgress,
+    getEmotionProgress,
+  }), [progress, hasCompletedOnboarding, hasSeenWelcome, completeOnboarding, completeWelcome, addSession, resetProgress, getEmotionProgress]);
 });
