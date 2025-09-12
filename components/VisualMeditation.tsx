@@ -240,7 +240,7 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
       >
         <SacredGeometry
           type={currentGeometry}
-          size={280}
+          size={200}
           color="#ffffff"
           animated={true}
           opacity={0.6}
@@ -251,7 +251,7 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
       <View style={styles.secondaryGeometry}>
         <SacredGeometry
           type="vesicaPiscis"
-          size={400}
+          size={280}
           color="#ffffff"
           animated={true}
           opacity={0.2}
@@ -261,7 +261,7 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
       <View style={styles.tertiaryGeometry}>
         <SacredGeometry
           type="flowerOfLife"
-          size={500}
+          size={350}
           color="#ffffff"
           animated={true}
           opacity={0.1}

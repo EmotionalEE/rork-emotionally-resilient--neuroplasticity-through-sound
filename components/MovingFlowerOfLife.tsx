@@ -10,7 +10,7 @@ interface MovingFlowerOfLifeProps {
 }
 
 export function MovingFlowerOfLife({ 
-  size = 80, 
+  size = 60, 
   color = 'rgba(100, 200, 255, 0.2)', 
   opacity = 0.6,
   speed = 1

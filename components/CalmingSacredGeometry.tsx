@@ -9,7 +9,7 @@ interface CalmingSacredGeometryProps {
 }
 
 export const CalmingSacredGeometry: React.FC<CalmingSacredGeometryProps> = ({
-  size = 120,
+  size = 80,
   color = 'rgba(100, 200, 255, 0.4)',
   opacity = 0.6,
 }) => {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '20%',
     left: '50%',
-    transform: [{ translateX: -60 }], // Half of default size
+    transform: [{ translateX: -40 }], // Half of default size
     zIndex: 1,
   },
   geometryContainer: {

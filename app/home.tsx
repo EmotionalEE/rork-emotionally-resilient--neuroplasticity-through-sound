@@ -219,7 +219,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <TetrahedronGrid size={50} color={geometryColor} strokeWidth={1.5} />
+              <TetrahedronGrid size={35} color={geometryColor} strokeWidth={1.5} />
             </Animated.View>
             <Animated.View
               style={[
@@ -233,7 +233,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <VesicaPiscis size={35} color={geometryColor} strokeWidth={1} />
+              <VesicaPiscis size={25} color={geometryColor} strokeWidth={1} />
             </Animated.View>
           </>
         );
@@ -254,7 +254,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <Merkabah size={45} color={geometryColor} strokeWidth={2} />
+              <Merkabah size={32} color={geometryColor} strokeWidth={2} />
             </Animated.View>
             <Animated.View
               style={[
@@ -268,7 +268,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <TreeOfLife size={30} color={geometryColor} strokeWidth={1} />
+              <TreeOfLife size={22} color={geometryColor} strokeWidth={1} />
             </Animated.View>
           </>
         );
@@ -289,7 +289,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <SeedOfLife size={45} color={geometryColor} strokeWidth={1.5} />
+              <SeedOfLife size={32} color={geometryColor} strokeWidth={1.5} />
             </Animated.View>
             <Animated.View
               style={[
@@ -303,7 +303,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <VesicaPiscis size={30} color={geometryColor} strokeWidth={1} />
+              <VesicaPiscis size={22} color={geometryColor} strokeWidth={1} />
             </Animated.View>
           </>
         );
@@ -324,7 +324,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <MetatronsCube size={50} color={geometryColor} strokeWidth={2} />
+              <MetatronsCube size={35} color={geometryColor} strokeWidth={2} />
             </Animated.View>
             <Animated.View
               style={[
@@ -338,7 +338,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <Merkabah size={35} color={geometryColor} strokeWidth={1.5} />
+              <Merkabah size={25} color={geometryColor} strokeWidth={1.5} />
             </Animated.View>
           </>
         );
@@ -356,7 +356,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <FlowerOfLife size={50} color={geometryColor} strokeWidth={1} />
+              <FlowerOfLife size={25} color={geometryColor} strokeWidth={1} />
             </Animated.View>
             <Animated.View
               style={[
@@ -370,7 +370,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <SeedOfLife size={30} color={geometryColor} strokeWidth={1} />
+              <SeedOfLife size={22} color={geometryColor} strokeWidth={1} />
             </Animated.View>
           </>
         );
@@ -391,7 +391,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <VectorEquilibrium size={50} color={geometryColor} strokeWidth={1.5} />
+              <VectorEquilibrium size={35} color={geometryColor} strokeWidth={1.5} />
             </Animated.View>
             <Animated.View
               style={[
@@ -405,7 +405,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <Cubeoctahedron size={35} color={geometryColor} strokeWidth={1} />
+              <Cubeoctahedron size={25} color={geometryColor} strokeWidth={1} />
             </Animated.View>
           </>
         );
@@ -426,7 +426,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <SixPetalRosette size={50} color={geometryColor} strokeWidth={1.5} />
+              <SixPetalRosette size={35} color={geometryColor} strokeWidth={1.5} />
             </Animated.View>
             <Animated.View
               style={[
@@ -440,7 +440,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <FlowerOfLife size={35} color={geometryColor} strokeWidth={1} />
+              <FlowerOfLife size={25} color={geometryColor} strokeWidth={1} />
             </Animated.View>
           </>
         );
@@ -461,7 +461,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <FruitOfLife size={50} color={geometryColor} strokeWidth={1.5} />
+              <FruitOfLife size={35} color={geometryColor} strokeWidth={1.5} />
             </Animated.View>
             <Animated.View
               style={[
@@ -475,7 +475,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <EggOfLife size={35} color={geometryColor} strokeWidth={1} />
+              <EggOfLife size={25} color={geometryColor} strokeWidth={1} />
             </Animated.View>
           </>
         );
@@ -496,7 +496,7 @@ const SacredGeometryIcon = ({ emotion, isSelected }: { emotion: EmotionalState; 
                 },
               ]}
             >
-              <EggOfLife size={45} color={geometryColor} strokeWidth={1.5} />
+              <EggOfLife size={32} color={geometryColor} strokeWidth={1.5} />
             </Animated.View>
           </>
         );

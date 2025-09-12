@@ -631,7 +631,7 @@ const SacredGeometry = ({
               opacity: flowerOpacity,
             }}
           >
-            <TorusGeometry size={120} color={primaryColor} strokeWidth={4} />
+            <TorusGeometry size={80} color={primaryColor} strokeWidth={4} />
           </Animated.View>
         );
 
@@ -643,7 +643,7 @@ const SacredGeometry = ({
               opacity: flowerOpacity,
             }}
           >
-            <DodecahedronGeometry size={120} color={primaryColor} strokeWidth={2} />
+            <DodecahedronGeometry size={80} color={primaryColor} strokeWidth={2} />
           </Animated.View>
         );
 
