@@ -8,6 +8,8 @@ import {
   Animated,
   Alert,
   BackHandler,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,10 +17,13 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Play,
   Pause,
-  X,
-  Volume2,
+  ChevronDown,
+  Download,
   Heart,
-  Activity,
+  Share2,
+  Timer,
+  Layers,
+  Radio,
 } from "lucide-react-native";
 import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
@@ -30,6 +35,8 @@ import SacredGeometry from "@/components/SacredGeometry";
 import { GeometryConfig } from "@/types/session";
 
 type SacredGeometryVariant = React.ComponentProps<typeof SacredGeometry>["type"];
+
+
 
 const geometryTypeMap: Record<GeometryConfig["type"], SacredGeometryVariant> = {
   mandala: "flowerOfLife",
@@ -59,10 +66,12 @@ export default function SessionScreen() {
       sessionMusic: found ? getSessionMusic(found.id) : undefined,
     };
   }, [sessionId, getSessionMusic]);
+  
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const breathAnim = useRef(new Animated.Value(0)).current;
-  const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [frequencyIntensity, setFrequencyIntensity] = useState<'Off' | 'Low' | 'Normal' | 'High'>('High');
+  const [beatMode, setBeatMode] = useState<'Binaural' | 'Isochronic'>('Binaural');
   const [shareModalVisible, setShareModalVisible] = useState<boolean>(false);
   const [shareData, setShareData] = useState<{
     type: 'progress' | 'achievement' | 'streak' | 'session';
@@ -76,113 +85,163 @@ export default function SessionScreen() {
     };
   } | null>(null);
   
-  // Wave animation refs for music sync
-  const waveAnims = useRef(Array.from({ length: 8 }, () => new Animated.Value(0))).current;
-  const pauseOverlayAnim = useRef(new Animated.Value(0)).current;
+  // Animation refs
+  const orbPulseAnim = useRef(new Animated.Value(1)).current;
+  const particleAnims = useRef(Array.from({ length: 50 }, () => ({
+    x: new Animated.Value(0),
+    y: new Animated.Value(0),
+    opacity: new Animated.Value(0),
+  }))).current;
+  const roadLineAnim = useRef(new Animated.Value(0)).current;
+  const expandAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0.8)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
   
-  // Icon animation values
-  const heartAnim = useRef(new Animated.Value(1)).current;
-  const activityAnim = useRef(new Animated.Value(0)).current;
-  const volumeAnim = useRef(new Animated.Value(1)).current;
-  
-  // Initialize animated values with proper numbers
+  // Initialize animated values
   useEffect(() => {
-    breathAnim.setValue(0);
-    heartAnim.setValue(1);
-    activityAnim.setValue(0);
-    volumeAnim.setValue(1);
-    pauseOverlayAnim.setValue(isPaused ? 1 : 0);
-    waveAnims.forEach(anim => anim.setValue(0));
-  }, [breathAnim, heartAnim, activityAnim, volumeAnim, pauseOverlayAnim, waveAnims, isPaused]);
+    orbPulseAnim.setValue(1);
+    roadLineAnim.setValue(0);
+    expandAnim.setValue(0);
+    glowAnim.setValue(0.8);
+    particleAnims.forEach(particle => {
+      particle.x.setValue(0);
+      particle.y.setValue(0);
+      particle.opacity.setValue(0);
+    });
+  }, [orbPulseAnim, roadLineAnim, expandAnim, glowAnim, particleAnims]);
   
-  // Wave animations synced with music state
+  // Orb pulse and particle animations synced with music
   useEffect(() => {
-    const waveLoops: Animated.CompositeAnimation[] = [];
+    const animations: Animated.CompositeAnimation[] = [];
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
     
     if (isPlaying && !isPaused) {
-      // Animate pause overlay out
-      Animated.timing(pauseOverlayAnim, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-      
-      // Start wave animations with session frequency
-      waveAnims.forEach((anim, index) => {
-        const baseFreq = typeof session?.frequency === 'number' ? session.frequency : parseInt(String(session?.frequency || '440'), 10) || 440;
-        const waveFreq = Math.max(800, 3000 - (baseFreq * 3) + (index * 150));
+      // Orb pulsing animation
+      const orbAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(orbPulseAnim, {
+            toValue: 1.15,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(orbPulseAnim, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      orbAnimation.start();
+      animations.push(orbAnimation);
+
+      // Glow animation
+      const glowAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(glowAnim, {
+            toValue: 1,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(glowAnim, {
+            toValue: 0.6,
+            duration: 3000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      glowAnimation.start();
+      animations.push(glowAnimation);
+
+      // Particle animations
+      const screenHeight = Dimensions.get('window').height;
+      particleAnims.forEach((particle, index) => {
+        const delay = index * 60;
+        const duration = 4000 + Math.random() * 2000;
         
-        const loop = Animated.loop(
-          Animated.sequence([
-            Animated.timing(anim, {
-              toValue: 1,
-              duration: waveFreq,
-              useNativeDriver: true,
-            }),
-            Animated.timing(anim, {
-              toValue: 0,
-              duration: waveFreq,
-              useNativeDriver: true,
-            }),
-          ])
-        );
-        
-        // Stagger the start times
-        setTimeout(() => loop.start(), index * 200);
-        waveLoops.push(loop);
+        const timeout = setTimeout(() => {
+          const particleAnimation = Animated.loop(
+            Animated.parallel([
+              Animated.sequence([
+                Animated.timing(particle.y, {
+                  toValue: -screenHeight * 0.6,
+                  duration: duration,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(particle.y, {
+                  toValue: 0,
+                  duration: 0,
+                  useNativeDriver: true,
+                }),
+              ]),
+              Animated.sequence([
+                Animated.timing(particle.x, {
+                  toValue: (Math.random() - 0.5) * 300,
+                  duration: duration,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(particle.x, {
+                  toValue: 0,
+                  duration: 0,
+                  useNativeDriver: true,
+                }),
+              ]),
+              Animated.sequence([
+                Animated.timing(particle.opacity, {
+                  toValue: Math.random() * 0.8 + 0.2,
+                  duration: duration * 0.3,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(particle.opacity, {
+                  toValue: 0,
+                  duration: duration * 0.7,
+                  useNativeDriver: true,
+                }),
+              ]),
+            ])
+          );
+          particleAnimation.start();
+          animations.push(particleAnimation);
+        }, delay);
+        timeouts.push(timeout);
       });
-    } else {
-      // Animate pause overlay in
-      Animated.timing(pauseOverlayAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-      
-      // Stop wave animations
-      waveAnims.forEach(anim => {
-        Animated.timing(anim, {
-          toValue: 0,
-          duration: 800,
+
+      // Road line animation
+      const roadAnimation = Animated.loop(
+        Animated.timing(roadLineAnim, {
+          toValue: 1,
+          duration: 3000,
           useNativeDriver: true,
-        }).start();
+        })
+      );
+      roadAnimation.start();
+      animations.push(roadAnimation);
+    } else {
+      // Stop animations when paused
+      orbPulseAnim.setValue(1);
+      glowAnim.setValue(0.8);
+      particleAnims.forEach(particle => {
+        particle.opacity.setValue(0);
       });
     }
     
     return () => {
-      waveLoops.forEach(loop => loop.stop());
+      animations.forEach(anim => anim.stop());
+      timeouts.forEach(timeout => clearTimeout(timeout));
     };
-  }, [isPlaying, isPaused, session?.frequency, waveAnims, pauseOverlayAnim]);
+  }, [isPlaying, isPaused, orbPulseAnim, glowAnim, particleAnims, roadLineAnim]);
 
+  // Expand animation for controls
+  useEffect(() => {
+    Animated.timing(expandAnim, {
+      toValue: isExpanded ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [isExpanded, expandAnim]);
 
-
-  // Breathing indicator animation
-  const breathIndicatorScale = breathAnim.interpolate({
+  const expandHeight = expandAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.8, 1.4],
-  });
-
-  const breathIndicatorOpacity = breathAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.3, 0.8],
-  });
-
-  // Icon animations
-  const heartScale = heartAnim.interpolate({
-    inputRange: [0.8, 1, 1.2],
-    outputRange: [0.8, 1, 1.2],
-    extrapolate: 'clamp',
-  });
-
-  const activityRotation = activityAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const volumeScale = volumeAnim.interpolate({
-    inputRange: [0.9, 1, 1.1],
-    outputRange: [0.9, 1, 1.1],
-    extrapolate: 'clamp',
+    outputRange: [0, 280],
   });
 
   const handleClose = useCallback(() => {
@@ -200,7 +259,6 @@ export default function SessionScreen() {
             } catch (error) {
               console.log("Error stopping sound during close:", error);
             }
-            // Always navigate to home to avoid GO_BACK errors
             router.replace("/home");
           },
         },
@@ -214,96 +272,22 @@ export default function SessionScreen() {
     } catch (error) {
       console.log("Error stopping sound during quick exit:", error);
     }
-    // Always navigate to home to avoid GO_BACK errors
     router.replace("/home");
   }, [stopSound, router]);
 
   useEffect(() => {
     if (!session) return;
 
-    // Initialize animations
-
-
-
-    // Heart beating animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(heartAnim, {
-          toValue: 1.2,
-          duration: 600,
-          useNativeDriver: false,
-        }),
-        Animated.timing(heartAnim, {
-          toValue: 0.8,
-          duration: 600,
-          useNativeDriver: false,
-        }),
-        Animated.timing(heartAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: false,
-        }),
-      ])
-    ).start();
-
-    // Activity pulse animation
-    Animated.loop(
-      Animated.timing(activityAnim, {
-        toValue: 1,
-        duration: 4000,
-        useNativeDriver: false,
-      })
-    ).start();
-
-    // Volume wave animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(volumeAnim, {
-          toValue: 1.1,
-          duration: 1500,
-          useNativeDriver: false,
-        }),
-        Animated.timing(volumeAnim, {
-          toValue: 0.9,
-          duration: 1500,
-          useNativeDriver: false,
-        }),
-      ])
-    ).start();
-
-    const breathAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(breathAnim, {
-          toValue: 1,
-          duration: 4000,
-          useNativeDriver: false,
-        }),
-        Animated.timing(breathAnim, {
-          toValue: 0,
-          duration: 4000,
-          useNativeDriver: false,
-        }),
-      ])
-    );
-    breathAnimation.start();
-
-    // Update breathing phase
-    const breathTimer = setInterval(() => {
-      setBreathingPhase(prev => prev === 'in' ? 'out' : 'in');
-    }, 4000);
-
-    // Handle Android back button
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       handleClose();
-      return true; // Prevent default back action
+      return true;
     });
 
     return () => {
       stopSound();
-      clearInterval(breathTimer);
       backHandler.remove();
     };
-  }, [session, breathAnim, stopSound, handleClose]);
+  }, [session, stopSound, handleClose]);
 
   const handleShare = useCallback((type: 'session') => {
     if (!session) return;
@@ -351,7 +335,6 @@ export default function SessionScreen() {
         {
           text: "Continue",
           onPress: () => {
-            // Always navigate to home to avoid GO_BACK errors
             router.replace("/home");
           },
         },
@@ -391,13 +374,7 @@ export default function SessionScreen() {
     }
   }, [isPlaying, session, sessionMusic, playSound, stopSound]);
 
-  const formatTime = useCallback((seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  }, []);
+
 
   if (!session) {
     return (
@@ -407,7 +384,6 @@ export default function SessionScreen() {
     );
   }
 
-  const progress = (timeElapsed / (session.duration * 60)) * 100;
   const geometry = session.geometry;
   const sacredGeometryType = geometryTypeMap[geometry.type];
   const sacredGeometryColor = geometry.colors?.[0] ?? "rgba(255,255,255,0.8)";
@@ -419,154 +395,281 @@ export default function SessionScreen() {
     3,
     0.6 + Math.max(1, geometry.layers) * 0.25
   );
-  const sacredGeometrySize = 260;
+  const sacredGeometrySize = 200;
 
   return (
-    <LinearGradient colors={session.gradient as unknown as readonly [string, string, ...string[]]} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleQuickExit} style={styles.closeButton}>
-            <X size={28} color="#fff" />
-          </TouchableOpacity>
+    <View style={styles.container}>
+      {/* Background with road perspective */}
+      <LinearGradient 
+        colors={['#000000', '#1a1a1a', '#000000']} 
+        style={StyleSheet.absoluteFillObject}
+      />
+      
+      {/* Road perspective */}
+      <View style={styles.roadContainer}>
+        <View style={styles.road}>
+          <Animated.View 
+            style={[
+              styles.roadLine,
+              {
+                transform: [{
+                  translateY: roadLineAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 100],
+                  })
+                }]
+              }
+            ]}
+          />
         </View>
+        <View style={styles.mountains} />
+      </View>
 
-        <View style={styles.content}>
-          <Text style={styles.sessionTitle}>{session.title}</Text>
-          <Text style={styles.frequency}>{session.frequency}Hz</Text>
-
-          <View style={styles.visualizer}>
-            {/* Sacred Geometry Background */}
-            <SacredGeometry
-              type={sacredGeometryType}
-              size={sacredGeometrySize}
-              color={sacredGeometryColor}
-              strokeWidth={sacredGeometryStrokeWidth}
-              animated
-              pulse={isPlaying && !isPaused}
-              frequency={typeof session?.frequency === 'number' ? session.frequency : parseInt(String(session?.frequency || '440'), 10) || 440}
-              isActive={sacredGeometryType === "circleOfLife" ? isPlaying : undefined}
-              opacity={sacredGeometryOpacity}
-            />
-            
-            {/* Wave visualization overlay */}
-            <View style={styles.waveOverlay}>
-              {waveAnims.map((anim, index) => {
-                const waveHeight = anim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [10, 40],
-                });
-                
-                const waveOpacity = anim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.2, 0.8],
-                });
-                
-                const angle = (index * 45) * (Math.PI / 180);
-                const radius = 120;
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
-                
-                const waveStyle = {
-                  left: 150 + x,
-                  top: 150 + y,
-                  height: waveHeight,
-                  opacity: waveOpacity,
-                  backgroundColor: session?.gradient?.[0] || '#ffffff',
-                };
-                
-                return (
-                  <Animated.View
-                    key={`session-wave-${index}`}
-                    style={[styles.waveElement, waveStyle]}
-                  />
-                );
-              })}
+      {/* Main content */}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
+        <SafeAreaView style={styles.safeArea}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={handleQuickExit} style={styles.headerButton}>
+              <ChevronDown size={24} color="#fff" />
+            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity style={styles.headerButton}>
+                <Download size={20} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.headerButton}>
+                <Heart size={20} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.headerButton}>
+                <Share2 size={20} color="#fff" />
+              </TouchableOpacity>
             </View>
+          </View>
+
+          {/* Orb visualization */}
+          <View style={styles.orbContainer}>
+            {/* Particles */}
+            {particleAnims.map((particle, index) => (
+              <Animated.View
+                key={`particle-${index}`}
+                style={[
+                  styles.particle,
+                  {
+                    transform: [
+                      { translateX: particle.x },
+                      { translateY: particle.y },
+                    ],
+                    opacity: particle.opacity,
+                  },
+                ]}
+              />
+            ))}
             
-            {/* Pause overlay */}
+            {/* Glow effect */}
             <Animated.View 
               style={[
-                styles.pauseOverlay,
+                styles.orbGlow,
                 {
-                  opacity: pauseOverlayAnim,
+                  opacity: glowAnim,
+                  transform: [{ scale: orbPulseAnim }],
+                }
+              ]}
+            />
+            
+            {/* Main orb */}
+            <Animated.View 
+              style={[
+                styles.orb,
+                {
+                  transform: [{ scale: orbPulseAnim }],
                 }
               ]}
             >
-              <View style={styles.pauseContent}>
-                <Text style={styles.pauseTitle}>Session Paused</Text>
-                <Text style={styles.pauseSubtitle}>Tap play to continue your journey</Text>
-              </View>
+              <LinearGradient
+                colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.3)', 'transparent']}
+                style={styles.orbGradient}
+              >
+                <View style={styles.orbContent}>
+                  <Text style={styles.frequencyText}>{session.frequency} Hz</Text>
+                  <Text style={styles.frequencyLabel}>
+                    {session.frequency === '40' ? 'Focus' : 
+                     session.frequency === '528' ? 'Love' :
+                     session.frequency === '741' ? 'Cleanse' :
+                     session.frequency === '396' ? 'Release' :
+                     session.frequency === '2' ? 'Sleep' :
+                     session.frequency === '6' ? 'Healing' :
+                     session.frequency === '10' ? 'Calm' :
+                     session.frequency === '20' ? 'Focus' :
+                     session.frequency === '432' ? 'Harmony' :
+                     session.frequency === '963' ? 'Awaken' :
+                     'Balance'}
+                  </Text>
+                </View>
+                
+                {/* Sacred Geometry inside orb */}
+                <View style={styles.geometryWrapper}>
+                  <SacredGeometry
+                    type={sacredGeometryType}
+                    size={sacredGeometrySize}
+                    color={sacredGeometryColor}
+                    strokeWidth={sacredGeometryStrokeWidth}
+                    animated
+                    pulse={isPlaying && !isPaused}
+                    frequency={typeof session?.frequency === 'number' ? session.frequency : parseInt(String(session?.frequency || '440'), 10) || 440}
+                    isActive={sacredGeometryType === "circleOfLife" ? isPlaying : undefined}
+                    opacity={sacredGeometryOpacity}
+                  />
+                </View>
+              </LinearGradient>
             </Animated.View>
           </View>
 
-          <View style={styles.breathingGuide}>
-            <Animated.View
-              style={[
-                styles.breathIndicator,
-                {
-                  transform: [{ scale: breathIndicatorScale }],
-                  opacity: breathIndicatorOpacity,
-                },
-              ]}
-            />
-            <Text style={styles.breathText}>
-              {breathingPhase === 'in' ? "Breathe In" : "Breathe Out"}
+          {/* Play/Pause button */}
+          <TouchableOpacity
+            onPress={handlePlayPause}
+            style={styles.playButton}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={["rgba(255,255,255,0.2)", "rgba(255,255,255,0.05)"]}
+              style={styles.playButtonGradient}
+            >
+              {isPlaying ? (
+                <Pause size={32} color="#fff" />
+              ) : (
+                <Play size={32} color="#fff" style={styles.playIcon} />
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Session info */}
+          <View style={styles.sessionInfo}>
+            <Text style={styles.sessionTitle}>{session.title}</Text>
+            <Text style={styles.sessionDescription}>{session.description}</Text>
+          </View>
+
+          {/* Expandable controls */}
+          <TouchableOpacity 
+            style={styles.expandButton}
+            onPress={() => setIsExpanded(!isExpanded)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.expandButtonContent}>
+              <Text style={styles.expandButtonText}>Frequency intensity</Text>
+              <Animated.View
+                style={[styles.chevronRotate, {
+                  transform: [{
+                    rotate: expandAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '180deg'],
+                    })
+                  }]
+                }]}
+              >
+                <ChevronDown size={20} color="rgba(255,255,255,0.6)" />
+              </Animated.View>
+            </View>
+          </TouchableOpacity>
+
+          <Animated.View style={[styles.expandedContent, { height: expandHeight }]}>
+            {/* Frequency intensity selector */}
+            <View style={styles.controlSection}>
+              <Text style={styles.controlLabel}>Frequency intensity</Text>
+              <View style={styles.intensitySelector}>
+                {['Off', 'Low', 'Normal', 'High'].map((level) => (
+                  <TouchableOpacity
+                    key={level}
+                    style={[
+                      styles.intensityOption,
+                      frequencyIntensity === level && styles.intensityOptionActive,
+                    ]}
+                    onPress={() => setFrequencyIntensity(level as typeof frequencyIntensity)}
+                  >
+                    <Text style={[
+                      styles.intensityText,
+                      frequencyIntensity === level && styles.intensityTextActive,
+                    ]}>
+                      {level}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Beat mode selector */}
+            <View style={styles.controlSection}>
+              <View style={styles.beatModeHeader}>
+                <Text style={styles.controlLabel}>Beat mode</Text>
+                <Radio size={16} color="rgba(255,255,255,0.6)" />
+              </View>
+              <View style={styles.beatModeSelector}>
+                {['Binaural', 'Isochronic'].map((mode) => (
+                  <TouchableOpacity
+                    key={mode}
+                    style={[
+                      styles.beatModeOption,
+                      beatMode === mode && styles.beatModeOptionActive,
+                    ]}
+                    onPress={() => setBeatMode(mode as typeof beatMode)}
+                  >
+                    <Text style={[
+                      styles.beatModeText,
+                      beatMode === mode && styles.beatModeTextActive,
+                    ]}>
+                      {mode}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.beatModeHint}>
+                Recommended. Best with headphones.
+              </Text>
+            </View>
+
+            {/* Session details */}
+            <View style={styles.detailsSection}>
+              <Text style={styles.detailsTitle}>{session.frequency} Hz Gamma brainwaves</Text>
+              <Text style={styles.detailsText}>
+                The beat frequency in this session induces Gamma waves in the brain which are associated 
+                with heightened perception, problem solving, and conscious awareness.
+              </Text>
+            </View>
+          </Animated.View>
+
+          {/* About section */}
+          <View style={styles.aboutSection}>
+            <Text style={styles.aboutTitle}>About this soundscape</Text>
+            <Text style={styles.aboutText}>
+              Embark on a musical drive towards the limitless horizon. The rhythmic dance of synths inspires 
+              purpose and determination, accompanied by the embrace of tranquil harmonies. Gamma beats 
+              seamlessly integrate, sharpening your focus, as you navigate the winding roads of your objectives 
+              with clarity and motivation.
             </Text>
           </View>
 
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progress}%` }]} />
-            </View>
-            <View style={styles.timeContainer}>
-              <Text style={styles.timeText}>{formatTime(timeElapsed)}</Text>
-              <Text style={styles.timeText}>
-                {formatTime(session.duration * 60)}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.controls}>
-            <TouchableOpacity
-              onPress={handlePlayPause}
-              style={styles.playButton}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
-                style={styles.playButtonGradient}
-              >
-                {isPlaying ? (
-                  <Pause size={40} color="#fff" />
-                ) : (
-                  <Play size={40} color="#fff" style={styles.playIcon} />
-                )}
-              </LinearGradient>
+          {/* Bottom controls */}
+          <View style={styles.bottomControls}>
+            <TouchableOpacity style={styles.bottomButton}>
+              <Timer size={20} color="rgba(255,255,255,0.6)" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.bottomButton}>
+              <Layers size={20} color="rgba(255,255,255,0.6)" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.bottomButton}>
+              <Radio size={20} color="rgba(255,255,255,0.6)" />
             </TouchableOpacity>
           </View>
-
-          <View style={styles.infoCards}>
-            <View style={styles.infoCard}>
-              <Animated.View style={[styles.iconContainer, { transform: [{ scale: heartScale }] }]}>
-                <Heart size={20} color="#fff" />
-              </Animated.View>
-              <Text style={styles.infoText}>Reduces Stress</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <Animated.View style={[styles.iconContainer, { transform: [{ rotate: activityRotation }] }]}>
-                <Activity size={20} color="#fff" />
-              </Animated.View>
-              <Text style={styles.infoText}>Balances Energy</Text>
-            </View>
-            <View style={styles.infoCard}>
-              <Animated.View style={[styles.iconContainer, { transform: [{ scale: volumeScale }] }]}>
-                <Volume2 size={20} color="#fff" />
-              </Animated.View>
-              <Text style={styles.infoText}>Binaural Beats</Text>
-            </View>
-          </View>
-        </View>
-      </SafeAreaView>
+        </SafeAreaView>
+      </ScrollView>
       
       {/* Social Share Modal */}
       {shareData && (
@@ -575,250 +678,142 @@ export default function SessionScreen() {
           onClose={() => {
             setShareModalVisible(false);
             setShareData(null);
-            // Navigate to home after sharing
             router.replace("/home");
           }}
           shareType={shareData.type}
           data={shareData}
         />
       )}
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   safeArea: {
     flex: 1,
   },
+  roadContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '40%',
+    overflow: 'hidden',
+  },
+  road: {
+    position: 'absolute',
+    bottom: 0,
+    left: '35%',
+    right: '35%',
+    height: '100%',
+    alignItems: 'center',
+  },
+  roadLine: {
+    width: 4,
+    height: 40,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    marginVertical: 20,
+  },
+  mountains: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 200,
+    backgroundColor: 'rgba(30,30,30,0.5)',
+    borderTopLeftRadius: 100,
+    borderTopRightRadius: 100,
+  },
   header: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 10,
+    paddingBottom: 20,
   },
-  closeButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.2)",
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: 30,
+  headerActions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  orbContainer: {
+    height: 400,
     alignItems: "center",
     justifyContent: "center",
+    marginVertical: 20,
   },
-  sessionTitle: {
-    fontSize: 28,
-    fontWeight: "bold" as const,
-    color: "#fff",
-    marginBottom: 8,
-    textAlign: "center",
+  particle: {
+    position: 'absolute',
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: 'rgba(255,255,255,0.8)',
   },
-  frequency: {
-    fontSize: 18,
-    color: "rgba(255,255,255,0.8)",
-    marginBottom: 40,
+  orbGlow: {
+    position: 'absolute',
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
-  visualizer: {
-    width: 300,
-    height: 300,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 40,
-  },
-  geometryContainer: {
-    position: "absolute",
-    width: 300,
-    height: 300,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mandalaOuter: {
-    position: "absolute",
+  orb: {
     width: 280,
     height: 280,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mandalaLine: {
-    position: "absolute",
-    width: 3,
-    height: 140,
-    backgroundColor: "rgba(255,255,255,0.7)",
-    top: 0,
-    borderRadius: 1.5,
-    shadowColor: "#fff",
+    borderRadius: 140,
+    overflow: 'hidden',
+    elevation: 10,
+    shadowColor: '#fff',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
   },
-  outerRing: {
-    position: "absolute",
-    width: 240,
-    height: 240,
-    alignItems: "center",
-    justifyContent: "center",
+  orbGradient: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  ringDot: {
-    position: "absolute",
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "rgba(255,255,255,0.8)",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 6,
+  orbContent: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
   },
-  hexagonContainer: {
-    position: "absolute",
-    width: 160,
-    height: 160,
-    alignItems: "center",
-    justifyContent: "center",
+  frequencyText: {
+    fontSize: 48,
+    fontWeight: '300' as const,
+    color: '#fff',
+    marginBottom: 5,
   },
-  hexagonSide: {
-    position: "absolute",
-    width: 3,
-    height: 80,
-    backgroundColor: "rgba(255,255,255,0.6)",
-    top: 0,
-    borderRadius: 1.5,
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 3,
+  frequencyLabel: {
+    fontSize: 24,
+    fontWeight: '400' as const,
+    color: 'rgba(255,255,255,0.9)',
   },
-  flowerContainer: {
-    position: "absolute",
-    width: 120,
-    height: 120,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  flowerCircle: {
-    position: "absolute",
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.7)",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 4,
-  },
-  spiralContainer: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  spiralDot: {
-    position: "absolute",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 5,
-  },
-  triangleContainer: {
-    position: "absolute",
-    width: 80,
-    height: 80,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  innerTriangle: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    borderLeftWidth: 12,
-    borderRightWidth: 12,
-    borderBottomWidth: 20,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "rgba(255,255,255,0.5)",
-    top: -10,
-  },
-  breathGeometry: {
-    position: "absolute",
-    width: 100,
-    height: 100,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  breathTriangle: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    borderLeftWidth: 15,
-    borderRightWidth: 15,
-    borderBottomWidth: 25,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "rgba(255,255,255,0.4)",
-    top: -12.5,
-  },
-
-  breathingGuide: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  breathIndicator: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.3)",
-    marginBottom: 10,
-  },
-  breathText: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.9)",
-    fontWeight: "600" as const,
-  },
-  progressContainer: {
-    width: "100%",
-    marginBottom: 40,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 3,
-    overflow: "hidden",
-    marginBottom: 10,
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 3,
-  },
-  timeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  timeText: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 14,
-  },
-  controls: {
-    marginBottom: 40,
+  geometryWrapper: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   playButton: {
-    width: 80,
-    height: 80,
+    alignSelf: 'center',
+    marginVertical: 30,
   },
   playButtonGradient: {
     width: 80,
@@ -827,214 +822,165 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderColor: "rgba(255,255,255,0.2)",
   },
-  infoCards: {
-    flexDirection: "row",
-    gap: 15,
+  playIcon: {
+    marginLeft: 4,
   },
-  infoCard: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  sessionInfo: {
+    paddingHorizontal: 30,
+    marginBottom: 30,
   },
-  infoText: {
-    color: "#fff",
-    fontSize: 12,
+  sessionTitle: {
+    fontSize: 28,
     fontWeight: "600" as const,
+    color: "#fff",
+    marginBottom: 10,
+  },
+  sessionDescription: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.7)",
+    lineHeight: 24,
+  },
+  expandButton: {
+    marginHorizontal: 30,
+    marginBottom: 10,
+  },
+  expandButtonContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  expandButtonText: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  expandedContent: {
+    overflow: 'hidden',
+    marginHorizontal: 30,
+  },
+  controlSection: {
+    marginVertical: 20,
+  },
+  controlLabel: {
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: '#fff',
+    marginBottom: 15,
+  },
+  intensitySelector: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+    padding: 4,
+  },
+  intensityOption: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  intensityOptionActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  intensityText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  intensityTextActive: {
+    color: '#fff',
+    fontWeight: '600' as const,
+  },
+  beatModeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 15,
+  },
+  beatModeSelector: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  beatModeOption: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  beatModeOptionActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  beatModeText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  beatModeTextActive: {
+    color: '#fff',
+    fontWeight: '600' as const,
+  },
+  beatModeHint: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 10,
+  },
+  detailsSection: {
+    marginVertical: 20,
+    padding: 20,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+  },
+  detailsTitle: {
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: '#fff',
+    marginBottom: 10,
+  },
+  detailsText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 22,
+  },
+  aboutSection: {
+    paddingHorizontal: 30,
+    marginVertical: 30,
+  },
+  aboutTitle: {
+    fontSize: 20,
+    fontWeight: '600' as const,
+    color: '#fff',
+    marginBottom: 15,
+  },
+  aboutText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 22,
+  },
+  bottomControls: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 30,
+    paddingVertical: 30,
+  },
+  bottomButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   errorText: {
     color: "#fff",
     fontSize: 18,
     textAlign: "center",
+    marginTop: 100,
   },
-  starContainer: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  starPoint: {
-    position: "absolute",
-    width: 6,
-    height: 20,
-    borderRadius: 3,
-    backgroundColor: "rgba(255,255,255,0.8)",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-  },
-  lotusLayer: {
-    position: "absolute",
-    width: 180,
-    height: 180,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  lotusPetal: {
-    position: "absolute",
-    width: 8,
-    height: 25,
-    borderRadius: 4,
-    backgroundColor: "rgba(255,255,255,0.7)",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 3,
-  },
-  merkabaContainer: {
-    position: "absolute",
-    width: 150,
-    height: 150,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  merkabaTriangle: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    borderLeftWidth: 18,
-    borderRightWidth: 18,
-    borderBottomWidth: 30,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "rgba(255,255,255,0.6)",
-    top: -15,
-  },
-  // Sri Yantra Sacred Geometry Styles
-  sriYantraBindu: {
-    position: "absolute",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    zIndex: 10,
-  },
-  sriYantraContainer: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sriYantraTriangleUp: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    borderLeftWidth: 20,
-    borderRightWidth: 20,
-    borderBottomWidth: 35,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "rgba(168,237,234,0.8)",
-    top: -17.5,
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 4,
-  },
-  sriYantraTriangleDown: {
-    position: "absolute",
-    width: 0,
-    height: 0,
-    borderLeftWidth: 16,
-    borderRightWidth: 16,
-    borderTopWidth: 28,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderTopColor: "rgba(254,214,227,0.7)",
-    bottom: -14,
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 3,
-  },
-  sriYantraLotus: {
-    position: "absolute",
-    width: 240,
-    height: 240,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sriYantraPetal: {
-    position: "absolute",
-    width: 6,
-    height: 30,
-    borderRadius: 3,
-    backgroundColor: "rgba(255,255,255,0.6)",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 2,
-  },
-  sriYantraSquare: {
-    position: "absolute",
-    width: 280,
-    height: 280,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.4)",
-    backgroundColor: "transparent",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-  },
-  waveOverlay: {
-    position: "absolute",
-    width: 300,
-    height: 300,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  waveElement: {
-    position: "absolute",
-    width: 3,
-    borderRadius: 1.5,
-    shadowColor: "#ffffff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 3,
-  },
-  pauseOverlay: {
-    position: "absolute",
-    width: 300,
-    height: 300,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.3)",
-    borderRadius: 150,
-  },
-  pauseContent: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pauseTitle: {
-    color: "#ffffff",
-    fontSize: 18,
-    fontWeight: "bold" as const,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  pauseSubtitle: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  playIcon: {
-    marginLeft: 4,
-  },
-  iconContainer: {
-    alignItems: "center",
-    justifyContent: "center",
+  chevronRotate: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
