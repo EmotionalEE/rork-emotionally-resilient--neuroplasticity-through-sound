@@ -580,7 +580,7 @@ export default function SessionScreen() {
             </View>
           </TouchableOpacity>
 
-          <Animated.View style={[styles.expandedContent, { height: expandHeight }]}>
+          <Animated.View style={[styles.expandedContent, { maxHeight: expandHeight, overflow: 'hidden' }]}>
             {/* Frequency intensity selector */}
             <View style={styles.controlSection}>
               <Text style={styles.controlLabel}>Frequency intensity</Text>
