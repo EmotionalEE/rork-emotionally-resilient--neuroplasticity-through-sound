@@ -354,15 +354,47 @@ export const SriYantra: React.FC<SacredGeometryProps> = ({
   color = "rgba(255,255,255,0.6)",
   strokeWidth = 1,
 }) => {
+  const viewBoxSize = 100;
+  const center = viewBoxSize / 2;
+  const outerRadius = 45;
+  const sqrtThreeOverTwo = Math.sqrt(3) / 2;
+
+  const formatPoints = (points: { x: number; y: number }[]) =>
+    points.map(({ x, y }) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+
+  const createTrianglePoints = (orientation: "up" | "down", scale: number) => {
+    const radius = outerRadius * scale;
+
+    if (orientation === "up") {
+      return formatPoints([
+        { x: center, y: center - radius },
+        { x: center + sqrtThreeOverTwo * radius, y: center + radius / 2 },
+        { x: center - sqrtThreeOverTwo * radius, y: center + radius / 2 },
+      ]);
+    }
+
+    return formatPoints([
+      { x: center, y: center + radius },
+      { x: center + sqrtThreeOverTwo * radius, y: center - radius / 2 },
+      { x: center - sqrtThreeOverTwo * radius, y: center - radius / 2 },
+    ]);
+  };
+
+  const upwardTriangles = [1, 0.82, 0.64, 0.4];
+  const downwardTriangles = [0.94, 0.74, 0.56, 0.36, 0.18];
+
   return (
-    <Svg width={size} height={size} viewBox="0 0 100 100">
+    <Svg width={size} height={size} viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}>
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
-        <Circle cx="50" cy="50" r="45" />
-        {/* Interlocking triangles */}
-        <Polygon points="50,20 85,80 15,80" />
-        <Polygon points="50,80 85,20 15,20" />
-        <Polygon points="25,40 75,40 50,85" />
-        <Polygon points="75,60 25,60 50,15" />
+        <Circle cx={center} cy={center} r={outerRadius} />
+        {/* Upward-pointing triangles */}
+        {upwardTriangles.map((scale, index) => (
+          <Polygon key={`up-${index}`} points={createTrianglePoints("up", scale)} />
+        ))}
+        {/* Downward-pointing triangles */}
+        {downwardTriangles.map((scale, index) => (
+          <Polygon key={`down-${index}`} points={createTrianglePoints("down", scale)} />
+        ))}
       </G>
     </Svg>
   );
