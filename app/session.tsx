@@ -17,7 +17,6 @@ import {
   Pause,
   X,
   Volume2,
-  Brain,
   Heart,
   Activity,
 } from "lucide-react-native";
@@ -700,8 +699,6 @@ export default function SessionScreen() {
   }, [sessionId, getSessionMusic]);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const waveAnim = useRef(new Animated.Value(0)).current;
   const breathAnim = useRef(new Animated.Value(0)).current;
   const [breathingPhase, setBreathingPhase] = useState<'in' | 'out'>('in');
   const [shareModalVisible, setShareModalVisible] = useState<boolean>(false);
@@ -724,24 +721,13 @@ export default function SessionScreen() {
   
   // Initialize animated values with proper numbers
   useEffect(() => {
-    pulseAnim.setValue(1);
-    waveAnim.setValue(0);
     breathAnim.setValue(0);
     heartAnim.setValue(1);
     activityAnim.setValue(0);
     volumeAnim.setValue(1);
-  }, [pulseAnim, waveAnim, breathAnim, heartAnim, activityAnim, volumeAnim]);
+  }, [breathAnim, heartAnim, activityAnim, volumeAnim]);
 
-  // Create interpolations for main animations
-  const pulseOpacity = pulseAnim.interpolate({
-    inputRange: [1, 1.2],
-    outputRange: [0.1, 0.3],
-  });
 
-  const waveOpacity = waveAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.2, 0.4],
-  });
 
   // Breathing indicator animation
   const breathIndicatorScale = breathAnim.interpolate({
@@ -810,29 +796,7 @@ export default function SessionScreen() {
 
     // Initialize animations
 
-    // Start animations
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.2,
-          duration: 2000,
-          useNativeDriver: false,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: false,
-        }),
-      ])
-    ).start();
 
-    Animated.loop(
-      Animated.timing(waveAnim, {
-        toValue: 1,
-        duration: 3000,
-        useNativeDriver: false,
-      })
-    ).start();
 
     // Heart beating animation
     Animated.loop(
@@ -912,7 +876,7 @@ export default function SessionScreen() {
       clearInterval(breathTimer);
       backHandler.remove();
     };
-  }, [session, pulseAnim, waveAnim, breathAnim, stopSound, handleClose]);
+  }, [session, breathAnim, stopSound, handleClose]);
 
   const handleShare = useCallback((type: 'session') => {
     if (!session) return;
@@ -1034,26 +998,6 @@ export default function SessionScreen() {
           <View style={styles.visualizer}>
             {/* Sacred Geometry Background */}
             <SacredGeometry isPlaying={isPlaying} breathingPhase={breathingPhase} geometry={session.geometry} />
-            
-            <Animated.View
-              style={[
-                styles.pulseCircle,
-                {
-                  opacity: pulseOpacity,
-                },
-              ]}
-            />
-            <Animated.View
-              style={[
-                styles.waveCircle,
-                {
-                  opacity: waveOpacity,
-                },
-              ]}
-            />
-            <View style={styles.centerCircle}>
-              <Brain size={48} color="#fff" />
-            </View>
           </View>
 
           <View style={styles.breathingGuide}>
@@ -1327,31 +1271,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(255,255,255,0.4)",
     top: -12.5,
   },
-  pulseCircle: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: "#fff",
-  },
-  waveCircle: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  centerCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.4)",
-  },
+
   breathingGuide: {
     alignItems: "center",
     marginBottom: 30,
