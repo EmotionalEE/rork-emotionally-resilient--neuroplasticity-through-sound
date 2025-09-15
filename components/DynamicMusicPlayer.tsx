@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Play, Pause, Volume2, Waves } from 'lucide-react-native';
 import { useDynamicMusic } from '@/providers/DynamicMusicProvider';
@@ -22,10 +22,123 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
     currentSessionId
   } = useDynamicMusic();
   
+  // Animation refs for wave and pause effects
+  const waveAnims = useRef(Array.from({ length: 12 }, () => new Animated.Value(0))).current;
+  const pauseAnim = useRef(new Animated.Value(1)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const breathAnim = useRef(new Animated.Value(0)).current;
+  
   // Find current session info
   const currentSession = sessions.find(s => s.id === (currentSessionId || sessionId));
   const displaySessionId = currentSessionId || sessionId || '396hz-release';
   const sessionTitle = currentSession?.title || 'Dynamic Healing Music';
+  
+  // Wave and pause animations synced with music
+  useEffect(() => {
+    const waveLoops: Animated.CompositeAnimation[] = [];
+    let pulseLoop: Animated.CompositeAnimation | null = null;
+    let breathLoop: Animated.CompositeAnimation | null = null;
+    
+    if (isPlaying) {
+      // Animate pause indicator out
+      Animated.timing(pauseAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
+      // Start wave animations with different frequencies
+      waveAnims.forEach((anim, index) => {
+        const baseFreq = currentLayers.length > 0 ? currentLayers[0].frequency : 440;
+        const waveFreq = Math.max(500, 2000 - (baseFreq * 2) + (index * 100));
+        
+        const loop = Animated.loop(
+          Animated.sequence([
+            Animated.timing(anim, {
+              toValue: 1,
+              duration: waveFreq,
+              useNativeDriver: true,
+            }),
+            Animated.timing(anim, {
+              toValue: 0,
+              duration: waveFreq,
+              useNativeDriver: true,
+            }),
+          ])
+        );
+        loop.start();
+        waveLoops.push(loop);
+      });
+      
+      // Pulse animation for active state
+      pulseLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.1,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 0.9,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulseLoop.start();
+      
+      // Breathing rhythm animation
+      breathLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(breathAnim, {
+            toValue: 1,
+            duration: 4000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(breathAnim, {
+            toValue: 0,
+            duration: 4000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      breathLoop.start();
+    } else {
+      // Animate pause indicator in
+      Animated.timing(pauseAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
+      // Reset all animations
+      waveAnims.forEach(anim => {
+        Animated.timing(anim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      });
+      
+      Animated.timing(pulseAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
+      Animated.timing(breathAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }
+    
+    return () => {
+      waveLoops.forEach(loop => loop.stop());
+      pulseLoop?.stop();
+      breathLoop?.stop();
+    };
+  }, [isPlaying, currentLayers, waveAnims, pauseAnim, pulseAnim, breathAnim]);
 
   if (Platform.OS !== 'web') {
     return (
@@ -58,40 +171,74 @@ export default function DynamicMusicPlayer({ sessionId, style }: DynamicMusicPla
         </Text>
         
         <View style={styles.visualizer}>
-          {currentLayers.map((layer, index) => (
-            <View
-              key={layer.id}
-              style={[
-                styles.waveBar,
-                {
-                  height: Math.max(20, layer.volume * intensity * 100),
-                  backgroundColor: `hsl(${(layer.frequency / 10) % 360}, 70%, 60%)`,
-                  opacity: 0.7 + (layer.volume * 0.3)
-                }
-              ]}
-            />
-          ))}
-          {!isPlaying && (
-            <View style={styles.placeholderWaves}>
-              <Waves size={40} color="#ffffff40" />
-              <Text style={styles.placeholderText}>
-                Your unique healing journey will visualize here
-              </Text>
-            </View>
-          )}
+          {/* Animated wave bars synced with music */}
+          {waveAnims.map((anim, index) => {
+            const layer = currentLayers[index % currentLayers.length];
+            const waveHeight = anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, Math.max(60, intensity * 120)],
+            });
+            
+            const waveOpacity = anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.3, 0.9],
+            });
+            
+            const waveColor = layer 
+              ? `hsl(${(layer.frequency / 10) % 360}, 70%, 60%)`
+              : `hsl(${(index * 30) % 360}, 70%, 60%)`;
+            
+            return (
+              <Animated.View
+                key={`wave-${index}-${currentSessionId || 'default'}`}
+                style={[
+                  styles.waveBar,
+                  styles.waveBarAnimated,
+                  {
+                    height: waveHeight,
+                    backgroundColor: waveColor,
+                    opacity: waveOpacity,
+                  }
+                ]}
+              />
+            );
+          })}
+          
+          {/* Pause indicator with breathing animation */}
+          <Animated.View 
+            style={[
+              styles.pauseIndicator,
+              {
+                opacity: pauseAnim,
+                transform: [{
+                  scale: breathAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.8, 1.2],
+                  })
+                }]
+              }
+            ]}
+          >
+            <Waves size={40} color="#ffffff60" />
+            <Text style={styles.pauseText}>
+              {isPlaying ? '' : 'Ready for your healing journey'}
+            </Text>
+          </Animated.View>
         </View>
 
         <View style={styles.controls}>
-          <TouchableOpacity
-            style={[styles.playButton, isPlaying && styles.playButtonActive]}
-            onPress={isPlaying ? stopMusic : () => startSession(displaySessionId)}
-          >
-            {isPlaying ? (
-              <Pause size={24} color="#ffffff" />
-            ) : (
-              <Play size={24} color="#ffffff" />
-            )}
-          </TouchableOpacity>
+          <Animated.View style={[styles.pulseContainer, { transform: [{ scale: pulseAnim }] }]}>
+            <TouchableOpacity
+              style={[styles.playButton, isPlaying && styles.playButtonActive]}
+              onPress={isPlaying ? stopMusic : () => startSession(displaySessionId)}
+            >
+              {isPlaying ? (
+                <Pause size={24} color="#ffffff" />
+              ) : (
+                <Play size={24} color="#ffffff" />
+              )}
+            </TouchableOpacity>
+          </Animated.View>
 
           <View style={styles.intensityControl}>
             <Text style={styles.intensityLabel}>Intensity</Text>
@@ -195,14 +342,17 @@ const styles = StyleSheet.create({
     width: 4,
     borderRadius: 2,
     minHeight: 20,
+    marginHorizontal: 1,
   },
-  placeholderWaves: {
-    flex: 1,
+  pauseIndicator: {
+    position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    height: '100%',
   },
-  placeholderText: {
-    color: '#ffffff40',
+  pauseText: {
+    color: '#ffffff60',
     fontSize: 12,
     marginTop: 10,
     textAlign: 'center',
@@ -289,5 +439,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     marginTop: 10,
+  },
+  pulseContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waveBarAnimated: {
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
   },
 });

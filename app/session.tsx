@@ -76,6 +76,10 @@ export default function SessionScreen() {
     };
   } | null>(null);
   
+  // Wave animation refs for music sync
+  const waveAnims = useRef(Array.from({ length: 8 }, () => new Animated.Value(0))).current;
+  const pauseOverlayAnim = useRef(new Animated.Value(0)).current;
+  
   // Icon animation values
   const heartAnim = useRef(new Animated.Value(1)).current;
   const activityAnim = useRef(new Animated.Value(0)).current;
@@ -87,7 +91,68 @@ export default function SessionScreen() {
     heartAnim.setValue(1);
     activityAnim.setValue(0);
     volumeAnim.setValue(1);
-  }, [breathAnim, heartAnim, activityAnim, volumeAnim]);
+    pauseOverlayAnim.setValue(isPaused ? 1 : 0);
+    waveAnims.forEach(anim => anim.setValue(0));
+  }, [breathAnim, heartAnim, activityAnim, volumeAnim, pauseOverlayAnim, waveAnims, isPaused]);
+  
+  // Wave animations synced with music state
+  useEffect(() => {
+    const waveLoops: Animated.CompositeAnimation[] = [];
+    
+    if (isPlaying && !isPaused) {
+      // Animate pause overlay out
+      Animated.timing(pauseOverlayAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+      
+      // Start wave animations with session frequency
+      waveAnims.forEach((anim, index) => {
+        const baseFreq = typeof session?.frequency === 'number' ? session.frequency : parseInt(String(session?.frequency || '440'), 10) || 440;
+        const waveFreq = Math.max(800, 3000 - (baseFreq * 3) + (index * 150));
+        
+        const loop = Animated.loop(
+          Animated.sequence([
+            Animated.timing(anim, {
+              toValue: 1,
+              duration: waveFreq,
+              useNativeDriver: true,
+            }),
+            Animated.timing(anim, {
+              toValue: 0,
+              duration: waveFreq,
+              useNativeDriver: true,
+            }),
+          ])
+        );
+        
+        // Stagger the start times
+        setTimeout(() => loop.start(), index * 200);
+        waveLoops.push(loop);
+      });
+    } else {
+      // Animate pause overlay in
+      Animated.timing(pauseOverlayAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
+      // Stop wave animations
+      waveAnims.forEach(anim => {
+        Animated.timing(anim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }).start();
+      });
+    }
+    
+    return () => {
+      waveLoops.forEach(loop => loop.stop());
+    };
+  }, [isPlaying, isPaused, session?.frequency, waveAnims, pauseOverlayAnim]);
 
 
 
@@ -380,6 +445,56 @@ export default function SessionScreen() {
               isActive={sacredGeometryType === "circleOfLife" ? isPlaying : undefined}
               opacity={sacredGeometryOpacity}
             />
+            
+            {/* Wave visualization overlay */}
+            <View style={styles.waveOverlay}>
+              {waveAnims.map((anim, index) => {
+                const waveHeight = anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [10, 40],
+                });
+                
+                const waveOpacity = anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.2, 0.8],
+                });
+                
+                const angle = (index * 45) * (Math.PI / 180);
+                const radius = 120;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                const waveStyle = {
+                  left: 150 + x,
+                  top: 150 + y,
+                  height: waveHeight,
+                  opacity: waveOpacity,
+                  backgroundColor: session?.gradient?.[0] || '#ffffff',
+                };
+                
+                return (
+                  <Animated.View
+                    key={`session-wave-${index}`}
+                    style={[styles.waveElement, waveStyle]}
+                  />
+                );
+              })}
+            </View>
+            
+            {/* Pause overlay */}
+            <Animated.View 
+              style={[
+                styles.pauseOverlay,
+                {
+                  opacity: pauseOverlayAnim,
+                }
+              ]}
+            >
+              <View style={styles.pauseContent}>
+                <Text style={styles.pauseTitle}>Session Paused</Text>
+                <Text style={styles.pauseSubtitle}>Tap play to continue your journey</Text>
+              </View>
+            </Animated.View>
           </View>
 
           <View style={styles.breathingGuide}>
@@ -422,7 +537,7 @@ export default function SessionScreen() {
                 {isPlaying ? (
                   <Pause size={40} color="#fff" />
                 ) : (
-                  <Play size={40} color="#fff" style={{ marginLeft: 4 }} />
+                  <Play size={40} color="#fff" style={styles.playIcon} />
                 )}
               </LinearGradient>
             </TouchableOpacity>
@@ -430,19 +545,19 @@ export default function SessionScreen() {
 
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
-              <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+              <Animated.View style={[styles.iconContainer, { transform: [{ scale: heartScale }] }]}>
                 <Heart size={20} color="#fff" />
               </Animated.View>
               <Text style={styles.infoText}>Reduces Stress</Text>
             </View>
             <View style={styles.infoCard}>
-              <Animated.View style={{ transform: [{ rotate: activityRotation }] }}>
+              <Animated.View style={[styles.iconContainer, { transform: [{ rotate: activityRotation }] }]}>
                 <Activity size={20} color="#fff" />
               </Animated.View>
               <Text style={styles.infoText}>Balances Energy</Text>
             </View>
             <View style={styles.infoCard}>
-              <Animated.View style={{ transform: [{ scale: volumeScale }] }}>
+              <Animated.View style={[styles.iconContainer, { transform: [{ scale: volumeScale }] }]}>
                 <Volume2 size={20} color="#fff" />
               </Animated.View>
               <Text style={styles.infoText}>Binaural Beats</Text>
@@ -871,5 +986,53 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
+  },
+  waveOverlay: {
+    position: "absolute",
+    width: 300,
+    height: 300,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  waveElement: {
+    position: "absolute",
+    width: 3,
+    borderRadius: 1.5,
+    shadowColor: "#ffffff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+  },
+  pauseOverlay: {
+    position: "absolute",
+    width: 300,
+    height: 300,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 150,
+  },
+  pauseContent: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pauseTitle: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "bold" as const,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  pauseSubtitle: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  playIcon: {
+    marginLeft: 4,
+  },
+  iconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
