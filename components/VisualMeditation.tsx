@@ -7,6 +7,7 @@ interface VisualMeditationProps {
   frequency: number;
   isPlaying: boolean;
   emotionGradient: string[];
+  showSecondaryLayers?: boolean;
 }
 
 function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; emotionGradient: string[] }) {
@@ -63,7 +64,7 @@ function FrequencyRings({ isPlaying, emotionGradient }: { isPlaying: boolean; em
   );
 }
 
-export default function VisualMeditation({ frequency, isPlaying, emotionGradient }: VisualMeditationProps) {
+export default function VisualMeditation({ frequency, isPlaying, emotionGradient, showSecondaryLayers = false }: VisualMeditationProps) {
   const [currentGeometry, setCurrentGeometry] = useState<'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral'>('flowerOfLife');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const particleAnims = useRef(Array.from({ length: 12 }, () => new Animated.Value(0))).current;
@@ -248,25 +249,29 @@ export default function VisualMeditation({ frequency, isPlaying, emotionGradient
       </Animated.View>
 
       {/* Secondary geometry layers */}
-      <View style={styles.secondaryGeometry}>
-        <SacredGeometry
-          type="vesicaPiscis"
-          size={280}
-          color="#ffffff"
-          animated={true}
-          opacity={0.2}
-        />
-      </View>
+      {showSecondaryLayers && (
+        <View style={styles.secondaryGeometry}>
+          <SacredGeometry
+            type="vesicaPiscis"
+            size={280}
+            color="#ffffff"
+            animated={true}
+            opacity={0.2}
+          />
+        </View>
+      )}
 
-      <View style={styles.tertiaryGeometry}>
-        <SacredGeometry
-          type="flowerOfLife"
-          size={350}
-          color="#ffffff"
-          animated={true}
-          opacity={0.1}
-        />
-      </View>
+      {showSecondaryLayers && (
+        <View style={styles.tertiaryGeometry}>
+          <SacredGeometry
+            type="flowerOfLife"
+            size={350}
+            color="#ffffff"
+            animated={true}
+            opacity={0.1}
+          />
+        </View>
+      )}
 
       {/* Frequency visualization rings */}
       <FrequencyRings isPlaying={isPlaying} emotionGradient={emotionGradient} />
