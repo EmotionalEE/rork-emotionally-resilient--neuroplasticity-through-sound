@@ -44,11 +44,11 @@ export default function RootLayout() {
           <AuthProvider>
             <PaymentProvider>
               <UserProgressProvider>
-                <CustomMusicProvider>
-                  <AudioProvider>
+                <AudioProvider>
+                  <CustomMusicProvider>
                     <RootLayoutNav />
-                  </AudioProvider>
-                </CustomMusicProvider>
+                  </CustomMusicProvider>
+                </AudioProvider>
               </UserProgressProvider>
             </PaymentProvider>
           </AuthProvider>
