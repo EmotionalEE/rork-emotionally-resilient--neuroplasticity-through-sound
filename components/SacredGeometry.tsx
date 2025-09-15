@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, View } from 'react-native';
-import Svg, { Circle, Path, Line, Polygon, G } from 'react-native-svg';
+import React, { useEffect, useRef } from "react";
+import { Animated, View } from "react-native";
+import Svg, { Circle, Path, Line, Polygon, G } from "react-native-svg";
 
 interface SacredGeometryProps {
   size?: number;
@@ -9,10 +9,10 @@ interface SacredGeometryProps {
 }
 
 // Egg of Life
-export const EggOfLife: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const EggOfLife: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -31,83 +31,11 @@ export const EggOfLife: React.FC<SacredGeometryProps> = ({
   );
 };
 
-// Default SacredGeometry wrapper
-interface SacredGeometryWrapperProps extends SacredGeometryProps {
-  type: 'flowerOfLife' | 'metatronsCube' | 'sriYantra' | 'vesicaPiscis' | 'goldenSpiral';
-  animated?: boolean;
-  opacity?: number;
-}
-
-const SacredGeometry: React.FC<SacredGeometryWrapperProps> = ({
-  type,
-  size = 40,
-  color = 'rgba(255,255,255,0.6)',
-  strokeWidth = 1,
-  animated = false,
-  opacity = 1,
-}) => {
-  const rotationAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (animated) {
-      const loop = Animated.loop(
-        Animated.timing(rotationAnim, {
-          toValue: 1,
-          duration: 20000,
-          useNativeDriver: true,
-        })
-      );
-      loop.start();
-      return () => loop.stop();
-    }
-  }, [animated, rotationAnim]);
-
-  const rotation = rotationAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const commonProps = { size, color, strokeWidth };
-
-  let GeometryComponent: React.FC<SacredGeometryProps>;
-  switch (type) {
-    case 'metatronsCube':
-      GeometryComponent = MetatronsCube;
-      break;
-    case 'vesicaPiscis':
-      GeometryComponent = VesicaPiscis;
-      break;
-    case 'sriYantra':
-      GeometryComponent = SriYantra;
-      break;
-    case 'goldenSpiral':
-      GeometryComponent = GoldenSpiral;
-      break;
-    case 'flowerOfLife':
-    default:
-      GeometryComponent = FlowerOfLife;
-  }
-
-  const content = <GeometryComponent {...commonProps} />;
-
-  if (animated) {
-    return (
-      <Animated.View style={{ transform: [{ rotate: rotation }], opacity }}>
-        {content}
-      </Animated.View>
-    );
-  }
-
-  return <View style={{ opacity }}>{content}</View>;
-};
-
-export default SacredGeometry;
-
 // Fruit of Life
-export const FruitOfLife: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const FruitOfLife: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -135,10 +63,10 @@ export const FruitOfLife: React.FC<SacredGeometryProps> = ({
 };
 
 // Metatron's Cube
-export const MetatronsCube: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const MetatronsCube: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -174,10 +102,10 @@ export const MetatronsCube: React.FC<SacredGeometryProps> = ({
 };
 
 // Vesica Piscis
-export const VesicaPiscis: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const VesicaPiscis: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -191,10 +119,10 @@ export const VesicaPiscis: React.FC<SacredGeometryProps> = ({
 };
 
 // Seed of Life
-export const SeedOfLife: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const SeedOfLife: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -214,10 +142,10 @@ export const SeedOfLife: React.FC<SacredGeometryProps> = ({
 };
 
 // Six-Petal Rosette
-export const SixPetalRosette: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const SixPetalRosette: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -236,10 +164,10 @@ export const SixPetalRosette: React.FC<SacredGeometryProps> = ({
 };
 
 // Tree of Life
-export const TreeOfLife: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const TreeOfLife: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -277,10 +205,10 @@ export const TreeOfLife: React.FC<SacredGeometryProps> = ({
 };
 
 // Merkabah (Star Tetrahedron)
-export const Merkabah: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const Merkabah: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -299,10 +227,10 @@ export const Merkabah: React.FC<SacredGeometryProps> = ({
 };
 
 // Flower of Life
-export const FlowerOfLife: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const FlowerOfLife: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -332,10 +260,10 @@ export const FlowerOfLife: React.FC<SacredGeometryProps> = ({
 };
 
 // Cubeoctahedron
-export const Cubeoctahedron: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const Cubeoctahedron: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -363,10 +291,10 @@ export const Cubeoctahedron: React.FC<SacredGeometryProps> = ({
 };
 
 // Vector Equilibrium
-export const VectorEquilibrium: React.FC<SacredGeometryProps> = ({ 
-  size = 40, 
-  color = 'rgba(255,255,255,0.6)', 
-  strokeWidth = 1 
+export const VectorEquilibrium: React.FC<SacredGeometryProps> = ({
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -396,8 +324,8 @@ export const VectorEquilibrium: React.FC<SacredGeometryProps> = ({
 // 64-Tetrahedron Grid (simplified)
 export const TetrahedronGrid: React.FC<SacredGeometryProps> = ({
   size = 40,
-  color = 'rgba(255,255,255,0.6)',
-  strokeWidth = 1
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -414,17 +342,17 @@ export const TetrahedronGrid: React.FC<SacredGeometryProps> = ({
         {/* Inner pattern */}
         <Circle cx="50" cy="50" r="15" />
         <Polygon points="50,40 58,55 42,55" />
-      <Polygon points="50,60 42,45 58,45" />
-    </G>
-  </Svg>
+        <Polygon points="50,60 42,45 58,45" />
+      </G>
+    </Svg>
   );
 };
 
 // Sri Yantra
 export const SriYantra: React.FC<SacredGeometryProps> = ({
   size = 40,
-  color = 'rgba(255,255,255,0.6)',
-  strokeWidth = 1
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -443,8 +371,8 @@ export const SriYantra: React.FC<SacredGeometryProps> = ({
 // Golden Spiral (simplified)
 export const GoldenSpiral: React.FC<SacredGeometryProps> = ({
   size = 40,
-  color = 'rgba(255,255,255,0.6)',
-  strokeWidth = 1
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
 }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
@@ -465,11 +393,13 @@ export const GoldenSpiral: React.FC<SacredGeometryProps> = ({
 };
 
 // Circle of Life - Pulsating breathing circle for sadness transformation
-export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }> = ({
+export const CircleOfLife: React.FC<
+  SacredGeometryProps & { isActive?: boolean }
+> = ({
   size = 200,
-  color = 'rgba(255,255,255,0.8)',
+  color = "rgba(255,255,255,0.8)",
   strokeWidth = 2,
-  isActive = false
+  isActive = false,
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(0.6)).current;
@@ -505,11 +435,11 @@ export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }
               useNativeDriver: true,
             }),
           ]),
-        ])
+        ]),
       );
-      
+
       breathingAnimation.start();
-      
+
       return () => {
         breathingAnimation.stop();
       };
@@ -521,7 +451,7 @@ export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }
   }, [isActive, scaleAnim, opacityAnim]);
 
   return (
-    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ alignItems: "center", justifyContent: "center" }}>
       <Animated.View
         style={{
           transform: [{ scale: scaleAnim }],
@@ -532,28 +462,137 @@ export const CircleOfLife: React.FC<SacredGeometryProps & { isActive?: boolean }
           <G stroke={color} strokeWidth={strokeWidth} fill="none">
             {/* Outer circle - the cycle of life */}
             <Circle cx="100" cy="100" r="80" strokeOpacity="0.8" />
-            
+
             {/* Inner circles representing the eternal cycle */}
             <Circle cx="100" cy="100" r="60" strokeOpacity="0.6" />
             <Circle cx="100" cy="100" r="40" strokeOpacity="0.4" />
-            
+
             {/* Center breathing circle */}
-            <Circle cx="100" cy="100" r="20" strokeOpacity="1" strokeWidth={strokeWidth * 1.5} />
-            
+            <Circle
+              cx="100"
+              cy="100"
+              r="20"
+              strokeOpacity="1"
+              strokeWidth={strokeWidth * 1.5}
+            />
+
             {/* Connecting lines showing the flow of life energy */}
             <Line x1="100" y1="20" x2="100" y2="40" strokeOpacity="0.5" />
             <Line x1="100" y1="160" x2="100" y2="180" strokeOpacity="0.5" />
             <Line x1="20" y1="100" x2="40" y2="100" strokeOpacity="0.5" />
             <Line x1="160" y1="100" x2="180" y2="100" strokeOpacity="0.5" />
-            
+
             {/* Diagonal flow lines */}
             <Line x1="41.4" y1="41.4" x2="58.6" y2="58.6" strokeOpacity="0.3" />
-            <Line x1="158.6" y1="41.4" x2="141.4" y2="58.6" strokeOpacity="0.3" />
-            <Line x1="158.6" y1="158.6" x2="141.4" y2="141.4" strokeOpacity="0.3" />
-            <Line x1="41.4" y1="158.6" x2="58.6" y2="141.4" strokeOpacity="0.3" />
+            <Line
+              x1="158.6"
+              y1="41.4"
+              x2="141.4"
+              y2="58.6"
+              strokeOpacity="0.3"
+            />
+            <Line
+              x1="158.6"
+              y1="158.6"
+              x2="141.4"
+              y2="141.4"
+              strokeOpacity="0.3"
+            />
+            <Line
+              x1="41.4"
+              y1="158.6"
+              x2="58.6"
+              y2="141.4"
+              strokeOpacity="0.3"
+            />
           </G>
         </Svg>
       </Animated.View>
     </View>
   );
 };
+
+// Default SacredGeometry wrapper placed after all individual components
+interface SacredGeometryWrapperProps extends SacredGeometryProps {
+  type:
+    | "flowerOfLife"
+    | "metatronsCube"
+    | "sriYantra"
+    | "vesicaPiscis"
+    | "goldenSpiral"
+    | "circleOfLife";
+  animated?: boolean;
+  opacity?: number;
+  /** Optional flag for CircleOfLife breathing animation */
+  isActive?: boolean;
+}
+
+const SacredGeometry: React.FC<SacredGeometryWrapperProps> = ({
+  type,
+  size = 40,
+  color = "rgba(255,255,255,0.6)",
+  strokeWidth = 1,
+  animated = false,
+  opacity = 1,
+  isActive = false,
+}) => {
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (animated) {
+      const loop = Animated.loop(
+        Animated.timing(rotationAnim, {
+          toValue: 1,
+          duration: 20000,
+          useNativeDriver: true,
+        }),
+      );
+      loop.start();
+      return () => loop.stop();
+    }
+  }, [animated, rotationAnim]);
+
+  const rotation = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  let GeometryComponent: React.FC<any> = FlowerOfLife;
+  let componentProps: any = { size, color, strokeWidth };
+
+  switch (type) {
+    case "metatronsCube":
+      GeometryComponent = MetatronsCube;
+      break;
+    case "vesicaPiscis":
+      GeometryComponent = VesicaPiscis;
+      break;
+    case "sriYantra":
+      GeometryComponent = SriYantra;
+      break;
+    case "goldenSpiral":
+      GeometryComponent = GoldenSpiral;
+      break;
+    case "circleOfLife":
+      GeometryComponent = CircleOfLife;
+      componentProps = { ...componentProps, isActive };
+      break;
+    case "flowerOfLife":
+    default:
+      GeometryComponent = FlowerOfLife;
+  }
+
+  const content = <GeometryComponent {...componentProps} />;
+
+  if (animated) {
+    return (
+      <Animated.View style={{ transform: [{ rotate: rotation }], opacity }}>
+        {content}
+      </Animated.View>
+    );
+  }
+
+  return <View style={{ opacity }}>{content}</View>;
+};
+
+export default SacredGeometry;
