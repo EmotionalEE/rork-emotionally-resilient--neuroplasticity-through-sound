@@ -592,6 +592,10 @@ interface SacredGeometryWrapperProps extends SacredGeometryProps {
   opacity?: number;
   /** Optional flag for CircleOfLife breathing animation */
   isActive?: boolean;
+  /** Enable pulsing animation that syncs with music */
+  pulse?: boolean;
+  /** Frequency for pulse animation (in Hz) */
+  frequency?: number;
 }
 
 const SacredGeometry: React.FC<SacredGeometryWrapperProps> = ({
@@ -602,8 +606,11 @@ const SacredGeometry: React.FC<SacredGeometryWrapperProps> = ({
   animated = false,
   opacity = 1,
   isActive = false,
+  pulse = false,
+  frequency = 440,
 }) => {
   const rotationAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (animated) {
@@ -619,9 +626,44 @@ const SacredGeometry: React.FC<SacredGeometryWrapperProps> = ({
     }
   }, [animated, rotationAnim]);
 
+  useEffect(() => {
+    if (pulse) {
+      // Calculate pulse duration based on frequency
+      // Higher frequency = faster pulse, lower frequency = slower pulse
+      const baseDuration = 2000; // 2 seconds base
+      const pulseDuration = Math.max(800, Math.min(3000, baseDuration - (frequency - 440) * 2));
+      
+      const pulseLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.3,
+            duration: pulseDuration / 2,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 0.8,
+            duration: pulseDuration / 2,
+            useNativeDriver: true,
+          }),
+        ]),
+      );
+      pulseLoop.start();
+      return () => pulseLoop.stop();
+    } else {
+      // Reset pulse animation
+      pulseAnim.setValue(1);
+    }
+  }, [pulse, frequency, pulseAnim]);
+
   const rotation = rotationAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
+  });
+
+  const pulseScale = pulseAnim.interpolate({
+    inputRange: [0.8, 1, 1.3],
+    outputRange: [0.8, 1, 1.3],
+    extrapolate: 'clamp',
   });
 
   let GeometryComponent: React.FC<any> = FlowerOfLife;
@@ -651,9 +693,17 @@ const SacredGeometry: React.FC<SacredGeometryWrapperProps> = ({
 
   const content = <GeometryComponent {...componentProps} />;
 
+  const transforms = [];
   if (animated) {
+    transforms.push({ rotate: rotation });
+  }
+  if (pulse) {
+    transforms.push({ scale: pulseScale });
+  }
+
+  if (transforms.length > 0) {
     return (
-      <Animated.View style={{ transform: [{ rotate: rotation }], opacity }}>
+      <Animated.View style={{ transform: transforms, opacity }}>
         {content}
       </Animated.View>
     );

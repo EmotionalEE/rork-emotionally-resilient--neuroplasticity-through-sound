@@ -442,6 +442,8 @@ export default function SessionScreen() {
               color={sacredGeometryColor}
               strokeWidth={sacredGeometryStrokeWidth}
               animated
+              pulse={isPlaying && !isPaused}
+              frequency={typeof session?.frequency === 'number' ? session.frequency : parseInt(String(session?.frequency || '440'), 10) || 440}
               isActive={sacredGeometryType === "circleOfLife" ? isPlaying : undefined}
               opacity={sacredGeometryOpacity}
             />
