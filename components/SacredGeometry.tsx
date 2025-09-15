@@ -232,28 +232,63 @@ export const FlowerOfLife: React.FC<SacredGeometryProps> = ({
   color = "rgba(255,255,255,0.6)",
   strokeWidth = 1,
 }) => {
+  const viewBoxSize = 100;
+  const center = viewBoxSize / 2;
+  const outerRadius = 40;
+  const circleRadius = 12;
+  const latticeRadius = 2;
+  const sqrt3Over2 = Math.sqrt(3) / 2;
+
+  type CirclePosition = { cx: number; cy: number; ring: number };
+
+  const circles: CirclePosition[] = [
+    {
+      cx: center,
+      cy: center,
+      ring: 0,
+    },
+  ];
+
+  for (let q = -latticeRadius; q <= latticeRadius; q += 1) {
+    for (let r = -latticeRadius; r <= latticeRadius; r += 1) {
+      const s = -q - r;
+      const hexDistance = Math.max(Math.abs(q), Math.abs(r), Math.abs(s));
+
+      if (hexDistance === 0 || hexDistance > latticeRadius) {
+        continue;
+      }
+
+      const cx = center + circleRadius * (q + r / 2);
+      const cy = center + circleRadius * sqrt3Over2 * r;
+
+      circles.push({
+        cx,
+        cy,
+        ring: hexDistance,
+      });
+    }
+  }
+
+  const sortedCircles = [...circles].sort((a, b) => {
+    if (a.ring !== b.ring) {
+      return a.ring - b.ring;
+    }
+
+    const angleA = Math.atan2(a.cy - center, a.cx - center);
+    const angleB = Math.atan2(b.cy - center, b.cx - center);
+
+    return angleA - angleB;
+  });
+
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <G stroke={color} strokeWidth={strokeWidth} fill="none">
         {/* Outer circle */}
-        <Circle cx="50" cy="50" r="40" />
-        {/* Inner pattern - simplified version */}
-        <Circle cx="50" cy="50" r="10" />
-        <Circle cx="50" cy="35" r="10" />
-        <Circle cx="62" cy="42.5" r="10" />
-        <Circle cx="62" cy="57.5" r="10" />
-        <Circle cx="50" cy="65" r="10" />
-        <Circle cx="38" cy="57.5" r="10" />
-        <Circle cx="38" cy="42.5" r="10" />
-        {/* Second ring */}
-        <Circle cx="50" cy="20" r="10" />
-        <Circle cx="67" cy="27.5" r="10" />
-        <Circle cx="74" cy="50" r="10" />
-        <Circle cx="67" cy="72.5" r="10" />
-        <Circle cx="50" cy="80" r="10" />
-        <Circle cx="33" cy="72.5" r="10" />
-        <Circle cx="26" cy="50" r="10" />
-        <Circle cx="33" cy="27.5" r="10" />
+        <Circle cx={center} cy={center} r={outerRadius} />
+        {/* Flower of Life lattice */}
+        {sortedCircles.map(({ cx, cy }, index) => (
+          <Circle key={`${index}-${cx}-${cy}`} cx={cx} cy={cy} r={circleRadius} />
+        ))}
       </G>
     </Svg>
   );
