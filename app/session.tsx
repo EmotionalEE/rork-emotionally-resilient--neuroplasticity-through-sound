@@ -587,7 +587,7 @@ const SacredGeometry = ({
               style={[
                 styles.sriYantraLotus,
                 {
-                  transform: [{ rotate: `${rotation}deg` }, { scale: flowerOpacity }],
+                  transform: [{ rotate: rotation }, { scale: flowerOpacity }],
                   opacity: flowerOpacity,
                 },
               ]}
@@ -615,7 +615,7 @@ const SacredGeometry = ({
                 styles.sriYantraSquare,
                 {
                   borderColor: accentColor,
-                  transform: [{ rotate: `${counterRotation}deg` }, { scale: breathScale }],
+                  transform: [{ rotate: counterRotation }, { scale: breathScale }],
                   opacity: breathOpacity,
                 },
               ]}
