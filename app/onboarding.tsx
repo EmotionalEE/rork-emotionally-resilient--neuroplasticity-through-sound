@@ -47,7 +47,7 @@ export default function OnboardingScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     await completeOnboarding();
-    router.replace("/home");
+    router.replace("/intro-session");
   }, [completeOnboarding, router]);
 
   React.useEffect(() => {
