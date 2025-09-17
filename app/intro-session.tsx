@@ -51,6 +51,9 @@ export default function IntroSessionScreen() {
   
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [frequencyIntensity, setFrequencyIntensity] = useState<'Off' | 'Low' | 'Normal' | 'High'>('High');
+  const [beatMode, setBeatMode] = useState<'Binaural' | 'Isochronic'>('Binaural');
 
   
   // Animation refs
@@ -61,7 +64,7 @@ export default function IntroSessionScreen() {
     opacity: new Animated.Value(0),
   }))).current;
   const roadLineAnim = useRef(new Animated.Value(0)).current;
-
+  const expandAnim = useRef(new Animated.Value(0)).current;
   const glowAnim = useRef(new Animated.Value(0.8)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
   
@@ -69,14 +72,14 @@ export default function IntroSessionScreen() {
   useEffect(() => {
     orbPulseAnim.setValue(1);
     roadLineAnim.setValue(0);
-
+    expandAnim.setValue(0);
     glowAnim.setValue(0.8);
     particleAnims.forEach(particle => {
       particle.x.setValue(0);
       particle.y.setValue(0);
       particle.opacity.setValue(0);
     });
-  }, [orbPulseAnim, roadLineAnim, glowAnim, particleAnims]);
+  }, [orbPulseAnim, roadLineAnim, expandAnim, glowAnim, particleAnims]);
   
   // Orb pulse and particle animations synced with music
   useEffect(() => {
@@ -197,6 +200,20 @@ export default function IntroSessionScreen() {
       timeouts.forEach(timeout => clearTimeout(timeout));
     };
   }, [isPlaying, isPaused, orbPulseAnim, glowAnim, particleAnims, roadLineAnim]);
+
+  // Expand animation for controls
+  useEffect(() => {
+    Animated.timing(expandAnim, {
+      toValue: isExpanded ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [isExpanded, expandAnim]);
+
+  const expandHeight = expandAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 280],
+  });
 
 
 
@@ -462,6 +479,95 @@ export default function IntroSessionScreen() {
             <Text style={styles.sessionDescription}>{introSession.description}</Text>
           </View>
 
+          {/* Expandable controls */}
+          <TouchableOpacity 
+            style={styles.expandButton}
+            onPress={() => setIsExpanded(!isExpanded)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.expandButtonContent}>
+              <Text style={styles.expandButtonText}>Frequency intensity</Text>
+              <Animated.View
+                style={[styles.chevronRotate, {
+                  transform: [{
+                    rotate: expandAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '180deg'],
+                    })
+                  }]
+                }]}
+              >
+                <ChevronDown size={20} color="rgba(255,255,255,0.6)" />
+              </Animated.View>
+            </View>
+          </TouchableOpacity>
+
+          <Animated.View style={[styles.expandedContent, { maxHeight: expandHeight, overflow: 'hidden' }]}>
+            {/* Frequency intensity selector */}
+            <View style={styles.controlSection}>
+              <Text style={styles.controlLabel}>Frequency intensity</Text>
+              <View style={styles.intensitySelector}>
+                {['Off', 'Low', 'Normal', 'High'].map((level) => (
+                  <TouchableOpacity
+                    key={level}
+                    style={[
+                      styles.intensityOption,
+                      frequencyIntensity === level && styles.intensityOptionActive,
+                    ]}
+                    onPress={() => setFrequencyIntensity(level as typeof frequencyIntensity)}
+                  >
+                    <Text style={[
+                      styles.intensityText,
+                      frequencyIntensity === level && styles.intensityTextActive,
+                    ]}>
+                      {level}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Beat mode selector */}
+            <View style={styles.controlSection}>
+              <View style={styles.beatModeHeader}>
+                <Text style={styles.controlLabel}>Beat mode</Text>
+                <Radio size={16} color="rgba(255,255,255,0.6)" />
+              </View>
+              <View style={styles.beatModeSelector}>
+                {['Binaural', 'Isochronic'].map((mode) => (
+                  <TouchableOpacity
+                    key={mode}
+                    style={[
+                      styles.beatModeOption,
+                      beatMode === mode && styles.beatModeOptionActive,
+                    ]}
+                    onPress={() => setBeatMode(mode as typeof beatMode)}
+                  >
+                    <Text style={[
+                      styles.beatModeText,
+                      beatMode === mode && styles.beatModeTextActive,
+                    ]}>
+                      {mode}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.beatModeHint}>
+                Recommended. Best with headphones.
+              </Text>
+            </View>
+
+            {/* Session details */}
+            <View style={styles.detailsSection}>
+              <Text style={styles.detailsTitle}>432 Hz Harmony frequency</Text>
+              <Text style={styles.detailsText}>
+                This healing frequency is known to promote relaxation, reduce stress, and create a sense 
+                of peace and well-being. It's often called the "natural frequency" and is perfect for 
+                your first meditation experience.
+              </Text>
+            </View>
+          </Animated.View>
+
           {/* Welcome message */}
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeTitle}>Your Journey Begins</Text>
@@ -717,6 +823,112 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  expandButton: {
+    marginHorizontal: 30,
+    marginBottom: 10,
+  },
+  expandButtonContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  expandButtonText: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  expandedContent: {
+    overflow: 'hidden',
+    marginHorizontal: 30,
+  },
+  controlSection: {
+    marginVertical: 20,
+  },
+  controlLabel: {
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: '#fff',
+    marginBottom: 15,
+  },
+  intensitySelector: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+    padding: 4,
+  },
+  intensityOption: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  intensityOptionActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  intensityText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  intensityTextActive: {
+    color: '#fff',
+    fontWeight: '600' as const,
+  },
+  beatModeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 15,
+  },
+  beatModeSelector: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  beatModeOption: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  beatModeOptionActive: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  beatModeText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  beatModeTextActive: {
+    color: '#fff',
+    fontWeight: '600' as const,
+  },
+  beatModeHint: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 10,
+  },
+  detailsSection: {
+    marginVertical: 20,
+    padding: 20,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+  },
+  detailsTitle: {
+    fontSize: 18,
+    fontWeight: '600' as const,
+    color: '#fff',
+    marginBottom: 10,
+  },
+  detailsText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 22,
+  },
+  chevronRotate: {
     alignItems: 'center',
     justifyContent: 'center',
   },
