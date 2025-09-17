@@ -55,34 +55,70 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
       console.log("Loading sound from:", url);
       
-      // Create sound with better error handling
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: url },
-        {
-          shouldPlay: true,
-          isLooping: true,
-          // Add web-specific options
-          ...(Platform.OS === 'web' && {
-            progressUpdateIntervalMillis: 1000,
-            positionMillis: 0
-          })
+      // Fallback URLs for better reliability
+      const fallbackUrls = [
+        url,
+        "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+        "https://actions.google.com/sounds/v1/alarms/beep_short.ogg",
+        "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT"
+      ];
+      
+      let newSound: Audio.Sound | null = null;
+      let lastError: Error | null = null;
+      
+      // Try each URL until one works
+      for (const tryUrl of fallbackUrls) {
+        try {
+          console.log("Trying audio URL:", tryUrl.substring(0, 50) + "...");
+          
+          const result = await Audio.Sound.createAsync(
+            { uri: tryUrl },
+            {
+              shouldPlay: false, // Don't auto-play until we confirm it loaded
+              isLooping: true,
+              volume: 0.7,
+              // Add web-specific options
+              ...(Platform.OS === 'web' && {
+                progressUpdateIntervalMillis: 1000,
+                positionMillis: 0
+              })
+            }
+          );
+          
+          newSound = result.sound;
+          console.log("Successfully loaded audio from:", tryUrl.substring(0, 50) + "...");
+          break;
+        } catch (urlError) {
+          console.log("Failed to load from URL:", tryUrl.substring(0, 50) + "...", urlError);
+          lastError = urlError as Error;
+          continue;
         }
-      );
+      }
+      
+      if (!newSound) {
+        throw lastError || new Error("All audio URLs failed to load");
+      }
 
       setSound(newSound);
 
       try {
         await newSound.playAsync();
         setIsPlaying(true);
+        console.log("Audio playback started successfully");
       } catch (playError) {
         console.error("Error starting playback:", playError);
         setIsPlaying(false);
+        throw playError;
       }
 
       // Set up playback status update
       newSound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
           setIsPlaying(status.isPlaying);
+          if ('error' in status && status.error) {
+            console.error("Playback status error:", status.error);
+            setIsPlaying(false);
+          }
         } else {
           // Handle loading errors
           setIsPlaying(false);
@@ -97,12 +133,22 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       
       // Provide more specific error information
       if (error instanceof Error) {
-        if (error.message.includes('NotSupportedError')) {
-          console.error("Audio format not supported on this platform");
-        } else if (error.message.includes('NetworkError')) {
-          console.error("Network error loading audio");
+        if (error.message.includes('NotSupportedError') || error.name === 'NotSupportedError') {
+          console.error("Audio format not supported on this platform. This may be due to:");
+          console.error("- Unsupported audio format (try MP3, WAV, or OGG)");
+          console.error("- CORS restrictions on the audio URL");
+          console.error("- Network connectivity issues");
+        } else if (error.message.includes('NetworkError') || error.name === 'NetworkError') {
+          console.error("Network error loading audio - check internet connection and URL accessibility");
+        } else if (error.message.includes('AbortError') || error.name === 'AbortError') {
+          console.error("Audio loading was aborted - this may be due to user interaction requirements");
+        } else {
+          console.error("Unknown audio error:", error.name, error.message);
         }
       }
+      
+      // Don't throw the error, just log it and set playing to false
+      // This prevents the app from crashing
     }
   }, [sound]);
 
