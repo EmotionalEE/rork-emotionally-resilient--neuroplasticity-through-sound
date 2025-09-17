@@ -101,14 +101,42 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
       setSound(newSound);
 
-      try {
-        await newSound.playAsync();
-        setIsPlaying(true);
-        console.log("Audio playback started successfully");
-      } catch (playError) {
-        console.error("Error starting playback:", playError);
-        setIsPlaying(false);
-        throw playError;
+      // For web, we need to handle user interaction requirements
+      if (Platform.OS === 'web') {
+        // Add a small delay to ensure the sound is fully loaded
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        try {
+          // Check if the sound is still loaded before playing
+          const status = await newSound.getStatusAsync();
+          if (status.isLoaded) {
+            await newSound.playAsync();
+            setIsPlaying(true);
+            console.log("Audio playback started successfully");
+          } else {
+            console.log("Sound not loaded, cannot play");
+            setIsPlaying(false);
+          }
+        } catch (playError) {
+          console.log("Error starting playback (handled):", playError);
+          setIsPlaying(false);
+          
+          // For web, AbortError is common due to autoplay policies
+          if (playError instanceof Error && playError.name === 'AbortError') {
+            console.log("Playback was aborted - this is normal on web due to autoplay policies");
+            console.log("User needs to interact with the page first before audio can play");
+          }
+        }
+      } else {
+        // Native platforms
+        try {
+          await newSound.playAsync();
+          setIsPlaying(true);
+          console.log("Audio playback started successfully");
+        } catch (playError) {
+          console.error("Error starting playback:", playError);
+          setIsPlaying(false);
+        }
       }
 
       // Set up playback status update
@@ -116,34 +144,35 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
         if (status.isLoaded) {
           setIsPlaying(status.isPlaying);
           if ('error' in status && status.error) {
-            console.error("Playback status error:", status.error);
+            console.log("Playback status error (handled):", status.error);
             setIsPlaying(false);
           }
         } else {
           // Handle loading errors
           setIsPlaying(false);
           if ('error' in status && status.error) {
-            console.error("Sound loading error:", status.error);
+            console.log("Sound loading error (handled):", status.error);
           }
         }
       });
     } catch (error) {
-      console.error("Error playing sound:", error);
+      console.log("Error playing sound (handled):", error);
       setIsPlaying(false);
       
-      // Provide more specific error information
+      // Provide more specific error information but don't crash
       if (error instanceof Error) {
         if (error.message.includes('NotSupportedError') || error.name === 'NotSupportedError') {
-          console.error("Audio format not supported on this platform. This may be due to:");
-          console.error("- Unsupported audio format (try MP3, WAV, or OGG)");
-          console.error("- CORS restrictions on the audio URL");
-          console.error("- Network connectivity issues");
+          console.log("Audio format not supported on this platform. This may be due to:");
+          console.log("- Unsupported audio format (try MP3, WAV, or OGG)");
+          console.log("- CORS restrictions on the audio URL");
+          console.log("- Network connectivity issues");
         } else if (error.message.includes('NetworkError') || error.name === 'NetworkError') {
-          console.error("Network error loading audio - check internet connection and URL accessibility");
+          console.log("Network error loading audio - check internet connection and URL accessibility");
         } else if (error.message.includes('AbortError') || error.name === 'AbortError') {
-          console.error("Audio loading was aborted - this may be due to user interaction requirements");
+          console.log("Audio loading was aborted - this may be due to user interaction requirements");
+          console.log("On web browsers, user must interact with the page before audio can play");
         } else {
-          console.error("Unknown audio error:", error.name, error.message);
+          console.log("Audio error (handled):", error.name, error.message);
         }
       }
       

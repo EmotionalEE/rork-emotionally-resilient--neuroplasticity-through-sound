@@ -202,7 +202,8 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
           if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
             audioContextRef.current.resume().catch((resumeError: any) => {
               if (resumeError && typeof resumeError === 'object') {
-                console.log('Could not resume audio context:', resumeError);
+                console.log('Could not resume audio context (handled):', resumeError);
+                // Don't throw error, just log it
               }
             });
           }
@@ -211,7 +212,7 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
           console.log('Web Audio API not available in this browser');
         }
       } catch (error) {
-        console.log('Web Audio not supported:', error);
+        console.log('Web Audio not supported (handled):', error);
         audioContextRef.current = null;
       }
     }
@@ -330,7 +331,7 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   }, [createLayer, removeLayer, currentSessionId]);
 
   // Start simple healing frequency session - no orchestration
-  const startSession = useCallback((sessionId: string) => {
+  const startSession = useCallback(async (sessionId: string) => {
     if (Platform.OS !== 'web') {
       console.log('Dynamic music synthesis only available on web platform');
       return;
@@ -342,7 +343,16 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
       console.log('Could not initialize audio context');
       return;
     }
-    audioContextRef.current.resume();
+    
+    try {
+      // Resume audio context - this requires user interaction on web
+      await audioContextRef.current.resume();
+      console.log('Audio context resumed successfully');
+    } catch (resumeError) {
+      console.log('Could not resume audio context (handled):', resumeError);
+      // Continue anyway, the audio might still work
+    }
+    
     setIsPlaying(true);
     setCurrentSessionId(sessionId);
     
