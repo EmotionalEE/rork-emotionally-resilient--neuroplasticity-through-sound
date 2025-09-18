@@ -311,11 +311,19 @@ export default function IntroSessionScreen() {
     }
 
     if (isPlaying) {
-      stopSound();
+      await stopSound();
       setIsPaused(true);
     } else {
-      await playSound(introSession.audioUrl);
-      setIsPaused(false);
+      console.log('Starting playback for intro session');
+      console.log('Audio URL:', introSession.audioUrl);
+      try {
+        await playSound(introSession.audioUrl);
+        setIsPaused(false);
+        console.log('Intro session playback started successfully');
+      } catch (error) {
+        console.log('Error starting intro session playback:', error);
+        setIsPaused(true);
+      }
     }
   }, [isPlaying, playSound, stopSound]);
 

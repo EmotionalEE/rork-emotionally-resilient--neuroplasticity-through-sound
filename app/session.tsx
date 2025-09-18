@@ -364,12 +364,20 @@ export default function SessionScreen() {
     }
 
     if (isPlaying) {
-      stopSound();
+      await stopSound();
       setIsPaused(true);
     } else {
       if (session) {
-        await playSound(sessionMusic?.url ?? session.audioUrl);
-        setIsPaused(false);
+        console.log('Starting playback for session:', session.id);
+        console.log('Audio URL:', sessionMusic?.url ?? session.audioUrl);
+        try {
+          await playSound(sessionMusic?.url ?? session.audioUrl);
+          setIsPaused(false);
+          console.log('Playback started successfully');
+        } catch (error) {
+          console.log('Error starting playback:', error);
+          setIsPaused(true);
+        }
       }
     }
   }, [isPlaying, session, sessionMusic, playSound, stopSound]);
