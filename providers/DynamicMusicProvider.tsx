@@ -441,7 +441,7 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     };
   }, [stopMusic]);
 
-  // Use useMemo for optimization as required by linter
+  // Memoize the context value to prevent unnecessary re-renders
   return useMemo(() => ({
     startSession,
     stopMusic,
