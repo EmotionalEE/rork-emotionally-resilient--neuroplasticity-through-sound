@@ -8,6 +8,7 @@ interface AudioContextType {
   stopSound: () => void;
   isPlaying: boolean;
   setVolume: (volume: number) => Promise<void>;
+  retryPlay: () => Promise<void>;
 }
 
 export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() => {
@@ -55,6 +56,7 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
         } catch (cleanupError) {
           console.log("⚠️ AudioProvider: Sound cleanup error (non-critical):", cleanupError);
         }
+        setSound(null);
       }
       
       // Fallback URLs for better reliability
@@ -101,7 +103,8 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       
       if (!newSound) {
         console.log("❌ AudioProvider: All audio URLs failed to load. Last error:", lastError);
-        throw lastError || new Error("All audio URLs failed to load");
+        setIsPlaying(false);
+        return; // Don't throw, just return
       }
 
       // Set the sound first
@@ -136,10 +139,7 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       try {
         console.log("🔄 AudioProvider: Attempting to start playback...");
         
-        // Add a small delay to ensure the sound is fully loaded
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Check if the sound is still loaded before playing
+        // Check if the sound is loaded before playing
         const status = await newSound.getStatusAsync();
         console.log("📊 AudioProvider: Sound status before play:", {
           isLoaded: status.isLoaded,
@@ -164,6 +164,7 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
             console.log("🚫 AudioProvider: Playback was blocked - this is normal on web due to autoplay policies");
             console.log("👆 AudioProvider: User needs to interact with the page first before audio can play");
             console.log("🔄 AudioProvider: The audio is loaded and ready, just click play again to start");
+            // Keep the sound loaded for retry
           } else {
             console.log("❌ AudioProvider: Playback error:", playError.name, playError.message);
           }
@@ -233,10 +234,30 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
     }
   }, [sound]);
 
+  const retryPlay = useCallback(async () => {
+    if (sound && !isPlaying) {
+      try {
+        console.log("🔄 AudioProvider: Retrying playback...");
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          await sound.playAsync();
+          setIsPlaying(true);
+          console.log("✅ AudioProvider: Retry playback successful!");
+        } else {
+          console.log("❌ AudioProvider: Sound not loaded for retry");
+        }
+      } catch (error) {
+        console.log("❌ AudioProvider: Retry playback failed:", error);
+        setIsPlaying(false);
+      }
+    }
+  }, [sound, isPlaying]);
+
   return useMemo(() => ({
     playSound,
     stopSound,
     isPlaying,
     setVolume,
-  }), [playSound, stopSound, isPlaying, setVolume]);
+    retryPlay,
+  }), [playSound, stopSound, isPlaying, setVolume, retryPlay]);
 });

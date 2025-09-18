@@ -377,6 +377,11 @@ export default function SessionScreen() {
         } catch (error) {
           console.log('Error starting playback:', error);
           setIsPaused(true);
+          
+          // On web, show a user-friendly message about autoplay
+          if (Platform.OS === 'web') {
+            console.log('💡 Tip: If audio doesn\'t play, try clicking the play button again. Web browsers require user interaction before playing audio.');
+          }
         }
       }
     }
