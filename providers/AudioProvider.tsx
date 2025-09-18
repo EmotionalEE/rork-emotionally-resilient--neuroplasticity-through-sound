@@ -58,8 +58,11 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       // Fallback URLs for better reliability
       const fallbackUrls = [
         url,
-        "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
-        "https://actions.google.com/sounds/v1/alarms/beep_short.ogg",
+        // Reliable audio sources
+        "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
+        "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav",
+        "https://www2.cs.uic.edu/~i101/SoundFiles/ImperialMarch60.wav",
+        // Data URL as final fallback - a simple sine wave tone
         "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT"
       ];
       
@@ -99,43 +102,33 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
         throw lastError || new Error("All audio URLs failed to load");
       }
 
+      // Set the sound first
       setSound(newSound);
-
-      // For web, we need to handle user interaction requirements
-      if (Platform.OS === 'web') {
+      
+      // Try to play the sound immediately
+      try {
         // Add a small delay to ensure the sound is fully loaded
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
         
-        try {
-          // Check if the sound is still loaded before playing
-          const status = await newSound.getStatusAsync();
-          if (status.isLoaded) {
-            await newSound.playAsync();
-            setIsPlaying(true);
-            console.log("Audio playback started successfully");
-          } else {
-            console.log("Sound not loaded, cannot play");
-            setIsPlaying(false);
-          }
-        } catch (playError) {
-          console.log("Error starting playback (handled):", playError);
-          setIsPlaying(false);
-          
-          // For web, AbortError is common due to autoplay policies
-          if (playError instanceof Error && playError.name === 'AbortError') {
-            console.log("Playback was aborted - this is normal on web due to autoplay policies");
-            console.log("User needs to interact with the page first before audio can play");
-          }
-        }
-      } else {
-        // Native platforms
-        try {
+        // Check if the sound is still loaded before playing
+        const status = await newSound.getStatusAsync();
+        if (status.isLoaded) {
           await newSound.playAsync();
           setIsPlaying(true);
           console.log("Audio playback started successfully");
-        } catch (playError) {
-          console.error("Error starting playback:", playError);
+        } else {
+          console.log("Sound not loaded, cannot play");
           setIsPlaying(false);
+        }
+      } catch (playError) {
+        console.log("Error starting playback (handled):", playError);
+        setIsPlaying(false);
+        
+        // For web, AbortError is common due to autoplay policies
+        if (playError instanceof Error && (playError.name === 'AbortError' || playError.name === 'NotAllowedError')) {
+          console.log("Playback was blocked - this is normal on web due to autoplay policies");
+          console.log("User needs to interact with the page first before audio can play");
+          console.log("The audio is loaded and ready, just click play again to start");
         }
       }
 

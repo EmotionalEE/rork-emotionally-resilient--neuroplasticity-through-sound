@@ -52,7 +52,7 @@ export const sessions: Session[] = [
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
-    audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
     geometry: {
       type: 'spiral',
       elements: 12,
@@ -70,7 +70,7 @@ export const sessions: Session[] = [
     frequency: "741",
     gradient: ["#d299c2", "#fef9d7"],
     targetEmotions: ["angry", "sad", "stressed"],
-    audioUrl: "https://actions.google.com/sounds/v1/alarms/beep_short.ogg",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav",
     geometry: {
       type: 'triangle',
       elements: 9,
@@ -88,7 +88,7 @@ export const sessions: Session[] = [
     frequency: "6",
     gradient: ["#f093fb", "#f5576c"],
     targetEmotions: ["sad", "anxious", "calm"],
-    audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
     geometry: {
       type: 'lotus',
       elements: 8,
@@ -106,7 +106,7 @@ export const sessions: Session[] = [
     frequency: "2",
     gradient: ["#a8e6cf", "#88d8a3"],
     targetEmotions: ["anxious", "stressed", "calm"],
-    audioUrl: "https://actions.google.com/sounds/v1/alarms/beep_short.ogg",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav",
     geometry: {
       type: 'sri_yantra',
       elements: 9,
@@ -124,7 +124,7 @@ export const sessions: Session[] = [
     frequency: "10",
     gradient: ["#667eea", "#764ba2"],
     targetEmotions: ["anxious", "stressed", "calm"],
-    audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
     geometry: {
       type: 'hexagon',
       elements: 6,
@@ -142,7 +142,7 @@ export const sessions: Session[] = [
     frequency: "528",
     gradient: ["#ff9a9e", "#fecfef"],
     targetEmotions: ["sad", "angry", "happy", "calm"],
-    audioUrl: "https://actions.google.com/sounds/v1/alarms/beep_short.ogg",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav",
     geometry: {
       type: 'flower',
       elements: 12,
@@ -160,7 +160,7 @@ export const sessions: Session[] = [
     frequency: "20",
     gradient: ["#4facfe", "#00f2fe"],
     targetEmotions: ["focused", "energized"],
-    audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
     geometry: {
       type: 'star',
       elements: 8,
@@ -178,7 +178,7 @@ export const sessions: Session[] = [
     frequency: "40",
     gradient: ["#ffecd2", "#fcb69f"],
     targetEmotions: ["focused", "energized", "happy"],
-    audioUrl: "https://actions.google.com/sounds/v1/alarms/beep_short.ogg",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav",
     geometry: {
       type: 'merkaba',
       elements: 6,
@@ -196,7 +196,7 @@ export const sessions: Session[] = [
     frequency: "432",
     gradient: ["#89f7fe", "#66a6ff"],
     targetEmotions: ["calm", "focused"],
-    audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
     geometry: {
       type: 'torus',
       elements: 1,
@@ -214,7 +214,7 @@ export const sessions: Session[] = [
     frequency: "963",
     gradient: ["#fbd3e9", "#bb377d"],
     targetEmotions: ["focused", "energized"],
-    audioUrl: "https://actions.google.com/sounds/v1/alarms/beep_short.ogg",
+    audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav",
     geometry: {
       type: 'dodecahedron',
       elements: 12,

@@ -34,7 +34,7 @@ const introSession = {
   description: "Your first journey into emotional balance and mental clarity through sound frequencies",
   duration: 3, // 3 minutes for intro
   frequency: "432",
-  audioUrl: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+  audioUrl: "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav",
   targetEmotions: ["calm", "focused"],
   geometry: {
     type: "flower" as const,
