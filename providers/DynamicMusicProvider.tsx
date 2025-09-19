@@ -1,53 +1,6 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Platform } from "react-native";
 import createContextHook from "@nkzw/create-context-hook";
-
-// Web Audio API type definitions for better TypeScript support
-type OscillatorType = 'sine' | 'square' | 'sawtooth' | 'triangle';
-
-// Define Web Audio API types for platforms that don't have them
-interface WebAudioContext {
-  createOscillator(): WebOscillatorNode;
-  createGain(): WebGainNode;
-  destination: AudioDestinationNode;
-  currentTime: number;
-  state: string;
-  resume(): Promise<void>;
-  close(): Promise<void>;
-}
-
-interface WebOscillatorNode {
-  type: OscillatorType;
-  frequency: AudioParam;
-  connect(destination: WebGainNode | AudioDestinationNode): void;
-  start(): void;
-  stop(): void;
-}
-
-interface WebGainNode {
-  gain: AudioParam;
-  connect(destination: WebGainNode | AudioDestinationNode | AudioParam): void;
-}
-
-interface AudioParam {
-  setValueAtTime(value: number, startTime: number): void;
-  linearRampToValueAtTime(value: number, endTime: number): void;
-}
-
-interface AudioDestinationNode {
-  // Placeholder for audio destination node
-}
-
-// Extend Window interface for Web Audio API
-declare global {
-  interface Window {
-    AudioContext: new () => WebAudioContext;
-    webkitAudioContext: new () => WebAudioContext;
-  }
-  
-  // Declare window as a global variable
-  const window: Window & typeof globalThis;
-}
 
 interface MusicLayer {
   id: string;
@@ -183,37 +136,23 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   
   // All useRef hooks together
-  const audioContextRef = useRef<WebAudioContext | null>(null);
-  const oscillatorsRef = useRef<Map<string, WebOscillatorNode>>(new Map());
-  const gainNodesRef = useRef<Map<string, WebGainNode>>(new Map());
-  const fadeOutTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-  const progressionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const oscillatorsRef = useRef<Map<string, OscillatorNode>>(new Map());
+  const gainNodesRef = useRef<Map<string, GainNode>>(new Map());
+  const fadeOutTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const progressionTimeoutRef = useRef<any>(null);
+  const currentStepRef = useRef(0);
 
   // Initialize Web Audio Context (works on both web and mobile)
   const initAudioContext = useCallback(() => {
     if (Platform.OS === 'web' && !audioContextRef.current) {
       try {
-        // Check if Web Audio API is available
-        const globalWindow = typeof window !== 'undefined' ? window : null;
-        if (globalWindow && (globalWindow.AudioContext || (globalWindow as any).webkitAudioContext)) {
-          const AudioContextConstructor = globalWindow.AudioContext || (globalWindow as any).webkitAudioContext;
-          audioContextRef.current = new AudioContextConstructor();
-          
-          if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-            audioContextRef.current.resume().catch((resumeError: any) => {
-              if (resumeError && typeof resumeError === 'object') {
-                console.log('Could not resume audio context (handled):', resumeError);
-                // Don't throw error, just log it
-              }
-            });
-          }
-          console.log('Web Audio Context initialized successfully');
-        } else {
-          console.log('Web Audio API not available in this browser');
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume();
         }
       } catch (error) {
-        console.log('Web Audio not supported (handled):', error);
-        audioContextRef.current = null;
+        console.log('Web Audio not supported:', error);
       }
     }
   }, []);
@@ -261,7 +200,7 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
         }
       }, 120000); // 2 minutes
 
-      fadeOutTimeoutsRef.current.set(layer.id, fadeTimeout as ReturnType<typeof setTimeout>);
+      fadeOutTimeoutsRef.current.set(layer.id, fadeTimeout);
 
     } catch (error) {
       console.log('Error creating audio layer:', error);
@@ -282,14 +221,10 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     if (oscillator && gainNode && audioContextRef.current) {
       try {
         gainNode.gain.linearRampToValueAtTime(0, audioContextRef.current.currentTime + 1);
-        setTimeout(() => {
-          try {
-            oscillator.stop();
-            oscillatorsRef.current.delete(layerId);
-            gainNodesRef.current.delete(layerId);
-          } catch (stopError) {
-            console.log('Error stopping oscillator:', stopError);
-          }
+        const stopTimeout = setTimeout(() => {
+          oscillator.stop();
+          oscillatorsRef.current.delete(layerId);
+          gainNodesRef.current.delete(layerId);
         }, 1000);
       } catch (error) {
         console.log('Error removing layer:', error);
@@ -324,14 +259,14 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     createLayer(newLayer);
     
     // Auto-remove layer after 60 seconds
-    setTimeout(() => {
+    const removeTimeout = setTimeout(() => {
       removeLayer(newLayer.id);
     }, 60000);
     
   }, [createLayer, removeLayer, currentSessionId]);
 
   // Start simple healing frequency session - no orchestration
-  const startSession = useCallback(async (sessionId: string) => {
+  const startSession = useCallback((sessionId: string) => {
     if (Platform.OS !== 'web') {
       console.log('Dynamic music synthesis only available on web platform');
       return;
@@ -343,16 +278,7 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
       console.log('Could not initialize audio context');
       return;
     }
-    
-    try {
-      // Resume audio context - this requires user interaction on web
-      await audioContextRef.current.resume();
-      console.log('Audio context resumed successfully');
-    } catch (resumeError) {
-      console.log('Could not resume audio context (handled):', resumeError);
-      // Continue anyway, the audio might still work
-    }
-    
+    audioContextRef.current.resume();
     setIsPlaying(true);
     setCurrentSessionId(sessionId);
     
@@ -398,19 +324,15 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
           clearTimeout(fadeTimeout);
           fadeOutTimeoutsRef.current.delete(id);
         }
-        setTimeout(() => {
-          try {
-            oscillator.stop();
-          } catch (stopError) {
-            console.log('Error stopping oscillator in cleanup:', stopError);
-          }
+        const stopTimeout = setTimeout(() => {
+          oscillator.stop();
         }, 1000);
       } catch (error) {
         console.log('Error stopping oscillator:', error);
       }
     });
 
-    setTimeout(() => {
+    const cleanupTimeout = setTimeout(() => {
       oscillatorsRef.current.clear();
       gainNodesRef.current.clear();
       fadeOutTimeoutsRef.current.clear();
@@ -441,8 +363,8 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     };
   }, [stopMusic]);
 
-  // Memoize the context value to prevent unnecessary re-renders
-  return useMemo(() => ({
+  // Return object directly instead of useMemo to avoid hook order issues
+  return {
     startSession,
     stopMusic,
     isPlaying,
@@ -452,5 +374,5 @@ export const [DynamicMusicProvider, useDynamicMusic] = createContextHook<Dynamic
     removeLayer,
     currentLayers,
     currentSessionId,
-  }), [startSession, stopMusic, isPlaying, intensity, setIntensity, addHealingLayer, removeLayer, currentLayers, currentSessionId]);
+  };
 });

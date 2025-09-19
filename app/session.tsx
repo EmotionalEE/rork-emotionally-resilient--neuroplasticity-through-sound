@@ -364,25 +364,12 @@ export default function SessionScreen() {
     }
 
     if (isPlaying) {
-      await stopSound();
+      stopSound();
       setIsPaused(true);
     } else {
       if (session) {
-        console.log('Starting playback for session:', session.id);
-        console.log('Audio URL:', sessionMusic?.url ?? session.audioUrl);
-        try {
-          await playSound(sessionMusic?.url ?? session.audioUrl);
-          setIsPaused(false);
-          console.log('Playback started successfully');
-        } catch (error) {
-          console.log('Error starting playback:', error);
-          setIsPaused(true);
-          
-          // On web, show a user-friendly message about autoplay
-          if (Platform.OS === 'web') {
-            console.log('💡 Tip: If audio doesn\'t play, try clicking the play button again. Web browsers require user interaction before playing audio.');
-          }
-        }
+        await playSound(sessionMusic?.url ?? session.audioUrl);
+        setIsPaused(false);
       }
     }
   }, [isPlaying, session, sessionMusic, playSound, stopSound]);
