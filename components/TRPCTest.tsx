@@ -8,7 +8,7 @@ export default function TRPCTest() {
 
   const hiMutation = trpc.example.hi.useMutation({
     onSuccess: (data) => {
-      setResult(`Hello ${data.hello}! Server time: ${data.date}`);
+      setResult(`Hello ${data.hello}! Server timestamp: ${data.timestamp}`);
     },
     onError: (error) => {
       setResult(`Error: ${error.message}`);

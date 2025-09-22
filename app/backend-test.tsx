@@ -7,7 +7,7 @@ export default function BackendTest() {
   
   const hiMutation = trpc.example.hi.useMutation({
     onSuccess: (data) => {
-      Alert.alert("Success!", `Hello ${data.hello}! Date: ${data.date}`);
+      Alert.alert("Success!", `Hello ${data.hello}! Timestamp: ${data.timestamp}`);
     },
     onError: (error) => {
       Alert.alert("Error", error.message);
