@@ -353,21 +353,11 @@ export default function SessionScreen() {
 
     if (isPlaying) {
       console.log('[Session] Pausing audio + video');
-      try {
-        await videoRef.current?.pauseAsync();
-      } catch (e) {
-        console.log('Video pause error', e);
-      }
       stopSound();
       setIsPaused(true);
     } else {
       if (session) {
         console.log('[Session] Playing audio + video for', session.id);
-        try {
-          await videoRef.current?.playAsync();
-        } catch (e) {
-          console.log('Video play error', e);
-        }
         await playSound(sessionMusic?.url ?? session.audioUrl);
         setIsPaused(false);
       }
@@ -396,7 +386,7 @@ export default function SessionScreen() {
             ]}
             isLooping
             isMuted
-            shouldPlay
+            shouldPlay={isPlaying && !isPaused}
             resizeMode={(session.id === 'alpha-waves') ? ResizeMode.CONTAIN : ResizeMode.COVER}
             onLoadStart={() => console.log('[Session] Background video load start', session.id)}
             onLoad={() => console.log('[Session] Background video loaded', session.id)}
