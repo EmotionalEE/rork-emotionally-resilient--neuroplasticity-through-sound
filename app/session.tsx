@@ -497,7 +497,9 @@ export default function SessionScreen() {
             <Animated.View 
               style={[
                 styles.orb,
-                session.id === '396hz-release' ? { transform: [{ translateY: 120 }, { scale: orbPulseAnim }] } : { transform: [{ scale: orbPulseAnim }] }
+                {
+                  transform: [{ scale: orbPulseAnim }],
+                }
               ]}
             >
               <LinearGradient
