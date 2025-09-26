@@ -129,6 +129,7 @@ export const sessions: Session[] = [
     gradient: ["#667eea", "#764ba2"],
     targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-waves-on-the-beach-at-sunset-3125/1080p.mp4",
     geometry: {
       type: 'hexagon',
       elements: 6,
@@ -147,6 +148,7 @@ export const sessions: Session[] = [
     gradient: ["#ff9a9e", "#fecfef"],
     targetEmotions: ["sad", "angry", "happy", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-sunlight-through-palm-leaves-4091/1080p.mp4",
     geometry: {
       type: 'flower',
       elements: 12,
@@ -165,6 +167,7 @@ export const sessions: Session[] = [
     gradient: ["#4facfe", "#00f2fe"],
     targetEmotions: ["focused", "energized"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-city-lights-from-a-moving-car-8603/1080p.mp4",
     geometry: {
       type: 'star',
       elements: 8,
@@ -183,6 +186,7 @@ export const sessions: Session[] = [
     gradient: ["#ffecd2", "#fcb69f"],
     targetEmotions: ["focused", "energized", "happy"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-timelapse-sunrise-over-mountains-7134/1080p.mp4",
     geometry: {
       type: 'merkaba',
       elements: 6,
@@ -201,6 +205,7 @@ export const sessions: Session[] = [
     gradient: ["#89f7fe", "#66a6ff"],
     targetEmotions: ["calm", "focused"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-underwater-bubbles-3612/1080p.mp4",
     geometry: {
       type: 'torus',
       elements: 1,
@@ -219,6 +224,7 @@ export const sessions: Session[] = [
     gradient: ["#fbd3e9", "#bb377d"],
     targetEmotions: ["focused", "energized"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-aerial-shot-of-ocean-waves-2419/1080p.mp4",
     geometry: {
       type: 'dodecahedron',
       elements: 12,
