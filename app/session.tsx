@@ -383,17 +383,20 @@ export default function SessionScreen() {
   }
 
   return (
-    <View style={[styles.container, session.id === '396hz-release' ? { backgroundColor: 'transparent' } : null]}>
+    <View style={[styles.container, (session.id === '396hz-release' || session.id === 'alpha-waves') ? { backgroundColor: 'transparent' } : null]}>
       {/* Background video */}
       {session.videoUrl ? (
         <View style={styles.videoContainer} pointerEvents="none">
           <Video
             ref={videoRef}
             source={{ uri: session.videoUrl }}
-            style={[styles.videoElement, session.id === '396hz-release' ? { opacity: 1 } : null]}
+            style={[
+              styles.videoElement,
+              (session.id === '396hz-release' || session.id === 'alpha-waves') ? { opacity: 1 } : null
+            ]}
             isLooping
             isMuted
-            resizeMode={ResizeMode.COVER}
+            resizeMode={(session.id === 'alpha-waves') ? ResizeMode.CONTAIN : ResizeMode.COVER}
             onLoadStart={() => console.log('[Session] Background video load start', session.id)}
             onLoad={() => console.log('[Session] Background video loaded', session.id)}
             onPlaybackStatusUpdate={(status) => console.log('[Session] Video status', JSON.stringify(status))}
@@ -409,7 +412,7 @@ export default function SessionScreen() {
       ) : null}
 
       {/* Gradient overlay */}
-      {session.id === '396hz-release' ? null : (
+      {(session.id === '396hz-release' || session.id === 'alpha-waves') ? null : (
         <LinearGradient 
           colors={["rgba(0,0,0,0.9)", "rgba(0,0,0,0.6)", "rgba(0,0,0,0.95)"]} 
           style={StyleSheet.absoluteFillObject}
@@ -418,24 +421,26 @@ export default function SessionScreen() {
       )}
       
       {/* Road perspective */}
-      <View style={styles.roadContainer} pointerEvents="none">
-        <View style={styles.road}>
-          <Animated.View 
-            style={[
-              styles.roadLine,
-              {
-                transform: [{
-                  translateY: roadLineAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 100],
-                  })
-                }]
-              }
-            ]}
-          />
+      {(session.id === '396hz-release' || session.id === 'alpha-waves') ? null : (
+        <View style={styles.roadContainer} pointerEvents="none">
+          <View style={styles.road}>
+            <Animated.View 
+              style={[
+                styles.roadLine,
+                {
+                  transform: [{
+                    translateY: roadLineAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 100],
+                    })
+                  }]
+                }
+              ]}
+            />
+          </View>
+          <View style={styles.mountains} />
         </View>
-        <View style={styles.mountains} />
-      </View>
+      )}
 
       {/* Main content */}
       <ScrollView 
