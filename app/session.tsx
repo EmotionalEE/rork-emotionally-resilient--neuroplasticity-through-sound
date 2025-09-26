@@ -32,26 +32,6 @@ import { useUserProgress } from "@/providers/UserProgressProvider";
 import { useCustomMusic } from "@/providers/CustomMusicProvider";
 import SocialShare from "@/components/SocialShare";
 import * as Haptics from "expo-haptics";
-import SacredGeometry from "@/components/SacredGeometry";
-import { GeometryConfig } from "@/types/session";
-
-type SacredGeometryVariant = React.ComponentProps<typeof SacredGeometry>["type"];
-
-
-
-const geometryTypeMap: Record<GeometryConfig["type"], SacredGeometryVariant> = {
-  mandala: "flowerOfLife",
-  flower: "flowerOfLife",
-  spiral: "goldenSpiral",
-  triangle: "metatronsCube",
-  hexagon: "flowerOfLife",
-  star: "circleOfLife",
-  lotus: "flowerOfLife",
-  merkaba: "metatronsCube",
-  sri_yantra: "sriYantra",
-  torus: "circleOfLife",
-  dodecahedron: "metatronsCube",
-};
 
 export default function SessionScreen() {
   const router = useRouter();
@@ -394,8 +374,6 @@ export default function SessionScreen() {
     }
   }, [isPlaying, session, sessionMusic, playSound, stopSound]);
 
-
-
   if (!session) {
     return (
       <View style={styles.container}>
@@ -403,19 +381,6 @@ export default function SessionScreen() {
       </View>
     );
   }
-
-  const geometry = session.geometry;
-  const sacredGeometryType = geometryTypeMap[geometry.type];
-  const sacredGeometryColor = geometry.colors?.[0] ?? "rgba(255,255,255,0.8)";
-  const sacredGeometryOpacity = Math.max(
-    0.35,
-    Math.min(0.85, (geometry.pulseIntensity || 1.2) / 2)
-  );
-  const sacredGeometryStrokeWidth = Math.min(
-    3,
-    0.6 + Math.max(1, geometry.layers) * 0.25
-  );
-  const sacredGeometrySize = 200;
 
   return (
     <View style={[styles.container, session.id === '396hz-release' ? { backgroundColor: 'transparent' } : null]}>
@@ -564,21 +529,6 @@ export default function SessionScreen() {
                        'Balance'}
                     </Text>
                   ) : null}
-                </View>
-                
-                {/* Sacred Geometry inside orb */}
-                <View style={styles.geometryWrapper}>
-                  <SacredGeometry
-                    type={sacredGeometryType}
-                    size={sacredGeometrySize}
-                    color={sacredGeometryColor}
-                    strokeWidth={sacredGeometryStrokeWidth}
-                    animated
-                    pulse={isPlaying && !isPaused}
-                    frequency={typeof session?.frequency === 'number' ? session.frequency : parseInt(String(session?.frequency || '440'), 10) || 440}
-                    isActive={sacredGeometryType === "circleOfLife" ? isPlaying : undefined}
-                    opacity={sacredGeometryOpacity}
-                  />
                 </View>
               </LinearGradient>
             </Animated.View>
@@ -871,11 +821,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '400' as const,
     color: 'rgba(255,255,255,0.9)',
-  },
-  geometryWrapper: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   playButton: {
     alignSelf: 'center',
