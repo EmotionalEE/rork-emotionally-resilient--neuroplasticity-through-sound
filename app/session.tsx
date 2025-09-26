@@ -390,7 +390,28 @@ export default function SessionScreen() {
             resizeMode={(session.id === 'alpha-waves') ? ResizeMode.CONTAIN : ResizeMode.COVER}
             onLoadStart={() => console.log('[Session] Background video load start', session.id)}
             onLoad={() => console.log('[Session] Background video loaded', session.id)}
-            onPlaybackStatusUpdate={(status) => console.log('[Session] Video status', JSON.stringify(status))}
+            onPlaybackStatusUpdate={(status) => {
+              try {
+                console.log('[Session] Video status', {
+                  isLoaded: status.isLoaded,
+                  uri: status.uri,
+                  progressUpdateIntervalMillis: status.progressUpdateIntervalMillis,
+                  durationMillis: status.durationMillis,
+                  positionMillis: status.positionMillis,
+                  shouldPlay: status.shouldPlay,
+                  isPlaying: status.isPlaying,
+                  isBuffering: status.isBuffering,
+                  rate: status.rate,
+                  shouldCorrectPitch: status.shouldCorrectPitch,
+                  volume: status.volume,
+                  isMuted: status.isMuted,
+                  isLooping: status.isLooping,
+                  didJustFinish: status.didJustFinish
+                });
+              } catch (e) {
+                console.log('[Session] Video status update (safe log)');
+              }
+            }}
             onError={(e) => {
               console.log("Background video error", e);
             }}
