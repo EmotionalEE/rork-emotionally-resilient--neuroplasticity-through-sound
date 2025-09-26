@@ -710,45 +710,7 @@ export default function HomeScreen() {
             })}
           </ScrollView>
 
-          {/* Premium Upgrade Prompt */}
-          {!isPremium && (
-            <Animated.View
-              style={[
-                styles.upgradePrompt,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ scale: scaleAnim }],
-                },
-              ]}
-            >
-              <TouchableOpacity
-                onPress={() => router.push('/subscription')}
-                activeOpacity={0.9}
-              >
-                <LinearGradient
-                  colors={["#667eea", "#764ba2"]}
-                  style={styles.upgradeGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <View style={styles.upgradeContent}>
-                    <View style={styles.upgradeIcon}>
-                      <Sparkles size={24} color="#fff" />
-                    </View>
-                    <View style={styles.upgradeText}>
-                      <Text style={styles.upgradeTitle}>Unlock Premium Features</Text>
-                      <Text style={styles.upgradeSubtitle}>
-                        Advanced sacred geometry, binaural beats & more
-                      </Text>
-                    </View>
-                    <View style={styles.upgradeArrow}>
-                      <Text style={styles.upgradeArrowText}>→</Text>
-                    </View>
-                  </View>
-                </LinearGradient>
-              </TouchableOpacity>
-            </Animated.View>
-          )}
+
 
           {/* Trial Status */}
           {subscription?.status === 'trialing' && trialDaysLeft > 0 && (
@@ -1016,55 +978,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  upgradePrompt: {
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 20,
-    overflow: "hidden",
-  },
-  upgradeGradient: {
-    padding: 20,
-  },
-  upgradeContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  upgradeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  upgradeText: {
-    flex: 1,
-  },
-  upgradeTitle: {
-    fontSize: 18,
-    fontWeight: "bold" as const,
-    color: "#fff",
-    marginBottom: 4,
-  },
-  upgradeSubtitle: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
-    lineHeight: 20,
-  },
-  upgradeArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  upgradeArrowText: {
-    fontSize: 18,
-    color: "#fff",
-    fontWeight: "bold" as const,
-  },
+
   trialStatus: {
     marginHorizontal: 20,
     marginBottom: 20,
