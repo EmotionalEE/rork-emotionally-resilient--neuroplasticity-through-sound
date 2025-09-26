@@ -33,6 +33,7 @@ export interface Session {
   gradient: string[];
   targetEmotions: string[];
   audioUrl: string;
+  videoUrl?: string;
   geometry: GeometryConfig;
 }
 

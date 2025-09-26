@@ -25,6 +25,7 @@ import {
   Layers,
   Radio,
 } from "lucide-react-native";
+import { Video, ResizeMode } from "expo-av";
 import { sessions } from "@/constants/sessions";
 import { useAudio } from "@/providers/AudioProvider";
 import { useUserProgress } from "@/providers/UserProgressProvider";
@@ -96,6 +97,7 @@ export default function SessionScreen() {
   const expandAnim = useRef(new Animated.Value(0)).current;
   const glowAnim = useRef(new Animated.Value(0.8)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
+  const videoRef = useRef<Video | null>(null);
   
   // Initialize animated values
   useEffect(() => {
@@ -364,10 +366,12 @@ export default function SessionScreen() {
     }
 
     if (isPlaying) {
+      console.log('[Session] Pausing audio + video');
       stopSound();
       setIsPaused(true);
     } else {
       if (session) {
+        console.log('[Session] Playing audio + video for', session.id);
         await playSound(sessionMusic?.url ?? session.audioUrl);
         setIsPaused(false);
       }
@@ -399,14 +403,38 @@ export default function SessionScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Background with road perspective */}
+      {/* Background video */}
+      {session.videoUrl ? (
+        <Video
+          ref={videoRef}
+          source={{ uri: session.videoUrl }}
+          style={styles.bgVideo}
+          isLooping
+          isMuted
+          shouldPlay={isPlaying && !isPaused}
+          resizeMode={ResizeMode.COVER}
+          onLoadStart={() => console.log('[Session] Background video load start', session.id)}
+          onLoad={() => console.log('[Session] Background video loaded', session.id)}
+          onPlaybackStatusUpdate={(status) => console.log('[Session] Video status', JSON.stringify(status))}
+          onError={(e) => {
+            console.log("Background video error", e);
+          }}
+          accessibilityLabel="session background video"
+          testID="bg-video"
+          // @ts-expect-error: web only prop safe to ignore on native
+          playsInline
+        />
+      ) : null}
+
+      {/* Gradient overlay */}
       <LinearGradient 
-        colors={['#000000', '#1a1a1a', '#000000']} 
+        colors={["rgba(0,0,0,0.9)", "rgba(0,0,0,0.6)", "rgba(0,0,0,0.95)"]} 
         style={StyleSheet.absoluteFillObject}
+        pointerEvents="none"
       />
       
       {/* Road perspective */}
-      <View style={styles.roadContainer}>
+      <View style={styles.roadContainer} pointerEvents="none">
         <View style={styles.road}>
           <Animated.View 
             style={[
@@ -538,6 +566,7 @@ export default function SessionScreen() {
             onPress={handlePlayPause}
             style={styles.playButton}
             activeOpacity={0.8}
+            testID="play-pause"
           >
             <LinearGradient
               colors={["rgba(255,255,255,0.2)", "rgba(255,255,255,0.05)"]}
@@ -692,6 +721,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+  },
+  bgVideo: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.45,
   },
   scrollView: {
     flex: 1,

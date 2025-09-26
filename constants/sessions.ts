@@ -53,6 +53,7 @@ export const sessions: Session[] = [
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-moon-in-the-night-sky-3266/1080p.mp4",
     geometry: {
       type: 'spiral',
       elements: 12,
@@ -71,6 +72,7 @@ export const sessions: Session[] = [
     gradient: ["#d299c2", "#fef9d7"],
     targetEmotions: ["angry", "sad", "stressed"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-pink-clouds-7254/1080p.mp4",
     geometry: {
       type: 'triangle',
       elements: 9,
@@ -89,6 +91,7 @@ export const sessions: Session[] = [
     gradient: ["#f093fb", "#f5576c"],
     targetEmotions: ["sad", "anxious", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-stars-in-the-night-sky-9508/1080p.mp4",
     geometry: {
       type: 'lotus',
       elements: 8,
@@ -107,6 +110,7 @@ export const sessions: Session[] = [
     gradient: ["#a8e6cf", "#88d8a3"],
     targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-milky-way-above-the-mountains-2122/1080p.mp4",
     geometry: {
       type: 'sri_yantra',
       elements: 9,
