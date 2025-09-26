@@ -402,13 +402,13 @@ export default function SessionScreen() {
   const sacredGeometrySize = 200;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, session.id === '396hz-release' ? { backgroundColor: 'transparent' } : null]}>
       {/* Background video */}
       {session.videoUrl ? (
         <Video
           ref={videoRef}
           source={{ uri: session.videoUrl }}
-          style={styles.bgVideo}
+          style={[styles.bgVideo, session.id === '396hz-release' ? { opacity: 1 } : null]}
           isLooping
           isMuted
           shouldPlay={isPlaying && !isPaused}
@@ -427,11 +427,13 @@ export default function SessionScreen() {
       ) : null}
 
       {/* Gradient overlay */}
-      <LinearGradient 
-        colors={["rgba(0,0,0,0.9)", "rgba(0,0,0,0.6)", "rgba(0,0,0,0.95)"]} 
-        style={StyleSheet.absoluteFillObject}
-        pointerEvents="none"
-      />
+      {session.id === '396hz-release' ? null : (
+        <LinearGradient 
+          colors={["rgba(0,0,0,0.9)", "rgba(0,0,0,0.6)", "rgba(0,0,0,0.95)"]} 
+          style={StyleSheet.absoluteFillObject}
+          pointerEvents="none"
+        />
+      )}
       
       {/* Road perspective */}
       <View style={styles.roadContainer} pointerEvents="none">
