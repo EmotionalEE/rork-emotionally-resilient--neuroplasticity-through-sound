@@ -129,7 +129,7 @@ export const sessions: Session[] = [
     gradient: ["#667eea", "#764ba2"],
     targetEmotions: ["anxious", "stressed", "calm"],
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    videoUrl: "https://dl.dropboxusercontent.com/scl/fi/pktd0f9z2xadalgq8wicb/sacred-geometry-golden-yellow-2.mov?rlkey=028e751ad9lv12k29y0hvflt1&st=qzl9qap2&dl=1",
+    videoUrl: "https://cdn.coverr.co/videos/coverr-waves-on-the-beach-at-sunset-3125/1080p.mp4",
     geometry: {
       type: 'hexagon',
       elements: 6,
