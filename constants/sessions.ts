@@ -52,7 +52,7 @@ export const sessions: Session[] = [
     frequency: "396",
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+    audioUrl: "https://dl.dropboxusercontent.com/scl/fi/exrcyr02z1ihcajr4tt6h/to-app.mp3?rlkey=krvmrho44915vqzv2b5sa2lec&st=zz80li7f&dl=1",
     videoUrl: "https://cdn.coverr.co/videos/coverr-moon-in-the-night-sky-3266/1080p.mp4",
     geometry: {
       type: 'spiral',
