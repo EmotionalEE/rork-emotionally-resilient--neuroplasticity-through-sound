@@ -286,6 +286,12 @@ export default function SessionScreen() {
     });
 
     return () => {
+      try {
+        videoRef.current?.pauseAsync();
+        videoRef.current?.setPositionAsync(0);
+      } catch (e) {
+        console.log('Video cleanup error', e);
+      }
       stopSound();
       backHandler.remove();
     };
@@ -367,11 +373,21 @@ export default function SessionScreen() {
 
     if (isPlaying) {
       console.log('[Session] Pausing audio + video');
+      try {
+        await videoRef.current?.pauseAsync();
+      } catch (e) {
+        console.log('Video pause error', e);
+      }
       stopSound();
       setIsPaused(true);
     } else {
       if (session) {
         console.log('[Session] Playing audio + video for', session.id);
+        try {
+          await videoRef.current?.playAsync();
+        } catch (e) {
+          console.log('Video play error', e);
+        }
         await playSound(sessionMusic?.url ?? session.audioUrl);
         setIsPaused(false);
       }
@@ -405,25 +421,26 @@ export default function SessionScreen() {
     <View style={[styles.container, session.id === '396hz-release' ? { backgroundColor: 'transparent' } : null]}>
       {/* Background video */}
       {session.videoUrl ? (
-        <Video
-          ref={videoRef}
-          source={{ uri: session.videoUrl }}
-          style={[styles.bgVideo, session.id === '396hz-release' ? { opacity: 1 } : null]}
-          isLooping
-          isMuted
-          shouldPlay={isPlaying && !isPaused}
-          resizeMode={ResizeMode.COVER}
-          onLoadStart={() => console.log('[Session] Background video load start', session.id)}
-          onLoad={() => console.log('[Session] Background video loaded', session.id)}
-          onPlaybackStatusUpdate={(status) => console.log('[Session] Video status', JSON.stringify(status))}
-          onError={(e) => {
-            console.log("Background video error", e);
-          }}
-          accessibilityLabel="session background video"
-          testID="bg-video"
-          // @ts-expect-error: web only prop safe to ignore on native
-          playsInline
-        />
+        <View style={styles.videoContainer} pointerEvents="none">
+          <Video
+            ref={videoRef}
+            source={{ uri: session.videoUrl }}
+            style={[styles.videoElement, session.id === '396hz-release' ? { opacity: 1 } : null]}
+            isLooping
+            isMuted
+            resizeMode={ResizeMode.COVER}
+            onLoadStart={() => console.log('[Session] Background video load start', session.id)}
+            onLoad={() => console.log('[Session] Background video loaded', session.id)}
+            onPlaybackStatusUpdate={(status) => console.log('[Session] Video status', JSON.stringify(status))}
+            onError={(e) => {
+              console.log("Background video error", e);
+            }}
+            accessibilityLabel="session background video"
+            testID="bg-video"
+            // @ts-expect-error: web only prop safe to ignore on native
+            playsInline
+          />
+        </View>
       ) : null}
 
       {/* Gradient overlay */}
@@ -728,12 +745,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  bgVideo: {
+  videoContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoElement: {
+    width: '100%',
+    height: '100%',
     opacity: 0.45,
   },
   scrollView: {
