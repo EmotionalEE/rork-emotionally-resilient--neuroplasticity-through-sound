@@ -383,14 +383,14 @@ export default function SessionScreen() {
   }
 
   return (
-    <View style={[styles.container, session.id === '396hz-release' ? { backgroundColor: 'transparent' } : null]}>
+    <View style={[styles.container, (session.id === '396hz-release' || session.id === 'alpha-waves') ? { backgroundColor: 'transparent' } : null]}>
       {/* Background video */}
       {session.videoUrl ? (
         <View style={styles.videoContainer} pointerEvents="none">
           <Video
             ref={videoRef}
             source={{ uri: session.videoUrl }}
-            style={[styles.videoElement, session.id === '396hz-release' ? { opacity: 1 } : null]}
+            style={[styles.videoElement, (session.id === '396hz-release' || session.id === 'alpha-waves') ? { opacity: 1 } : null]}
             isLooping
             isMuted
             resizeMode={ResizeMode.COVER}
@@ -409,7 +409,7 @@ export default function SessionScreen() {
       ) : null}
 
       {/* Gradient overlay */}
-      {session.id === '396hz-release' ? null : (
+      {(session.id === '396hz-release' || session.id === 'alpha-waves') ? null : (
         <LinearGradient 
           colors={["rgba(0,0,0,0.9)", "rgba(0,0,0,0.6)", "rgba(0,0,0,0.95)"]} 
           style={StyleSheet.absoluteFillObject}
