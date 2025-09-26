@@ -527,7 +527,9 @@ export default function SessionScreen() {
                 style={styles.orbGradient}
               >
                 <View style={styles.orbContent}>
-                  <Text style={styles.frequencyText}>{session.frequency} Hz</Text>
+                  {session.id !== '396hz-release' ? (
+                    <Text style={styles.frequencyText}>{session.frequency} Hz</Text>
+                  ) : null}
                   <Text style={styles.frequencyLabel}>
                     {session.frequency === '40' ? 'Focus' : 
                      session.frequency === '528' ? 'Love' :
