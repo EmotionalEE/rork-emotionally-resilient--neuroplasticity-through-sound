@@ -530,19 +530,21 @@ export default function SessionScreen() {
                   {session.id !== '396hz-release' ? (
                     <Text style={styles.frequencyText}>{session.frequency} Hz</Text>
                   ) : null}
-                  <Text style={styles.frequencyLabel}>
-                    {session.frequency === '40' ? 'Focus' : 
-                     session.frequency === '528' ? 'Love' :
-                     session.frequency === '741' ? 'Cleanse' :
-                     session.frequency === '396' ? 'Release' :
-                     session.frequency === '2' ? 'Sleep' :
-                     session.frequency === '6' ? 'Healing' :
-                     session.frequency === '10' ? 'Calm' :
-                     session.frequency === '20' ? 'Focus' :
-                     session.frequency === '432' ? 'Harmony' :
-                     session.frequency === '963' ? 'Awaken' :
-                     'Balance'}
-                  </Text>
+                  {session.id !== '396hz-release' ? (
+                    <Text style={styles.frequencyLabel}>
+                      {session.frequency === '40' ? 'Focus' : 
+                       session.frequency === '528' ? 'Love' :
+                       session.frequency === '741' ? 'Cleanse' :
+                       session.frequency === '396' ? 'Release' :
+                       session.frequency === '2' ? 'Sleep' :
+                       session.frequency === '6' ? 'Healing' :
+                       session.frequency === '10' ? 'Calm' :
+                       session.frequency === '20' ? 'Focus' :
+                       session.frequency === '432' ? 'Harmony' :
+                       session.frequency === '963' ? 'Awaken' :
+                       'Balance'}
+                    </Text>
+                  ) : null}
                 </View>
                 
                 {/* Sacred Geometry inside orb */}
