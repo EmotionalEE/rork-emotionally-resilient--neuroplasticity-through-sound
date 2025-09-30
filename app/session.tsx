@@ -392,21 +392,23 @@ export default function SessionScreen() {
             onLoad={() => console.log('[Session] Background video loaded', session.id)}
             onPlaybackStatusUpdate={(status) => {
               try {
+                if (!status.isLoaded) {
+                  console.log('[Session] Video status (not loaded)', { error: status.error });
+                  return;
+                }
+                const s = status;
                 console.log('[Session] Video status', {
-                  isLoaded: status.isLoaded,
-                  uri: status.uri,
-                  progressUpdateIntervalMillis: status.progressUpdateIntervalMillis,
-                  durationMillis: status.durationMillis,
-                  positionMillis: status.positionMillis,
-                  shouldPlay: status.shouldPlay,
-                  isPlaying: status.isPlaying,
-                  isBuffering: status.isBuffering,
-                  rate: status.rate,
-                  shouldCorrectPitch: status.shouldCorrectPitch,
-                  volume: status.volume,
-                  isMuted: status.isMuted,
-                  isLooping: status.isLooping,
-                  didJustFinish: status.didJustFinish
+                  isLoaded: s.isLoaded,
+                  durationMillis: s.durationMillis ?? null,
+                  positionMillis: s.positionMillis,
+                  shouldPlay: s.shouldPlay,
+                  isPlaying: s.isPlaying,
+                  isBuffering: s.isBuffering,
+                  rate: s.rate,
+                  volume: s.volume,
+                  isMuted: s.isMuted,
+                  isLooping: s.isLooping,
+                  didJustFinish: s.didJustFinish ?? false,
                 });
               } catch (e) {
                 console.log('[Session] Video status update (safe log)');
