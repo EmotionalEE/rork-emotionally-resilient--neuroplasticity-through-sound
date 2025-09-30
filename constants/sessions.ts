@@ -109,7 +109,7 @@ export const sessions: Session[] = [
     frequency: "2",
     gradient: ["#a8e6cf", "#88d8a3"],
     targetEmotions: ["anxious", "stressed", "calm"],
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+    audioUrl: "https://dl.dropboxusercontent.com/scl/fi/2sqbh8x50bfkkpv1t9cjt/Anxiety-Dissolution.m4a?rlkey=o7rm1ocndguftgi6xyelwccv8&st=4idpkvei&dl=1",
     videoUrl: "https://cdn.coverr.co/videos/coverr-milky-way-above-the-mountains-2122/1080p.mp4",
     geometry: {
       type: 'sri_yantra',
