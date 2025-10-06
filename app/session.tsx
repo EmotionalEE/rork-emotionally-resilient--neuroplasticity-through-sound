@@ -387,7 +387,7 @@ export default function SessionScreen() {
             isLooping
             isMuted
             shouldPlay={isPlaying && !isPaused}
-            resizeMode={(session.id === 'alpha-waves') ? ResizeMode.CONTAIN : ResizeMode.COVER}
+            resizeMode={(session.id === 'alpha-waves' || session.id === '396hz-release') ? ResizeMode.CONTAIN : ResizeMode.COVER}
             onLoadStart={() => console.log('[Session] Background video load start', session.id)}
             onLoad={() => console.log('[Session] Background video loaded', session.id)}
             onPlaybackStatusUpdate={(status) => {
