@@ -19,6 +19,7 @@ interface AuthContextType {
 }
 
 const AUTH_KEY = "auth_user";
+const GUEST_KEY = "guest_user";
 
 // Mock user database - in a real app, this would be handled by your backend
 const MOCK_USERS_KEY = "mock_users";
@@ -26,28 +27,6 @@ const MOCK_USERS_KEY = "mock_users";
 export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const loadUser = useCallback(async () => {
-    try {
-      console.log("Loading user from AsyncStorage...");
-      const stored = await AsyncStorage.getItem(AUTH_KEY);
-      if (stored) {
-        const userData = JSON.parse(stored);
-        console.log("User loaded from storage:", userData);
-        setUser(userData);
-      } else {
-        console.log("No user found in storage");
-      }
-    } catch (error) {
-      console.error("Error loading user:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadUser();
-  }, [loadUser]);
 
   const saveUser = useCallback(async (userData: User) => {
     try {
@@ -59,6 +38,51 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
       console.error("Error saving user:", error);
     }
   }, []);
+
+  const ensureGuestUser = useCallback(async () => {
+    try {
+      console.log("No auth user found. Ensuring guest profile exists...");
+      const existingGuest = await AsyncStorage.getItem(GUEST_KEY);
+      if (existingGuest) {
+        const guestData: User = JSON.parse(existingGuest);
+        await saveUser(guestData);
+        return;
+      }
+      const guest: User = {
+        id: `guest-${Date.now()}`,
+        email: "guest@local",
+        name: "Guest",
+        createdAt: new Date().toISOString(),
+      };
+      await AsyncStorage.setItem(GUEST_KEY, JSON.stringify(guest));
+      await saveUser(guest);
+    } catch (e) {
+      console.error("Failed to ensure guest user:", e);
+    }
+  }, [saveUser]);
+
+  const loadUser = useCallback(async () => {
+    try {
+      console.log("Loading user from AsyncStorage...");
+      const stored = await AsyncStorage.getItem(AUTH_KEY);
+      if (stored) {
+        const userData: User = JSON.parse(stored);
+        console.log("User loaded from storage:", userData);
+        setUser(userData);
+      } else {
+        console.log("No user found in storage");
+        await ensureGuestUser();
+      }
+    } catch (error) {
+      console.error("Error loading user:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [ensureGuestUser]);
+
+  useEffect(() => {
+    loadUser();
+  }, [loadUser]);
 
   const getMockUsers = useCallback(async (): Promise<User[]> => {
     try {
@@ -81,20 +105,12 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
   const login = useCallback(async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise(resolve => setTimeout(resolve, 500));
       const users = await getMockUsers();
       const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
       if (!foundUser) {
         return { success: false, error: "User not found" };
       }
-      
-      // In a real app, you'd verify the password hash
-      // For demo purposes, we'll accept any password
-      
       await saveUser(foundUser);
       return { success: true };
     } catch (error) {
@@ -109,37 +125,27 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
     try {
       setIsLoading(true);
       console.log("Starting registration for:", { name, email });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise(resolve => setTimeout(resolve, 500));
       const users = await getMockUsers();
       console.log("Existing users:", users.length);
       const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
       if (existingUser) {
         console.log("User already exists:", existingUser.email);
         return { success: false, error: "Email already exists" };
       }
-      
       const newUser: User = {
         id: Date.now().toString(),
         email: email.toLowerCase(),
         name,
         createdAt: new Date().toISOString(),
       };
-      
       console.log("Creating new user:", newUser);
       const updatedUsers = [...users, newUser];
       await saveMockUsers(updatedUsers);
-      
-      // Save user and verify it was saved
       await saveUser(newUser);
-      
-      // Verify the user was actually saved
+      await AsyncStorage.setItem(GUEST_KEY, JSON.stringify(newUser));
       const savedUser = await AsyncStorage.getItem(AUTH_KEY);
       console.log("Verification - User saved to storage:", savedUser ? JSON.parse(savedUser) : 'null');
-      
       console.log("Registration successful, user saved:", newUser);
       return { success: true };
     } catch (error) {
@@ -153,11 +159,17 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
   const logout = useCallback(async () => {
     try {
       await AsyncStorage.removeItem(AUTH_KEY);
-      setUser(null);
+      const guest = await AsyncStorage.getItem(GUEST_KEY);
+      if (guest) {
+        const guestData: User = JSON.parse(guest);
+        await saveUser(guestData);
+      } else {
+        await ensureGuestUser();
+      }
     } catch (error) {
       console.error("Logout error:", error);
     }
-  }, []);
+  }, [ensureGuestUser, saveUser]);
 
   return useMemo(() => ({
     user,
