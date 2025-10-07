@@ -86,7 +86,7 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       }
 
       const playableUrl = await resolvePlayableUrl(url);
-      console.log("Loading sound from:", playableUrl);
+      console.log("[AudioProvider] Loading sound from:", playableUrl);
       
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: playableUrl },
@@ -97,39 +97,47 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
             progressUpdateIntervalMillis: 1000,
             positionMillis: 0,
           })
+        },
+        (status) => {
+          if (status.isLoaded) {
+            setIsPlaying(status.isPlaying);
+            if (status.isPlaying) {
+              console.log('[AudioProvider] Audio playing successfully');
+            }
+          } else {
+            setIsPlaying(false);
+            if ('error' in status && status.error) {
+              console.error("[AudioProvider] Sound loading error:", status.error);
+            }
+          }
         }
       );
 
+      console.log('[AudioProvider] Sound object created');
       setSound(newSound);
 
       try {
         await newSound.playAsync();
+        console.log('[AudioProvider] playAsync called');
         setIsPlaying(true);
       } catch (playError) {
-        console.error("Error starting playback:", playError);
+        console.error("[AudioProvider] Error starting playback:", playError);
         setIsPlaying(false);
+        throw playError;
       }
-
-      newSound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          setIsPlaying(status.isPlaying);
-        } else {
-          setIsPlaying(false);
-          if ('error' in status && status.error) {
-            console.error("Sound loading error:", status.error);
-          }
-        }
-      });
     } catch (error) {
-      console.error("Error playing sound:", error);
+      console.error("[AudioProvider] Error playing sound:", error);
       setIsPlaying(false);
       if (error instanceof Error) {
         if (error.message.includes('NotSupportedError')) {
-          console.error("Audio format or CORS not supported in this environment");
+          console.error("[AudioProvider] Audio format or CORS not supported in this environment");
         } else if (error.message.includes('NetworkError')) {
-          console.error("Network error loading audio");
+          console.error("[AudioProvider] Network error loading audio");
+        } else if (error.message.includes('-1100')) {
+          console.error("[AudioProvider] File not found or inaccessible. Check URL:", url);
         }
       }
+      throw error;
     }
   }, [sound, resolvePlayableUrl]);
 

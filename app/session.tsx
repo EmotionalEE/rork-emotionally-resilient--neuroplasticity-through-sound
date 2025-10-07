@@ -358,8 +358,17 @@ export default function SessionScreen() {
     } else {
       if (session) {
         console.log('[Session] Playing audio + video for', session.id);
-        await playSound(sessionMusic?.url ?? session.audioUrl);
-        setIsPaused(false);
+        try {
+          await playSound(sessionMusic?.url ?? session.audioUrl);
+          setIsPaused(false);
+        } catch (error) {
+          console.error('[Session] Failed to play audio:', error);
+          Alert.alert(
+            "Audio Error",
+            "Unable to load the audio file. Please check your internet connection and try again.",
+            [{ text: "OK" }]
+          );
+        }
       }
     }
   }, [isPlaying, session, sessionMusic, playSound, stopSound]);
