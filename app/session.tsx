@@ -353,7 +353,14 @@ export default function SessionScreen() {
 
     if (isPlaying) {
       console.log('[Session] Pausing audio + video');
-      stopSound();
+      try {
+        await stopSound();
+      } catch {}
+      try {
+        await videoRef.current?.pauseAsync();
+      } catch (e) {
+        console.log('Video pause error (non-critical)', e);
+      }
       setIsPaused(true);
     } else {
       if (session) {
@@ -361,6 +368,11 @@ export default function SessionScreen() {
         try {
           await playSound(sessionMusic?.url ?? session.audioUrl);
           setIsPaused(false);
+          try {
+            await videoRef.current?.playAsync();
+          } catch (e) {
+            console.log('Video play error (non-critical)', e);
+          }
         } catch (error) {
           console.error('[Session] Failed to play audio:', error);
           Alert.alert(

@@ -5,7 +5,7 @@ import createContextHook from "@nkzw/create-context-hook";
 
 interface AudioContextType {
   playSound: (url: string) => Promise<void>;
-  stopSound: () => void;
+  stopSound: () => Promise<void>;
   isPlaying: boolean;
   setVolume: (volume: number) => Promise<void>;
 }
@@ -44,6 +44,10 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
     try {
       const url = new URL(input);
       url.searchParams.set("dl", "1");
+      // Force direct download host to avoid CORS and redirects
+      if (url.hostname.endsWith("dropbox.com")) {
+        url.hostname = "dl.dropboxusercontent.com";
+      }
       return url.toString();
     } catch {
       return input;
