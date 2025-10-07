@@ -489,7 +489,7 @@ export default function SessionScreen() {
 
       {/* Main content */}
       <ScrollView 
-        style={styles.scrollView}
+        style={[styles.scrollView, session.id === '396hz-release' ? styles.inverted : null]}
         contentContainerStyle={[
           styles.scrollContent,
           session.id === '396hz-release' ? styles.scrollContentTall : null
@@ -501,7 +501,7 @@ export default function SessionScreen() {
         )}
         scrollEventThrottle={16}
       >
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={[styles.safeArea, session.id === '396hz-release' ? styles.inverted : null]}>
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={handleQuickExit} style={styles.headerButton}>
@@ -764,6 +764,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  inverted: {
+    transform: [{ scaleY: -1 }],
   },
   scrollContent: {
     flexGrow: 1,
