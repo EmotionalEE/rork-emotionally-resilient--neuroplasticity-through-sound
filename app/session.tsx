@@ -394,7 +394,7 @@ export default function SessionScreen() {
   }
 
   return (
-    <View style={[styles.container, (session.id === '396hz-release' || session.id === 'alpha-waves') ? { backgroundColor: 'transparent' } : null]}>
+    <View style={styles.container}>
       {/* Background video */}
       {session.videoUrl ? (
         <View style={styles.videoContainer} pointerEvents="none">
@@ -407,8 +407,8 @@ export default function SessionScreen() {
             ]}
             isLooping
             isMuted
-            shouldPlay={isPlaying && !isPaused}
-            resizeMode={(session.id === 'alpha-waves' || session.id === '396hz-release') ? ResizeMode.CONTAIN : ResizeMode.COVER}
+            shouldPlay
+            resizeMode={(session.id === 'alpha-waves') ? ResizeMode.CONTAIN : ResizeMode.COVER}
             onLoadStart={() => console.log('[Session] Background video load start', session.id)}
             onLoad={() => console.log('[Session] Background video loaded', session.id)}
             onPlaybackStatusUpdate={(status) => {
@@ -748,6 +748,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     opacity: 0.45,
+    backgroundColor: '#000',
   },
   scrollView: {
     flex: 1,
