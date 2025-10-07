@@ -14,6 +14,7 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const objectUrlRef = useRef<string | null>(null);
+  const autoResumeTriedRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Configure audio mode - only on native platforms
@@ -97,22 +98,31 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
         {
           shouldPlay: true,
           isLooping: true,
-          ...(Platform.OS === 'web' && {
-            progressUpdateIntervalMillis: 1000,
-            positionMillis: 0,
-          })
         },
         (status) => {
-          if (status.isLoaded) {
-            setIsPlaying(status.isPlaying);
-            if (status.isPlaying) {
-              console.log('[AudioProvider] Audio playing successfully');
+          try {
+            if (!status.isLoaded) {
+              setIsPlaying(false);
+              if ('error' in status && status.error) {
+                console.error('[AudioProvider] Sound loading error:', status.error);
+              }
+              return;
             }
-          } else {
-            setIsPlaying(false);
-            if ('error' in status && status.error) {
-              console.error("[AudioProvider] Sound loading error:", status.error);
+
+            setIsPlaying(status.isPlaying ?? false);
+
+            // Auto-resume once if playback is not running shortly after load
+            if (!status.isPlaying && (status.positionMillis ?? 0) <= 50 && !autoResumeTriedRef.current) {
+              autoResumeTriedRef.current = true;
+              newSound.playAsync().catch(() => {});
             }
+
+            if (status.didJustFinish) {
+              newSound.setIsLoopingAsync(true).catch(() => {});
+              newSound.playAsync().catch(() => {});
+            }
+          } catch (e) {
+            console.log('[AudioProvider] status update safe log');
           }
         }
       );
@@ -121,11 +131,14 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       setSound(newSound);
 
       try {
+        autoResumeTriedRef.current = false;
+        await newSound.setProgressUpdateIntervalAsync(1000);
+        await newSound.setIsLoopingAsync(true);
         await newSound.playAsync();
         console.log('[AudioProvider] playAsync called');
         setIsPlaying(true);
       } catch (playError) {
-        console.error("[AudioProvider] Error starting playback:", playError);
+        console.error('[AudioProvider] Error starting playback:', playError);
         setIsPlaying(false);
         throw playError;
       }
