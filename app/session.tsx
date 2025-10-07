@@ -518,54 +518,52 @@ export default function SessionScreen() {
             </View>
           </View>
 
-          {/* Orb visualization */}
-          <View style={styles.orbContainer}>
-            {/* Particles */}
-            {particleAnims.map((particle, index) => (
-              <Animated.View
-                key={`particle-${index}`}
+          {/* Orb visualization (hidden for Deep Despair Release) */}
+          {session.id === '396hz-release' ? null : (
+            <View style={styles.orbContainer}>
+              {/* Particles */}
+              {particleAnims.map((particle, index) => (
+                <Animated.View
+                  key={`particle-${index}`}
+                  style={[
+                    styles.particle,
+                    {
+                      transform: [
+                        { translateX: particle.x },
+                        { translateY: particle.y },
+                      ],
+                      opacity: particle.opacity,
+                    },
+                  ]}
+                />
+              ))}
+              
+              {/* Glow effect */}
+              <Animated.View 
                 style={[
-                  styles.particle,
+                  styles.orbGlow,
                   {
-                    transform: [
-                      { translateX: particle.x },
-                      { translateY: particle.y },
-                    ],
-                    opacity: particle.opacity,
-                  },
+                    opacity: glowAnim,
+                    transform: [{ scale: orbPulseAnim }],
+                  }
                 ]}
               />
-            ))}
-            
-            {/* Glow effect */}
-            <Animated.View 
-              style={[
-                styles.orbGlow,
-                {
-                  opacity: glowAnim,
-                  transform: [{ scale: orbPulseAnim }],
-                }
-              ]}
-            />
-            
-            {/* Main orb */}
-            <Animated.View 
-              style={[
-                styles.orb,
-                {
-                  transform: [{ scale: orbPulseAnim }],
-                }
-              ]}
-            >
-              <LinearGradient
-                colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.3)', 'transparent']}
-                style={styles.orbGradient}
+              
+              {/* Main orb */}
+              <Animated.View 
+                style={[
+                  styles.orb,
+                  {
+                    transform: [{ scale: orbPulseAnim }],
+                  }
+                ]}
               >
-                <View style={styles.orbContent}>
-                  {session.id !== '396hz-release' ? (
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.3)', 'transparent']}
+                  style={styles.orbGradient}
+                >
+                  <View style={styles.orbContent}>
                     <Text style={styles.frequencyText}>{session.frequency} Hz</Text>
-                  ) : null}
-                  {session.id !== '396hz-release' ? (
                     <Text style={styles.frequencyLabel}>
                       {session.frequency === '40' ? 'Focus' : 
                        session.frequency === '528' ? 'Love' :
@@ -579,11 +577,11 @@ export default function SessionScreen() {
                        session.frequency === '963' ? 'Awaken' :
                        'Balance'}
                     </Text>
-                  ) : null}
-                </View>
-              </LinearGradient>
-            </Animated.View>
-          </View>
+                  </View>
+                </LinearGradient>
+              </Animated.View>
+            </View>
+          )}
 
           {/* Play/Pause button */}
           <TouchableOpacity
