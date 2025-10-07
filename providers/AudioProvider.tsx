@@ -1,7 +1,27 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Audio } from "expo-av";
+import { Audio as ExpoAudio } from "expo-av";
 import { Platform } from "react-native";
 import createContextHook from "@nkzw/create-context-hook";
+
+type WebAudioEl = {
+  pause: () => void;
+  play: () => Promise<void>;
+  src: string;
+  volume: number;
+  loop: boolean;
+  preload: string;
+  crossOrigin: string;
+} | null;
+
+type AudioConstructor = new (src?: string) => {
+  pause: () => void;
+  play: () => Promise<void>;
+  src: string;
+  volume: number;
+  loop: boolean;
+  preload: string;
+  crossOrigin: string;
+};
 
 interface AudioContextType {
   playSound: (url: string) => Promise<void>;
@@ -11,15 +31,16 @@ interface AudioContextType {
 }
 
 export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() => {
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [sound, setSound] = useState<ExpoAudio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const objectUrlRef = useRef<string | null>(null);
   const autoResumeTriedRef = useRef<boolean>(false);
+  const webAudioRef = useRef<WebAudioEl>(null);
 
   useEffect(() => {
     // Configure audio mode - only on native platforms
     if (Platform.OS !== 'web') {
-      Audio.setAudioModeAsync({
+      ExpoAudio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
         staysActiveInBackground: true,
@@ -36,6 +57,13 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
             sound.unloadAsync().catch(() => {});
           }
         }).catch(() => {});
+      }
+      if (Platform.OS === 'web' && webAudioRef.current) {
+        try {
+          webAudioRef.current.pause();
+        } catch {}
+        webAudioRef.current.src = '';
+        webAudioRef.current = null;
       }
     };
   }, [sound]);
@@ -77,6 +105,14 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
   }, []);
 
   const playSound = useCallback(async (url: string) => {
+    const cleanupWebAudio = () => {
+      if (Platform.OS === 'web' && webAudioRef.current) {
+        try { webAudioRef.current.pause(); } catch {}
+        webAudioRef.current.src = '';
+        webAudioRef.current = null;
+      }
+    };
+
     try {
       if (sound) {
         try {
@@ -89,11 +125,31 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
           console.log("Sound cleanup error (non-critical):", cleanupError);
         }
       }
+      cleanupWebAudio();
 
       const playableUrl = await resolvePlayableUrl(url);
       console.log("[AudioProvider] Loading sound from:", playableUrl);
       
-      const { sound: newSound } = await Audio.Sound.createAsync(
+      if (Platform.OS === 'web') {
+        try {
+          const AudioCtor = (globalThis as any).Audio as AudioConstructor | undefined;
+          const el = AudioCtor ? new AudioCtor(playableUrl) : null as unknown as WebAudioEl;
+          if (!el) throw new Error('HTMLAudioElement not available');
+          el.loop = true;
+          el.preload = 'auto';
+          el.crossOrigin = 'anonymous';
+          webAudioRef.current = el;
+          await el.play();
+          console.log('[AudioProvider] HTMLAudioElement playing');
+          setIsPlaying(true);
+          return;
+        } catch (htmlErr) {
+          console.log('[AudioProvider] HTMLAudioElement play failed, falling back to expo-av', htmlErr);
+          // fall through to expo-av path
+        }
+      }
+
+      const { sound: newSound } = await ExpoAudio.Sound.createAsync(
         { uri: playableUrl },
         {
           shouldPlay: true,
@@ -111,7 +167,6 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
 
             setIsPlaying(status.isPlaying ?? false);
 
-            // Auto-resume once if playback is not running shortly after load
             if (!status.isPlaying && (status.positionMillis ?? 0) <= 50 && !autoResumeTriedRef.current) {
               autoResumeTriedRef.current = true;
               newSound.playAsync().catch(() => {});
@@ -177,12 +232,22 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
           try { URL.revokeObjectURL(objectUrlRef.current); } catch {}
           objectUrlRef.current = null;
         }
+        if (Platform.OS === 'web' && webAudioRef.current) {
+          try { webAudioRef.current.pause(); } catch {}
+          webAudioRef.current.src = '';
+          webAudioRef.current = null;
+        }
       }
     } else {
       setIsPlaying(false);
       if (Platform.OS === 'web' && objectUrlRef.current) {
         try { URL.revokeObjectURL(objectUrlRef.current); } catch {}
         objectUrlRef.current = null;
+      }
+      if (Platform.OS === 'web' && webAudioRef.current) {
+        try { webAudioRef.current.pause(); } catch {}
+        webAudioRef.current.src = '';
+        webAudioRef.current = null;
       }
     }
   }, [sound]);
@@ -197,6 +262,10 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
       } catch (error) {
         console.log("Error setting volume:", error);
       }
+    } else if (Platform.OS === 'web' && webAudioRef.current) {
+      try {
+        webAudioRef.current.volume = Math.max(0, Math.min(1, volume));
+      } catch {}
     }
   }, [sound]);
 
