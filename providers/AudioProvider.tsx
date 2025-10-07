@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Audio } from "expo-av";
 import { Platform } from "react-native";
 import createContextHook from "@nkzw/create-context-hook";
@@ -12,7 +12,8 @@ interface AudioContextType {
 
 export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const objectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Configure audio mode - only on native platforms
@@ -38,9 +39,40 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
     };
   }, [sound]);
 
+  const normalizeDropboxUrl = (input: string): string => {
+    if (!input.includes("dropbox.com")) return input;
+    try {
+      const url = new URL(input);
+      url.searchParams.set("dl", "1");
+      return url.toString();
+    } catch {
+      return input;
+    }
+  };
+
+  const resolvePlayableUrl = useCallback(async (rawUrl: string): Promise<string> => {
+    const normalized = normalizeDropboxUrl(rawUrl);
+    if (Platform.OS !== 'web') return normalized;
+
+    try {
+      const res = await fetch(normalized, { mode: 'cors' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      // store for cleanup
+      if (objectUrlRef.current) {
+        try { URL.revokeObjectURL(objectUrlRef.current); } catch {}
+      }
+      objectUrlRef.current = objectUrl;
+      return objectUrl;
+    } catch (e) {
+      console.log('Falling back to direct URL due to blob fetch failure', e);
+      return normalized;
+    }
+  }, []);
+
   const playSound = useCallback(async (url: string) => {
     try {
-      // Stop current sound if playing
       if (sound) {
         try {
           const status = await sound.getStatusAsync();
@@ -53,18 +85,17 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
         }
       }
 
-      console.log("Loading sound from:", url);
+      const playableUrl = await resolvePlayableUrl(url);
+      console.log("Loading sound from:", playableUrl);
       
-      // Create sound with better error handling
       const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: url },
+        { uri: playableUrl },
         {
           shouldPlay: true,
           isLooping: true,
-          // Add web-specific options
           ...(Platform.OS === 'web' && {
             progressUpdateIntervalMillis: 1000,
-            positionMillis: 0
+            positionMillis: 0,
           })
         }
       );
@@ -79,12 +110,10 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
         setIsPlaying(false);
       }
 
-      // Set up playback status update
       newSound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
           setIsPlaying(status.isPlaying);
         } else {
-          // Handle loading errors
           setIsPlaying(false);
           if ('error' in status && status.error) {
             console.error("Sound loading error:", status.error);
@@ -94,17 +123,15 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
     } catch (error) {
       console.error("Error playing sound:", error);
       setIsPlaying(false);
-      
-      // Provide more specific error information
       if (error instanceof Error) {
         if (error.message.includes('NotSupportedError')) {
-          console.error("Audio format not supported on this platform");
+          console.error("Audio format or CORS not supported in this environment");
         } else if (error.message.includes('NetworkError')) {
           console.error("Network error loading audio");
         }
       }
     }
-  }, [sound]);
+  }, [sound, resolvePlayableUrl]);
 
   const stopSound = useCallback(async () => {
     if (sound) {
@@ -118,15 +145,20 @@ export const [AudioProvider, useAudio] = createContextHook<AudioContextType>(() 
         }
       } catch (error) {
         console.log("Error stopping sound (handled):", error);
-        // Continue with cleanup even if stop/unload fails
       } finally {
-        // Always clean up state
         setSound(null);
         setIsPlaying(false);
+        if (Platform.OS === 'web' && objectUrlRef.current) {
+          try { URL.revokeObjectURL(objectUrlRef.current); } catch {}
+          objectUrlRef.current = null;
+        }
       }
     } else {
-      // Ensure state is clean even if no sound object
       setIsPlaying(false);
+      if (Platform.OS === 'web' && objectUrlRef.current) {
+        try { URL.revokeObjectURL(objectUrlRef.current); } catch {}
+        objectUrlRef.current = null;
+      }
     }
   }, [sound]);
 
