@@ -53,7 +53,7 @@ export const sessions: Session[] = [
     gradient: ["#a1c4fd", "#c2e9fb"],
     targetEmotions: ["anxious", "stressed", "angry"],
     audioUrl: "https://dl.dropboxusercontent.com/scl/fi/exrcyr02z1ihcajr4tt6h/to-app.mp3?rlkey=krvmrho44915vqzv2b5sa2lec&st=zz80li7f&dl=1",
-    videoUrl: "https://dl.dropboxusercontent.com/scl/fi/vwfm5kewttyt7rf5qvbqx/202509261625-1.mp4?rlkey=nl6zdcnpi50ba2g16kf6bbvlh&st=02zrv69s&dl=1",
+    videoUrl: "https://dl.dropboxusercontent.com/scl/fi/j3n86vz5zbk1eb54pugl2/sacred-geometry-golden-yellow-3.mov?rlkey=o6q9t6kvgkhvvfwmy7fk8fdaz&st=2j6gm1yn&dl=1",
     geometry: {
       type: 'spiral',
       elements: 12,
