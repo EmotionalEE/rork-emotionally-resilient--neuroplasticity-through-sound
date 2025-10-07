@@ -491,7 +491,10 @@ export default function SessionScreen() {
       {/* Main content */}
       <ScrollView 
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          session.id === '396hz-release' ? styles.scrollContentTall : null,
+        ]]
         showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -765,6 +768,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+  },
+  scrollContentTall: {
+    minHeight: Dimensions.get('window').height * 1.5,
+    paddingBottom: 120,
   },
   safeArea: {
     flex: 1,
