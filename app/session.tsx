@@ -394,30 +394,41 @@ export default function SessionScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, (session.id === '396hz-release') ? { backgroundColor: 'transparent' } : null]}>
       {/* Background video */}
       {session.videoUrl ? (
-        <View style={styles.videoContainer} pointerEvents="none">
+        <View style={[styles.videoContainer, (session.id === '396hz-release') ? { backgroundColor: 'transparent' } : null]} pointerEvents="none">
           <Video
             ref={videoRef}
             source={{ uri: session.videoUrl }}
             style={[
               styles.videoElement,
-              (session.id === '396hz-release' || session.id === 'alpha-waves') ? { opacity: 1 } : null
+              (session.id === '396hz-release' || session.id === 'alpha-waves') ? { opacity: 1 } : null,
+              (session.id === '396hz-release') ? { backgroundColor: 'transparent' } : null,
             ]}
             isLooping
             isMuted
-            shouldPlay={isPlaying && !isPaused}
+            shouldPlay={(session.id === '396hz-release') ? true : (isPlaying && !isPaused)}
             resizeMode={ResizeMode.COVER}
             onLoadStart={() => console.log('[Session] Background video load start', session.id)}
-            onLoad={() => console.log('[Session] Background video loaded', session.id)}
+            onLoad={async () => {
+              console.log('[Session] Background video loaded', session.id);
+              if (session.id === '396hz-release') {
+                try {
+                  await videoRef.current?.playAsync();
+                } catch (e) {
+                  console.log('Auto-play failed (non-critical)', e);
+                }
+              }
+            }}
             onPlaybackStatusUpdate={(status) => {
               try {
-                if (!status.isLoaded) {
-                  console.log('[Session] Video status (not loaded)', { error: status.error });
+                if (!('isLoaded' in status) || !status.isLoaded) {
+                  // @ts-ignore safe narrow for logging
+                  console.log('[Session] Video status (not loaded)', { error: (status as any).error });
                   return;
                 }
-                const s = status;
+                const s = status as any;
                 console.log('[Session] Video status', {
                   isLoaded: s.isLoaded,
                   durationMillis: s.durationMillis ?? null,
