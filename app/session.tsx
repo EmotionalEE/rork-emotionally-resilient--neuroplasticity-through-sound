@@ -451,8 +451,7 @@ export default function SessionScreen() {
             }}
             accessibilityLabel="session background video"
             testID="bg-video"
-            // @ts-expect-error: web only prop safe to ignore on native
-            playsInline
+            {...(Platform.OS === 'web' ? { playsInline: true } : {}) as any}
           />
         </View>
       ) : null}
@@ -493,8 +492,8 @@ export default function SessionScreen() {
         style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
-          session.id === '396hz-release' ? styles.scrollContentTall : null,
-        ]]
+          session.id === '396hz-release' ? styles.scrollContentTall : null
+        ]}
         showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
